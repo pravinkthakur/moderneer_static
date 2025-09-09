@@ -1,83 +1,143 @@
-<!DOCTYPE html><html lang='en-GB'><head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Moderneer — Transforming ideas into outcomes</title>
-    <meta name="description" content="Outcome Engineering for measurable product and engineering impact. Self‑serve maturity assessment, playbooks, and advisory.">
-    <link rel="icon" href="./icons/favicon.svg" type="image/svg+xml">
-    <link rel="manifest" href="./manifest.webmanifest">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Moderneer — Transforming ideas into outcomes">
-    <meta property="og:description" content="Outcome Engineering for measurable product and engineering impact. Self‑serve maturity assessment, playbooks, and advisory.">
-    <meta property="og:image" content="./images/logo.jpg">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Moderneer — Transforming ideas into outcomes">
-    <meta name="twitter:description" content="Outcome Engineering for measurable product and engineering impact. Self‑serve maturity assessment, playbooks, and advisory.">
-    <meta name="twitter:image" content="./images/logo.jpg">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./css/tokens.css">
-    <link rel="stylesheet" href="./css/base.css">
-    <link rel="stylesheet" href="./css/components.css">
-    <link rel="stylesheet" href="./css/utilities.css">
-    <link rel="stylesheet" href="./css/print.css" media="print">
-    </head><body>
-<header class="header">
-  <div class="container navbar">
-    <div class="logo-wrap">
-      <a href="./"><img class="logo" src="./images/logo.jpg" alt="Moderneer logo"></a>
-      <a class="site-name" href="./">Moderneer</a>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Moderneer — Moderneer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Outcome Engineering. AI reverse engineering. Maturity models. Advisory and bootcamps.">
+  <meta name="theme-color" content="#3B82F6">
+  <meta property="og:title" content="Moderneer — Moderneer">
+  <meta property="og:description" content="Outcome Engineering. AI reverse engineering. Maturity models. Advisory and bootcamps.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/og-image.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="styles/moderneer.css" rel="stylesheet">
+  <link href="styles/components.css" rel="stylesheet">
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<header class="sticky top-0 z-40 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-slate-200">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2 focus-ring">
+      <img src="assets/logo.svg" alt="Moderneer logo" class="logo">
+      <span class="font-semibold">Moderneer</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-6" aria-label="Main">
+      <a href="solutions.html" class="hover:underline">Solutions</a>
+      <a href="maturity-model.html" class="hover:underline">Maturity Model</a>
+      <a href="ai-reverse-engineering.html" class="hover:underline">AI Reverse Engineering</a>
+      <a href="case-studies.html" class="hover:underline">Case Studies</a>
+      <a href="about.html" class="hover:underline">About</a>
+      <a href="contact.html" class="hover:underline">Contact</a>
+    </nav>
+    <div class="md:hidden">
+      <button aria-label="Toggle navigation" data-nav-toggle class="p-2 rounded-lg border border-slate-300">Menu</button>
     </div>
-    <button id="nav-toggle" class="nav-toggle" aria-controls="nav" aria-expanded="false">Menu</button>
-    <nav id="nav" class="nav">
-      <a href="./approach.html">Approach</a>
-      <a href="./maturity-model.html">Maturity Model</a>
-      <a href="./services.html">Services</a>
-      <a href="./playbooks.html">Playbooks</a>
-      <a href="./case-studies.html">Outcomes</a>
-      <a href="./contact.html">Contact</a>
+    <a href="contact.html" class="hidden md:inline-block bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 focus-ring">Book intro</a>
+  </div>
+  <div class="md:hidden hidden px-4 pb-3" data-nav-menu data-open="false">
+    <nav class="flex flex-col gap-2 pt-2 border-t border-slate-200">
+      <a href="solutions.html" class="py-1">Solutions</a>
+      <a href="maturity-model.html" class="py-1">Maturity Model</a>
+      <a href="ai-reverse-engineering.html" class="py-1">AI Reverse Engineering</a>
+      <a href="case-studies.html" class="py-1">Case Studies</a>
+      <a href="about.html" class="py-1">About</a>
+      <a href="contact.html" class="py-1">Contact</a>
     </nav>
   </div>
 </header>
 
-<section class="hero"><div class="container">
-<h1>Transforming ideas into outcomes</h1>
-<p class="lead">We help organisations measure, improve, and prove engineering maturity. Outcome Engineering ties work to customer impact and business value.</p>
-<div class="cta-row">
-  <a class="btn btn-primary" href="./maturity-model.html">Explore the Maturity Model</a>
-  <a class="btn btn-ghost" href="./approach.html">How it works</a>
-</div>
-<div class="kpis mt-8">
-  <div class="kpi"><strong>50%</strong> faster deploy cycles</div>
-  <div class="kpi"><strong>30%</strong> lower MTTR</div>
-  <div class="kpi"><strong>2×</strong> release cadence</div>
-</div>
-</div></section>
-<section class="section"><div class="container grid-3">
-<div class="card"><h3>Assess</h3><p>Self‑serve assessment across strategy, product, engineering, quality, platform, data, and operations. Clear scoring and benchmarks.</p></div>
-<div class="card"><h3>Improve</h3><p>Targeted playbooks and coaching. Shift‑left practices. Automated quality. Observable systems. Secure by default.</p></div>
-<div class="card"><h3>Prove</h3><p>Track outcomes. Link delivery to customer behaviour and commercial metrics. Tell the story with data.</p></div>
-</div></section>
 
-<footer class="footer">
-  <div class="container cols">
-    <div>
-      <strong>Moderneer</strong>
-      <p class="text-muted mt-4">Transforming ideas into outcomes.</p>
-      <p class="text-muted">© 2025 Moderneer. All rights reserved.</p>
+<section class="section">
+  <div class="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-10 items-center">
+    <div class="fade-in">
+      <span class="badge">Outcome Engineering</span>
+      <h1 class="mt-4 text-4xl md:text-5xl font-extrabold tracking-tight">Transforming ideas into outcomes</h1>
+      <p class="mt-4 text-lg text-slate-700">
+        Connect engineering to customer impact. Use AI to reverse-engineer legacy, raise maturity, and ship fast with quality.
+      </p>
+      <div class="mt-6 flex gap-3">
+        <a href="maturity-model.html" class="bg-blue-600 text-white px-5 py-3 rounded-xl hover:bg-blue-700 focus-ring">Run self-assessment</a>
+        <a href="contact.html" class="px-5 py-3 rounded-xl border border-slate-300 hover:bg-slate-50 focus-ring">Book intro</a>
+      </div>
+      <div class="mt-6 text-sm text-slate-600">
+        Trusted approaches: daily releases, zero-vuln baseline, API-first, observability, shift-left quality.
+      </div>
     </div>
-    <div>
-      <strong>Company</strong>
-      <p><a href="./about.html">About</a></p>
-      <p><a href="./privacy.html">Privacy</a></p>
-      <p><a href="./terms.html">Terms</a></p>
-    </div>
-    <div>
-      <strong>Connect</strong>
-      <p><a href="mailto:hello@moderneer.co.uk">hello@moderneer.co.uk</a></p>
-      <p><a href="https://www.moderneer.co.uk">www.moderneer.co.uk</a></p>
+    <div class="fade-in token-card p-6">
+      <img src="assets/hero-graph.png" alt="System decomposition and maturity radar" class="rounded-xl w-full h-auto">
     </div>
   </div>
-  <script src="./js/main.js"></script>
+</section>
+
+<section class="section bg-slate-50">
+  <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-3 gap-6">
+    <div class="token-card p-6">
+      <h3 class="font-semibold text-lg">AI Reverse Engineering</h3>
+      <p class="mt-2 text-slate-700">Map services, APIs, tests, risks. Generate guardrails and change plans.</p>
+      <a href="ai-reverse-engineering.html" class="mt-3 inline-block link-underline">Learn more</a>
+    </div>
+    <div class="token-card p-6">
+      <h3 class="font-semibold text-lg">Maturity Model</h3>
+      <p class="mt-2 text-slate-700">Score outcomes, not rituals. Target gaps. Track progress by release.</p>
+      <a href="maturity-model.html" class="mt-3 inline-block link-underline">See the framework</a>
+    </div>
+    <div class="token-card p-6">
+      <h3 class="font-semibold text-lg">Advisory & Bootcamps</h3>
+      <p class="mt-2 text-slate-700">Shift-left, automation, platform ops. Practical training for squads.</p>
+      <a href="solutions.html" class="mt-3 inline-block link-underline">All solutions</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-4 gap-6 text-center">
+    <div class="token-card p-6">
+      <div class="text-3xl font-extrabold">↓ MTTR</div>
+      <p class="text-slate-600 mt-1">All-time low</p>
+    </div>
+    <div class="token-card p-6">
+      <div class="text-3xl font-extrabold">↑ Frequency</div>
+      <p class="text-slate-600 mt-1">Daily releases</p>
+    </div>
+    <div class="token-card p-6">
+      <div class="text-3xl font-extrabold">Zero</div>
+      <p class="text-slate-600 mt-1">Security vulns baseline</p>
+    </div>
+    <div class="token-card p-6">
+      <div class="text-3xl font-extrabold">API-first</div>
+      <p class="text-slate-600 mt-1">Across modules</p>
+    </div>
+  </div>
+</section>
+
+<section class="section bg-slate-900 text-white">
+  <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div>
+      <h2 class="text-2xl font-bold">Ready to see your maturity score?</h2>
+      <p class="text-slate-300 mt-1">Start the assessment. Get a plan in under 10 minutes.</p>
+    </div>
+    <a href="maturity-model.html" class="bg-white text-slate-900 px-6 py-3 rounded-xl hover:bg-slate-100 focus-ring">Run self-assessment</a>
+  </div>
+</section>
+
+
+<footer class="section-tight border-t border-slate-200">
+  <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-2">
+      <img src="assets/logo.svg" alt="Moderneer logo" class="logo">
+      <span class="text-sm text-slate-600">© Moderneer</span>
+    </div>
+    <nav class="flex items-center gap-4" aria-label="Footer">
+      <a href="https://www.linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn">LinkedIn</a>
+      <a href="https://x.com" target="_blank" rel="noopener" aria-label="X">X</a>
+      <a href="contact.html" class="link-underline">Contact</a>
+      <a href="privacy.html">Privacy</a>
+    </nav>
+  </div>
 </footer>
-</body></html>
+
+<script src="scripts/main.js"></script>
+<script src="scripts/analytics.js"></script>
+</body>
+</html>

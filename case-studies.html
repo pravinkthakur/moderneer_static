@@ -1,73 +1,98 @@
-<!DOCTYPE html><html lang='en-GB'><head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Outcomes — Moderneer</title>
-    <meta name="description" content="Anonymised impact snapshots across delivery, reliability, and quality.">
-    <link rel="icon" href="./icons/favicon.svg" type="image/svg+xml">
-    <link rel="manifest" href="./manifest.webmanifest">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Outcomes — Moderneer">
-    <meta property="og:description" content="Anonymised impact snapshots across delivery, reliability, and quality.">
-    <meta property="og:image" content="./images/logo.jpg">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Outcomes — Moderneer">
-    <meta name="twitter:description" content="Anonymised impact snapshots across delivery, reliability, and quality.">
-    <meta name="twitter:image" content="./images/logo.jpg">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./css/tokens.css">
-    <link rel="stylesheet" href="./css/base.css">
-    <link rel="stylesheet" href="./css/components.css">
-    <link rel="stylesheet" href="./css/utilities.css">
-    <link rel="stylesheet" href="./css/print.css" media="print">
-    </head><body>
-<header class="header">
-  <div class="container navbar">
-    <div class="logo-wrap">
-      <a href="./"><img class="logo" src="./images/logo.jpg" alt="Moderneer logo"></a>
-      <a class="site-name" href="./">Moderneer</a>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Case Studies — Moderneer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="APRIE-style decomposition, platform reliability gains, and bootcamp-led quality.">
+  <meta name="theme-color" content="#3B82F6">
+  <meta property="og:title" content="Case Studies — Moderneer">
+  <meta property="og:description" content="APRIE-style decomposition, platform reliability gains, and bootcamp-led quality.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="assets/og-image.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="styles/moderneer.css" rel="stylesheet">
+  <link href="styles/components.css" rel="stylesheet">
+</head>
+<body class="bg-white text-slate-900 antialiased">
+
+<header class="sticky top-0 z-40 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-slate-200">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2 focus-ring">
+      <img src="assets/logo.svg" alt="Moderneer logo" class="logo">
+      <span class="font-semibold">Moderneer</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-6" aria-label="Main">
+      <a href="solutions.html" class="hover:underline">Solutions</a>
+      <a href="maturity-model.html" class="hover:underline">Maturity Model</a>
+      <a href="ai-reverse-engineering.html" class="hover:underline">AI Reverse Engineering</a>
+      <a href="case-studies.html" class="hover:underline">Case Studies</a>
+      <a href="about.html" class="hover:underline">About</a>
+      <a href="contact.html" class="hover:underline">Contact</a>
+    </nav>
+    <div class="md:hidden">
+      <button aria-label="Toggle navigation" data-nav-toggle class="p-2 rounded-lg border border-slate-300">Menu</button>
     </div>
-    <button id="nav-toggle" class="nav-toggle" aria-controls="nav" aria-expanded="false">Menu</button>
-    <nav id="nav" class="nav">
-      <a href="./approach.html">Approach</a>
-      <a href="./maturity-model.html">Maturity Model</a>
-      <a href="./services.html">Services</a>
-      <a href="./playbooks.html">Playbooks</a>
-      <a href="./case-studies.html">Outcomes</a>
-      <a href="./contact.html">Contact</a>
+    <a href="contact.html" class="hidden md:inline-block bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 focus-ring">Book intro</a>
+  </div>
+  <div class="md:hidden hidden px-4 pb-3" data-nav-menu data-open="false">
+    <nav class="flex flex-col gap-2 pt-2 border-t border-slate-200">
+      <a href="solutions.html" class="py-1">Solutions</a>
+      <a href="maturity-model.html" class="py-1">Maturity Model</a>
+      <a href="ai-reverse-engineering.html" class="py-1">AI Reverse Engineering</a>
+      <a href="case-studies.html" class="py-1">Case Studies</a>
+      <a href="about.html" class="py-1">About</a>
+      <a href="contact.html" class="py-1">Contact</a>
     </nav>
   </div>
 </header>
 
-<section class="section"><div class="container">
-<h1>Outcomes</h1>
-<p class="lead">Representative results from multi‑team engagements. No client identities disclosed.</p>
-<div class="grid-3 mt-6">
-<div class="card"><h3>Release Flow</h3><p>Deployment frequency increased from weekly to daily with rollbacks under 5 minutes.</p></div>
-<div class="card"><h3>Reliability</h3><p>MTTR reduced by 30% through better alerts, runbooks, and error budgets.</p></div>
-<div class="card"><h3>Quality</h3><p>Regression defects in production reduced by 40% after shift‑left adoption.</p></div>
-</div></div></section>
 
-<footer class="footer">
-  <div class="container cols">
-    <div>
-      <strong>Moderneer</strong>
-      <p class="text-muted mt-4">Transforming ideas into outcomes.</p>
-      <p class="text-muted">© 2025 Moderneer. All rights reserved.</p>
-    </div>
-    <div>
-      <strong>Company</strong>
-      <p><a href="./about.html">About</a></p>
-      <p><a href="./privacy.html">Privacy</a></p>
-      <p><a href="./terms.html">Terms</a></p>
-    </div>
-    <div>
-      <strong>Connect</strong>
-      <p><a href="mailto:hello@moderneer.co.uk">hello@moderneer.co.uk</a></p>
-      <p><a href="https://www.moderneer.co.uk">www.moderneer.co.uk</a></p>
+<main class="section">
+  <div class="max-w-6xl mx-auto px-4">
+    <h1 class="text-3xl md:text-4xl font-extrabold">Case Studies</h1>
+    <p class="mt-3 text-slate-700">Selected examples that show the approach and the outcomes.</p>
+
+    <div class="grid md:grid-cols-3 gap-6 mt-8">
+      <article class="token-card p-4">
+        <img src="assets/case-aprie.png" alt="APRIE decomposition visual" class="rounded-xl w-full h-auto">
+        <h2 class="mt-3 font-semibold">Modular Decomposition for Scale</h2>
+        <p class="text-slate-700 mt-1 text-sm">De-composed heritage into service-aligned modules. Daily releases at scale, API-first, with SLO guardrails.</p>
+        <a href="contact.html" class="mt-2 inline-block link-underline">Discuss similar work</a>
+      </article>
+      <article class="token-card p-4">
+        <img src="assets/case-shop.png" alt="Shop platform reliability" class="rounded-xl w-full h-auto">
+        <h2 class="mt-3 font-semibold">Shop Platform Reliability Uplift</h2>
+        <p class="text-slate-700 mt-1 text-sm">All-time low MTTR, higher deployment frequency, zero-vuln baseline through shift-left and observability.</p>
+        <a href="contact.html" class="mt-2 inline-block link-underline">Explore approach</a>
+      </article>
+      <article class="token-card p-4">
+        <img src="assets/case-bootcamp.png" alt="Bootcamp enablement" class="rounded-xl w-full h-auto">
+        <h2 class="mt-3 font-semibold">Bootcamps that Change Delivery</h2>
+        <p class="text-slate-700 mt-1 text-sm">Engineers own E2E quality. BDD/ATDD foundations, CI/CD hardening, and practical automation.</p>
+        <a href="contact.html" class="mt-2 inline-block link-underline">Run a cohort</a>
+      </article>
     </div>
   </div>
-  <script src="./js/main.js"></script>
+</main>
+
+
+<footer class="section-tight border-t border-slate-200">
+  <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-2">
+      <img src="assets/logo.svg" alt="Moderneer logo" class="logo">
+      <span class="text-sm text-slate-600">© Moderneer</span>
+    </div>
+    <nav class="flex items-center gap-4" aria-label="Footer">
+      <a href="https://www.linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn">LinkedIn</a>
+      <a href="https://x.com" target="_blank" rel="noopener" aria-label="X">X</a>
+      <a href="contact.html" class="link-underline">Contact</a>
+      <a href="privacy.html">Privacy</a>
+    </nav>
+  </div>
 </footer>
-</body></html>
+
+<script src="scripts/main.js"></script>
+<script src="scripts/analytics.js"></script>
+</body>
+</html>
