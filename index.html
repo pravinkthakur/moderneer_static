@@ -1,78 +1,42 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Home — Moderneer</title>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/modern-2025.css">
-  <meta name="description" content="Home | Moderneer">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Moderneer — Transforming ideas into outcomes</title>
+  <link rel="stylesheet" href="moderneer.css">
 </head>
 <body>
-
-<header class="site" role="banner">
-  <div class="container nav" aria-label="Primary">
-    <a class="brand" href="index.html">
-      <img src="assets/logo.jpg" alt="Moderneer logo" />
-      <span>Moderneer</span>
-    </a>
-    <nav role="navigation" aria-label="Main navigation">
-      <ul>
-        <li><a href="index.html" aria-current="page">Home</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="maturity.html">Maturity Model</a></li>
-        <li><a href="ai-reverse-engineering.html">AI Reverse Engineering</a></li>
-        <li><a href="shift-left.html">Shift‑Left QE</a></li>
-        <li><a href="bootcamps.html">Bootcamps</a></li>
-        <li><a href="advisory.html">Advisory</a></li>
-        <li><a href="operating-models.html">Operating Models</a></li>
-        <li><a href="future-trends.html">Future Trends</a></li>
-        <li><a href="contact.html">Contact</a></li>
-      </ul>
-</nav>
-  </div>
-</header>
-<main class="container" role="main">
-
-<section class="hero" aria-label="Intro">
-  <div>
-    <span class="badge">Outcome Engineering</span>
-    <h1>Transforming ideas into outcomes</h1>
-    <p class="lead">We help product engineering leaders connect strategy, delivery and customer value — with a maturity model, AI diagnostics and hands‑on enablement.</p>
-    <div class="cta">
-      <a class="button" href="maturity.html">Explore the Maturity Model</a>
-      <a class="button secondary" href="ai-reverse-engineering.html">See AI in action</a>
+  <header class="header">
+    <div class="container">
+      <a class="brand" href="#home">
+        <img src="assets/icons/home.svg" alt="Moderneer logo">
+        <span class="name">Moderneer</span>
+      </a>
+      <nav class="nav" aria-label="Main">
+        <a href="#home" aria-current="page"><span class="icon"><img src="assets/icons/home.svg" alt=""></span><span class="label">Home</span></a>
+        <a href="#about"><span class="icon"><img src="assets/icons/about.svg" alt=""></span><span class="label">About</span></a>
+        <a href="#maturity"><span class="icon"><img src="assets/icons/maturity.svg" alt=""></span><span class="label">Maturity<br>Model</span></a>
+        <a href="#ai-re"><span class="icon"><img src="assets/icons/ai-re.svg" alt=""></span><span class="label">AI Reverse<br>Engineering</span></a>
+        <a href="#shiftleft"><span class="icon"><img src="assets/icons/shiftleft.svg" alt=""></span><span class="label">Shift-Left<br>QE</span></a>
+        <a href="#bootcamps"><span class="icon"><img src="assets/icons/bootcamps.svg" alt=""></span><span class="label">Bootcamps</span></a>
+        <a href="#advisory"><span class="icon"><img src="assets/icons/advisory.svg" alt=""></span><span class="label">Advisory</span></a>
+        <a href="#operating"><span class="icon"><img src="assets/icons/operating.svg" alt=""></span><span class="label">Operating<br>Models</span></a>
+        <a href="#trends"><span class="icon"><img src="assets/icons/trends.svg" alt=""></span><span class="label">Future<br>Trends</span></a>
+        <a href="#contact"><span class="icon"><img src="assets/icons/contact.svg" alt=""></span><span class="label">Contact</span></a>
+      </nav>
     </div>
-    <div class="chips" style="margin-top:14px">
-      <span class="chip">• Enterprise‑ready</span>
-      <span class="chip">• Privacy by design</span>
-      <span class="chip">• WCAG‑friendly</span>
-    </div>
-  </div>
-  <div class="hero-visual" aria-hidden="true">
-    <div class="grid"></div>
-    <div class="pulse p1"></div>
-    <div class="pulse p2"></div>
-  </div>
-</section>
+  </header>
 
-<section class="section cards" aria-labelledby="why">
-  <h2 id="why" style="grid-column:1/-1">What sets Moderneer apart</h2>
-  <div class="card"><h3>Evidence‑based maturity</h3><p>Core 24 & Full 12‑pillar model with sequenced tiers, honest scoring, gates and caps.</p></div>
-  <div class="card"><h3>AI‑powered insight</h3><p>Reverse‑engineer delivery exhaust — repos, pipelines, incidents — to reveal bottlenecks.</p></div>
-  <div class="card"><h3>Enablement that sticks</h3><p>Shift‑left quality, bootcamps and operating models that scale across squads.</p></div>
-</section>
-
-</main>
-
-<footer role="contentinfo">
-  <div class="container">
-    <div class="footer-links">
-      <a href="contact.html">Contact</a>
-    </div>
-    <div>© 2025 Moderneer. Transforming ideas into outcomes.</div>
-  </div>
-</footer>
-
+  <main>
+    <section id="home" class="hero">
+      <h1>Transforming ideas into outcomes</h1>
+      <p>Connect engineering to customer impact. Use AI to reverse‑engineer legacy, raise maturity, and ship fast with quality.</p>
+      <div class="cta">
+        <a class="button primary" href="#contact">Talk to us</a>
+        <a class="button" href="#maturity">Check maturity</a>
+      </div>
+    </section>
+  </main>
 </body>
 </html>
