@@ -1,0 +1,90 @@
+
+:root{
+  --brand:#2563EB; /* deeper blue for contrast */
+  --brand-2:#06B6D4; /* cyan accent */
+  --brand-3:#A855F7; /* purple accent for AI/futurism */
+  --ink:#0F172A; --muted:#475569;
+  --line:#E2E8F0; --bg:#FFFFFF; --bg-soft:#F8FAFC;
+  --radius:16px; --shadow:0 12px 28px rgba(2,6,23,.10);
+  --s1:8px; --s2:12px; --s3:16px; --s4:24px; --s5:32px; --s6:48px; --s7:72px;
+  --fz-s:.95rem; --fz-m:1.05rem; --fz-l:1.25rem; --fz-xl:2.2rem; --fz-xxl:3.2rem;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:radial-gradient(1200px 600px at 20% -10%, rgba(6,182,212,.08), transparent),
+             radial-gradient(1200px 600px at 80% -10%, rgba(168,85,247,.08), transparent),
+             var(--bg-soft);
+  color:var(--ink); line-height:1.6; font-size:16px;
+}
+img{max-width:100%; height:auto}
+.container{max-width:1200px; margin:auto; padding:0 var(--s3)}
+/* Header */
+header.site{position:sticky; top:0; z-index:30; background:rgba(255,255,255,.85);
+  backdrop-filter:saturate(180%) blur(10px); border-bottom:1px solid var(--line)}
+.nav{display:flex; align-items:center; justify-content:space-between; padding:12px 0}
+.brand{display:flex; gap:12px; align-items:center; text-decoration:none; color:inherit}
+.brand img{height:38px; width:auto; border-radius:10px}
+.brand span{font-weight:800; letter-spacing:.2px}
+nav ul{display:flex; gap:18px; list-style:none; margin:0; padding:0}
+nav a{color:var(--ink); text-decoration:none; padding:10px 12px; border-radius:12px}
+nav a[aria-current="page"], nav a:hover{background:#EEF2FF}
+/* Buttons */
+.button{display:inline-block; background:linear-gradient(135deg,var(--brand),var(--brand-2));
+  color:#fff; padding:12px 18px; border-radius:999px; border:1px solid rgba(37,99,235,.5);
+  font-weight:700; text-decoration:none; box-shadow:0 8px 18px rgba(37,99,235,.28)}
+.button.secondary{background:transparent; color:var(--brand); border:1px solid var(--brand); box-shadow:none}
+.button.ghost{background:transparent; border:1px solid var(--line); color:var(--ink)}
+/* Hero with subtle animated grid */
+.hero{padding:var(--s7) 0; display:grid; grid-template-columns:1.15fr .85fr; gap:var(--s5); align-items:center}
+.hero h1{font-size:var(--fz-xxl); line-height:1.05; margin:.2em 0}
+.hero p.lead{font-size:var(--fz-l); color:var(--muted); max-width:62ch}
+.hero .cta{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+.hero-visual{position:relative; min-height:260px; border-radius:20px; overflow:hidden; border:1px solid var(--line);
+  background:linear-gradient(180deg,#fff,rgba(255,255,255,.6));
+  box-shadow:0 20px 60px rgba(2,6,23,.12)}
+.grid{position:absolute; inset:0; background-image: linear-gradient(to right, rgba(99,102,241,.25) 1px, transparent 1px),
+linear-gradient(to bottom, rgba(6,182,212,.25) 1px, transparent 1px);
+background-size: 40px 40px; mask-image: radial-gradient(60% 60% at 50% 40%, black, transparent);}
+.pulse{position:absolute; width:220px; height:220px; border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, rgba(6,182,212,.35), transparent 60%);
+  filter:blur(6px); animation:pulse 6s ease-in-out infinite;}
+.pulse.p2{left:55%; top:10%}
+.pulse.p1{left:10%; top:35%}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+/* Sections & cards */
+.section{padding:var(--s6) 0}
+.cards{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s4)}
+.card{background:#fff; border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:var(--s4)}
+.card h3{margin-top:0}
+.badge{display:inline-flex; align-items:center; gap:8px; border-radius:999px; padding:6px 10px;
+  border:1px solid var(--line); font-size:.92rem; color:var(--muted)}
+/* Icon chips */
+.chips{display:flex; flex-wrap:wrap; gap:10px}
+.chip{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; border:1px solid var(--line); background:#fff}
+/* Grids */
+.two{display:grid; grid-template-columns:1fr 1fr; gap:var(--s4)}
+.three{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s4)}
+.four{display:grid; grid-template-columns:repeat(4,1fr); gap:var(--s4)}
+ul.cols{columns:2; gap:var(--s5)} ul.cols li{break-inside:avoid}
+blockquote{border-left:3px solid var(--brand-2); padding-left:12px; color:var(--muted)}
+/* Data visuals */
+.figure{background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:var(--shadow)}
+.figure svg{width:100%; height:auto; display:block}
+.caption{font-size:.92rem; color:var(--muted); margin-top:6px}
+/* Forms */
+form .field{display:flex; flex-direction:column; gap:6px; margin-bottom:14px}
+input, textarea, select{border:1px solid var(--line); border-radius:12px; padding:12px; background:#fff; font:inherit}
+input:focus, textarea:focus, select:focus{outline:2px solid var(--brand-2); outline-offset:2px}
+label{font-weight:600}
+/* Footer */
+footer{border-top:1px solid var(--line); padding:18px 0; color:var(--muted); font-size:.95rem}
+.footer-links{display:flex; gap:16px; flex-wrap:wrap}
+/* Responsive */
+@media (max-width:1080px){
+  .hero{grid-template-columns:1fr}
+  .cards,.three,.four{grid-template-columns:1fr}
+  .two{grid-template-columns:1fr}
+  ul.cols{columns:1}
+}
