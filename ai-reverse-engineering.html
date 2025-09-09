@@ -1,103 +1,107 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>AI Reverse Engineering — Moderneer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Code and system intelligence: decomposition, API diffs, risk maps, auto-tests.">
-  <meta name="theme-color" content="#3B82F6">
-  <meta property="og:title" content="AI Reverse Engineering — Moderneer">
-  <meta property="og:description" content="Code and system intelligence: decomposition, API diffs, risk maps, auto-tests.">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="assets/og-image.png">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="styles/moderneer.css" rel="stylesheet">
-  <link href="styles/components.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/modern-2025.css">
+  <meta name="description" content="AI Reverse Engineering | Moderneer">
 </head>
-<body class="bg-white text-slate-900 antialiased">
+<body>
 
-<header class="sticky top-0 z-40 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-slate-200">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-    <a href="index.html" class="flex items-center gap-2 focus-ring">
-      <img src="assets/logo.svg" alt="Moderneer logo" class="logo">
-      <span class="font-semibold">Moderneer</span>
+<header class="site" role="banner">
+  <div class="container nav" aria-label="Primary">
+    <a class="brand" href="index.html">
+      <img src="assets/logo.jpg" alt="Moderneer logo" />
+      <span>Moderneer</span>
     </a>
-    <nav class="hidden md:flex items-center gap-6" aria-label="Main">
-      <a href="solutions.html" class="hover:underline">Solutions</a>
-      <a href="maturity-model.html" class="hover:underline">Maturity Model</a>
-      <a href="ai-reverse-engineering.html" class="hover:underline">AI Reverse Engineering</a>
-      <a href="case-studies.html" class="hover:underline">Case Studies</a>
-      <a href="about.html" class="hover:underline">About</a>
-      <a href="contact.html" class="hover:underline">Contact</a>
-    </nav>
-    <div class="md:hidden">
-      <button aria-label="Toggle navigation" data-nav-toggle class="p-2 rounded-lg border border-slate-300">Menu</button>
-    </div>
-    <a href="contact.html" class="hidden md:inline-block bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 focus-ring">Book intro</a>
-  </div>
-  <div class="md:hidden hidden px-4 pb-3" data-nav-menu data-open="false">
-    <nav class="flex flex-col gap-2 pt-2 border-t border-slate-200">
-      <a href="solutions.html" class="py-1">Solutions</a>
-      <a href="maturity-model.html" class="py-1">Maturity Model</a>
-      <a href="ai-reverse-engineering.html" class="py-1">AI Reverse Engineering</a>
-      <a href="case-studies.html" class="py-1">Case Studies</a>
-      <a href="about.html" class="py-1">About</a>
-      <a href="contact.html" class="py-1">Contact</a>
-    </nav>
+    <nav role="navigation" aria-label="Main navigation">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="maturity.html">Maturity Model</a></li>
+        <li><a href="ai-reverse-engineering.html" aria-current="page">AI Reverse Engineering</a></li>
+        <li><a href="shift-left.html">Shift‑Left QE</a></li>
+        <li><a href="bootcamps.html">Bootcamps</a></li>
+        <li><a href="advisory.html">Advisory</a></li>
+        <li><a href="operating-models.html">Operating Models</a></li>
+        <li><a href="future-trends.html">Future Trends</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+</nav>
   </div>
 </header>
+<main class="container" role="main">
 
-
-<main class="section">
-  <div class="max-w-5xl mx-auto px-4">
-    <h1 class="text-3xl md:text-4xl font-extrabold">AI Reverse Engineering</h1>
-    <p class="mt-3 text-slate-700">From code to clarity. Generate an actionable map of services, contracts, and risks.</p>
-    <div class="grid md:grid-cols-3 gap-6 mt-8">
-      <div class="token-card p-6">
-        <h2 class="text-lg font-semibold">Decomposition</h2>
-        <p class="mt-2 text-slate-700">Call graphs, ownership, data flows, domain seams.</p>
-      </div>
-      <div class="token-card p-6">
-        <h2 class="text-lg font-semibold">Change planning</h2>
-        <p class="mt-2 text-slate-700">API diffs, blast radius, migration steps, fallbacks.</p>
-      </div>
-      <div class="token-card p-6">
-        <h2 class="text-lg font-semibold">Quality scaffolding</h2>
-        <p class="mt-2 text-slate-700">Auto-tests, contracts, chaos probes, SLO guardrails.</p>
-      </div>
-    </div>
-    <div class="token-card p-6 mt-8">
-      <h2 class="text-xl font-semibold">Outputs</h2>
-      <ul class="list-disc pl-5 mt-3 text-slate-700">
-        <li>Service map + ownership matrix</li>
-        <li>Risk heatmap and mitigation plan</li>
-        <li>Target architecture and rollout plan</li>
-        <li>Test suite blueprint and coverage targets</li>
-      </ul>
-      <div class="mt-6">
-        <a href="contact.html" class="bg-blue-600 text-white px-5 py-3 rounded-xl hover:bg-blue-700">Request a pilot</a>
-      </div>
+<section class="section">
+  <h1>AI‑Based Reverse Engineering</h1>
+  <p class="lead">Mine your delivery exhaust — repos, pipelines, incidents and tickets — to surface systemic blockers and outcome drift without slowing teams down.</p>
+</section>
+<section class="section two">
+  <div class="card">
+    <h2>How it works</h2>
+    <ol>
+      <li><strong>Ingest</strong> — read‑only connectors for Git, CI/CD, observability, ticketing (no PII).</li>
+      <li><strong>Model</strong> — code graph + LLMs map ownership, coupling, and change risk to outcomes.</li>
+      <li><strong>Recommend</strong> — prioritised, evidence‑based actions with expected ROI.</li>
+    </ol>
+    <div class="chips" style="margin-top:10px">
+      <span class="chip">Read‑only</span><span class="chip">Least‑privilege</span><span class="chip">Data minimisation</span>
     </div>
   </div>
+  <div class="card">
+    <h2>Sample findings</h2>
+    <ul>
+      <li>High PR cycle time and review lag in <em>Gateway</em> service (queueing bottleneck).</li>
+      <li>Test flake concentrated in <em>Mobile</em> module; target contracts first.</li>
+      <li>Incident pattern links to shared <em>auth</em> dependency; decouple seam.</li>
+    </ul>
+    <div class="figure"><svg viewBox="0 0 720 260" role="img" aria-label="Bar chart">
+      <defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0%" stop-color="#2563EB"/><stop offset="100%" stop-color="#06B6D4"/></linearGradient></defs>
+      <rect x="0" y="0" width="720" height="260" fill="white" rx="16" />
+      <g><rect x="40" y="126.66666666666667" width="80.0" height="93.33333333333333" rx="8" fill="url(#g1)"></rect><text x="80.0" y="238" font-size="12" text-anchor="middle" fill="#475569">Repo A</text><text x="80.0" y="120.66666666666667" font-size="12" text-anchor="middle" fill="#0F172A">42</text><rect x="168.0" y="68.88888888888889" width="80.0" height="151.11111111111111" rx="8" fill="url(#g1)"></rect><text x="208.0" y="238" font-size="12" text-anchor="middle" fill="#475569">Service B</text><text x="208.0" y="62.888888888888886" font-size="12" text-anchor="middle" fill="#0F172A">68</text><rect x="296.0" y="93.33333333333333" width="80.0" height="126.66666666666667" rx="8" fill="url(#g1)"></rect><text x="336.0" y="238" font-size="12" text-anchor="middle" fill="#475569">Gateway</text><text x="336.0" y="87.33333333333333" font-size="12" text-anchor="middle" fill="#0F172A">57</text><rect x="424.0" y="40.0" width="80.0" height="180.0" rx="8" fill="url(#g1)"></rect><text x="464.0" y="238" font-size="12" text-anchor="middle" fill="#475569">Mobile</text><text x="464.0" y="34.0" font-size="12" text-anchor="middle" fill="#0F172A">81</text><rect x="552.0" y="80.0" width="80.0" height="140.0" rx="8" fill="url(#g1)"></rect><text x="592.0" y="238" font-size="12" text-anchor="middle" fill="#475569">Batch</text><text x="592.0" y="74.0" font-size="12" text-anchor="middle" fill="#0F172A">63</text></g>
+    </svg><div class="caption">Illustrative risk/flow index by component (higher = more attention).</div></div>
+  </div>
+</section>
+<section class="section three">
+  <div class="card">
+    <h2>Signals we extract</h2>
+    <ul>
+      <li>Code churn, ownership, coupling, dependency centrality.</li>
+      <li>PR cycle times, review quality, flaky test hotspots.</li>
+      <li>Incident patterns, MTTR/MTBF, toil signatures.</li>
+      <li>Backlog volatility, delivery cadence, rework.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2>Why teams trust it</h2>
+    <ul>
+      <li>Transparent reasoning: link every recommendation to evidence.</li>
+      <li>Safe by default: no writes, no secrets harvested, narrow scopes.</li>
+      <li>Actionable: prioritised, small steps that teams can land this quarter.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2>What you get</h2>
+    <ul>
+      <li>Hotspot map by service/team/interface.</li>
+      <li>Refactor vs. replace decision support using flow & risk.</li>
+      <li>Top‑3 plays with owners, effort and expected impact.</li>
+    </ul>
+  </div>
+</section>
+
 </main>
 
-
-<footer class="section-tight border-t border-slate-200">
-  <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-    <div class="flex items-center gap-2">
-      <img src="assets/logo.svg" alt="Moderneer logo" class="logo">
-      <span class="text-sm text-slate-600">© Moderneer</span>
+<footer role="contentinfo">
+  <div class="container">
+    <div class="footer-links">
+      <a href="contact.html">Contact</a>
     </div>
-    <nav class="flex items-center gap-4" aria-label="Footer">
-      <a href="https://www.linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn">LinkedIn</a>
-      <a href="https://x.com" target="_blank" rel="noopener" aria-label="X">X</a>
-      <a href="contact.html" class="link-underline">Contact</a>
-      <a href="privacy.html">Privacy</a>
-    </nav>
+    <div>© 2025 Moderneer. Transforming ideas into outcomes.</div>
   </div>
 </footer>
 
-<script src="scripts/main.js"></script>
-<script src="scripts/analytics.js"></script>
 </body>
 </html>
