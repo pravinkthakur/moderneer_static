@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Assessment — Moderneer</title>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"></script>
+</head>
+<body>
+  <h1>Hello World</h1>
+  <button id="logout">Log out</button>
+  <script>
+    const auth0Domain = 'YOUR_AUTH0_DOMAIN';
+    const auth0ClientId = 'YOUR_AUTH0_CLIENT_ID';
+
+    let auth0 = null;
+
+    async function initAuth0() {
+      auth0 = await createAuth0Client({
+        domain: auth0Domain,
+        client_id: auth0ClientId,
+        cacheLocation: 'localstorage'
+      });
+
+      // Handle redirect callback
+      if (window.location.search.includes('code=')) {
+        await auth0.handleRedirectCallback();
+        window.history.replaceState({}, document.title, '/assessment.html');
+      }
+
+      const isAuthenticated = await auth0.isAuthenticated();
+      if (!isAuthenticated) {
+        window.location.href = '/maturity-model.html';
+      }
+    }
+
+    document.getElementById('logout').onclick = async () => {
+      await auth0.logout({ returnTo: window.location.origin + '/maturity-model.html' });
+    };
+
+    initAuth0();
+  </script>
+</body>
+</html>
