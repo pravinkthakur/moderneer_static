@@ -13,6 +13,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="styles/moderneer.css" rel="stylesheet">
   <link href="styles/components.css" rel="stylesheet">
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/1.22/auth0-spa-js.production.js"></script>
 </head>
 <body class="bg-white text-slate-900 antialiased">
 
@@ -108,6 +109,8 @@
         <a href="contact.html" class="px-5 py-3 rounded-xl border border-slate-300 hover:bg-slate-50">Get spreadsheet template</a>
       </div>
     </div>
+    <!-- Add your CTA button below -->
+    <button id="auth0-login" class="bg-blue-600 text-white px-5 py-3 rounded-xl hover:bg-blue-700">Request the full interactive assessment</button>
   </div>
 </main>
 
@@ -129,5 +132,30 @@
 
 <script src="scripts/main.js"></script>
 <script src="scripts/analytics.js"></script>
+<script>
+  // Replace with your Auth0 domain and client ID
+  const auth0Domain = 'YOUR_AUTH0_DOMAIN';
+  const auth0ClientId = 'YOUR_AUTH0_CLIENT_ID';
+
+  let auth0 = null;
+
+  async function initAuth0() {
+    auth0 = await createAuth0Client({
+      domain: auth0Domain,
+      client_id: auth0ClientId,
+      cacheLocation: 'localstorage'
+    });
+  }
+
+  async function login() {
+    await auth0.loginWithRedirect({
+      redirect_uri: window.location.origin + '/assessment.html'
+    });
+  }
+
+  document.getElementById('auth0-login').addEventListener('click', login);
+
+  initAuth0();
+</script>
 </body>
 </html>
