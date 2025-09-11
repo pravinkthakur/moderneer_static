@@ -35,43 +35,44 @@
 
   <!-- Main Content -->
   <main class="container section">
-    <div class="assessment-header" style="display:flex;align-items:center;gap:16px;padding:24px 0 16px 0;border-bottom:1px solid #e5e7eb;">
-      <div class="assessment-logo" style="width:38px;height:38px;border-radius:10px;background:conic-gradient(from 180deg,#3B82F6,#06b6d4);box-shadow:0 2px 8px rgba(0,0,0,0.04);flex-shrink:0;" aria-hidden="true"></div>
+    <section class="hero">
       <div>
-        <h1 class="assessment-title" style="font-size:1.5rem;font-family:Merriweather,Arial,serif;color:#0077B3;margin:0;">Moderneer • Outcome Engineering Maturity</h1>
-        <div class="assessment-sub" style="color:#666;font-size:.95rem;margin-bottom:0;">Core 24 • Full 12 Pillars • Sequenced tiers • Auto-scoring with gates/caps • Universal ⓘ</div>
+        <span class="badge">Outcome Engineering</span>
+        <h1>Outcome Engineering Maturity Assessment</h1>
+        <p class="lead">Evaluate your engineering practices across 24 core and 12 full pillars. Auto-scoring, gates, caps, and universal definitions included.</p>
+        <button id="btnHelp" class="button secondary" aria-label="Open help and legend">Help / Legend</button>
       </div>
-      <button id="btnHelp" class="button secondary" aria-label="Open help and legend">Help / Legend</button>
-    </div>
-
-    <div class="assessment-toolbar" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:24px 0 16px 0;">
-      <div class="segmented">
-        <button id="btnCore" class="active">Core 24</button>
-        <button id="btnFull">Full 12 Pillars</button>
-      </div>
-      <div class="segmented">
-        <button id="btnViewPillar" class="active">By Pillar</button>
-        <button id="btnViewTier">By Tier</button>
-      </div>
-      <div class="btn-group">
-        <button class="button" id="btnCompute">Compute</button>
-        <button class="button secondary" id="btnSave">Save</button>
-        <button class="button secondary" id="btnLoad">Load</button>
-        <button class="button accent" id="btnReset">Reset</button>
-        <button class="button secondary" id="btnExport">Export JSON</button>
-      </div>
-    </div>
-
-    <section class="card" style="margin-bottom:24px;">
-      <div class="tiny" style="margin-top:6px;">
-        <b>Scales carry purpose:</b> click ⓘ to see why a measure exists & anchor definitions (e.g., P95 lead time 0=≥20d … 5=≤1d).
-        <br/>Index→Scale: 0–25→1..2, 25–50→2..3, 50–80→3..4, 80–100→4..5. Gates & caps apply after weighting.
-      </div>
-      <div id="formArea"></div>
     </section>
 
-    <div class="grid grid-cols-2" style="gap:16px;">
-      <aside class="card">
+    <section class="section cards">
+      <div class="card">
+        <div class="segmented">
+          <button id="btnCore" class="active">Core 24</button>
+          <button id="btnFull">Full 12 Pillars</button>
+        </div>
+        <div class="segmented" style="margin-top:10px;">
+          <button id="btnViewPillar" class="active">By Pillar</button>
+          <button id="btnViewTier">By Tier</button>
+        </div>
+        <div class="btn-group" style="margin-top:10px;">
+          <button class="button" id="btnCompute">Compute</button>
+          <button class="button secondary" id="btnSave">Save</button>
+          <button class="button secondary" id="btnLoad">Load</button>
+          <button class="button accent" id="btnReset">Reset</button>
+          <button class="button secondary" id="btnExport">Export JSON</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="tiny">
+          <b>Scales carry purpose:</b> click ⓘ to see why a measure exists & anchor definitions (e.g., P95 lead time 0=≥20d … 5=≤1d).
+          <br/>Index→Scale: 0–25→1..2, 25–50→2..3, 50–80→3..4, 80–100→4..5. Gates & caps apply after weighting.
+        </div>
+        <div id="formArea"></div>
+      </div>
+    </section>
+
+    <section class="section cards">
+      <div class="card">
         <h2 class="h3">Results</h2>
         <div class="kpis">
           <div class="kpi"><div class="tiny">Overall (index 0–100)</div><strong id="overallIndex">—</strong></div>
@@ -79,16 +80,12 @@
           <div class="kpi"><div class="tiny">Band</div><strong id="overallBand">—</strong></div>
           <div class="kpi"><div class="tiny">Gates passed</div><strong id="gatesPassed">—</strong></div>
         </div>
-        <div style="margin-top:10px">
-          <h3 class="h3">Gate & cap diagnostics</h3>
-          <div id="gateList" style="display:grid;gap:10px"></div>
-        </div>
-        <div style="margin-top:10px">
-          <h3 class="h3">Breakdown</h3>
-          <div id="pillarBreakdown" style="display:grid;gap:10px"></div>
-        </div>
-      </aside>
-    </div>
+        <h3 class="h3" style="margin-top:18px;">Gate & cap diagnostics</h3>
+        <div id="gateList"></div>
+        <h3 class="h3" style="margin-top:18px;">Breakdown</h3>
+        <div id="pillarBreakdown"></div>
+      </div>
+    </section>
   </main>
 
   <!-- Modal -->
@@ -808,262 +805,4 @@ overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.style.disp
 function openModal(title, html){ modalTitle.textContent = title; modalContent.innerHTML = html; overlay.style.display="flex"; }
 function paramInfoHTML(pid){
   const def = MODEL.fullModel.parameters[pid]; const meta = PARAM_META[pid] || {};
-  const scaleItems = def.checks.map((ch,i)=>({ch,i})).filter(x=> x.ch.type==="scale5" || x.ch.type==="scale100");
-  let scalesHTML = "";
-  if(scaleItems.length){
-    scalesHTML = `<h4 style="margin:8px 0 4px 0">Scales & anchors</h4>`;
-    scaleItems.forEach(({ch,i})=>{
-      const sc = SCALE_CATALOG[ch.scaleRef||""] || null;
-      const label = ch.label + (sc?` — <em>${sc.label}</em>`:"");
-      const purpose = ch.purpose || (sc?sc.purpose:"");
-      const anchors = sc? `<ul style="margin:6px 0 0 18px">${sc.anchors.map(a=>`<li>${a}</li>`).join("")}</ul>` : "";
-      scalesHTML += `<div style="margin:8px 0"><strong>${label}</strong><div class="tiny">${purpose}</div>${anchors}</div>`;
-    });
-  }
-  const deps = (meta.dependsOn||[]).map(d=>`<code style="font-family:var(--font-mono)">${d}</code>`).join(", ");
-  return `
-    <div class="tiny" style="margin-bottom:6px"><code style="font-family:var(--font-mono)">${pid}</code></div>
-    <p>${meta.purpose || "No description available."}</p>
-    ${meta.popular?`<p class="tiny">★ Popular: commonly adopted / high ROI</p>`:""}
-    ${meta.dependsOn && meta.dependsOn.length ? `<p><strong>Depends on:</strong> ${deps}</p>`:""}
-    ${scalesHTML}
-  `;
-}
-document.getElementById("btnHelp").addEventListener("click", ()=>{
-  openModal("Moderneer • Help / Legend", `
-    <p>Assess via <b>checkboxes</b> & <b>scales</b> with clear <b>purpose</b> and <b>anchors</b>.</p>
-    <ul style="margin:8px 0 0 18px">
-      <li><b>Modules:</b> Core 24 (baseline) vs Full 12 Pillars (comprehensive).</li>
-      <li><b>Views:</b> By Pillar vs By Tier (sequence low→high). <b>Tier ≠ Score level</b>.</li>
-      <li><b>Icons:</b> ★ popular; ⛓️ dependencies; ⓘ details.</li>
-      <li><b>N/A:</b> Exclude non-applicable sub-items.</li>
-      <li><b>Weights:</b> Each sub-item shows its weight (w:%).</li>
-      <li><b>Index→Scale:</b> 0–25→1..2, 25–50→2..3, 50–80→3..4, 80–100→4..5.</li>
-      <li><b>Gates & Caps:</b> Key gates cap overall at ≤3; other caps may apply.</li>
-      <li><b>Save/Load/Export:</b> Stored locally; export JSON to share.</li>
-    </ul>
-  `);
-});
-
-/* ---------- Events & persistence ---------- */
-function attachHandlers(){
-  formArea.addEventListener("click", e=>{
-    const t=e.target;
-    if(t.matches('[data-info]')){ const pid=t.getAttribute('data-info'); openModal(MODEL.fullModel.parameters[pid].label, paramInfoHTML(pid)); }
-    if(t.matches('[data-pop]')){ const pid=t.getAttribute('data-pop'); openModal(MODEL.fullModel.parameters[pid].label, paramInfoHTML(pid)); }
-    if(t.matches('[data-dep]')){
-      const pid=t.getAttribute('data-dep'); const meta = PARAM_META[pid]||{}; const current = compute(true);
-      let html = `<div class="tiny" style="margin-bottom:6px"><code style="font-family:var(--font-mono)">${pid}</code></div>`;
-      if(!meta.dependsOn || !meta.dependsOn.length){ html += "<p>No dependencies.</p>"; }
-      else{
-        html += "<ul style='margin:8px 0 0 18px'>";
-        meta.dependsOn.forEach(d=>{
-          const scl = current.perParam?.[d]?.scale ?? null;
-          const label = MODEL.fullModel.parameters[d]?.label || d;
-          html += `<li><strong>${label}</strong> <span class="tiny">(${d})</span> — status: <b>${fmt(scl,1)}</b></li>`;
-        });
-        html += "</ul>";
-      }
-      openModal("Dependencies", html);
-    }
-    if(t.matches('[data-scale]')){
-      const ref=t.getAttribute('data-scale'); const sc = SCALE_CATALOG[ref] || null;
-      if(!sc){ openModal("Scale", "<p>No scale info available.</p>"); return; }
-      openModal(sc.label, `<p>${sc.purpose}</p><ul style="margin:8px 0 0 18px">${sc.anchors.map(a=>`<li>${a}</li>`).join("")}</ul>`);
-    }
-  });
-  formArea.addEventListener("change", e=>{
-    const t=e.target;
-    if(t.matches('[data-na="1"]')){
-      const ctrl = t.closest(".row").querySelector('[data-param][data-index]:not([data-na])');
-      if(ctrl){ ctrl.disabled = t.checked; }
-    }
-    compute();
-  });
-}
-function saveAll(){ alert("Saved locally."); }
-function loadAll(){ render(); alert("Loaded (if previously saved)."); }
-function resetAll(){ if(!confirm("Clear all selections for this module?")) return; localStorage.removeItem(STORAGE_KEYS[currentModule]); render(); }
-
-document.getElementById("btnCompute").addEventListener("click", ()=>compute());
-document.getElementById("btnSave").addEventListener("click", saveAll);
-document.getElementById("btnLoad").addEventListener("click", loadAll);
-document.getElementById("btnReset").addEventListener("click", resetAll);
-document.getElementById("btnExport").addEventListener("click", ()=>{
-  const payload = { module:currentModule, view:currentView, ts:new Date().toISOString(), selections:getSaved(), results:compute(true) };
-  const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
-  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`moderneer_oemm_${currentModule}_${Date.now()}.json`;
-  a.click(); URL.revokeObjectURL(a.href);
-});
-document.getElementById("btnCore").addEventListener("click", ()=>{
-  currentModule="core";
-  document.getElementById("btnCore").classList.add("active");
-  document.getElementById("btnFull").classList.remove("active");
-  render();
-});
-document.getElementById("btnFull").addEventListener("click", ()=>{
-  currentModule="full";
-  document.getElementById("btnFull").classList.add("active");
-  document.getElementById("btnCore").classList.remove("active");
-  render();
-});
-document.getElementById("btnViewPillar").addEventListener("click", ()=>{
-  currentView="pillar";
-  document.getElementById("btnViewPillar").classList.add("active");
-  document.getElementById("btnViewTier").classList.remove("active");
-  render();
-});
-document.getElementById("btnViewTier").addEventListener("click", ()=>{
-  currentView="tier";
-  document.getElementById("btnViewTier").classList.add("active");
-  document.getElementById("btnViewPillar").classList.remove("active");
-  render();
-});
-
-/* ---------- Compute ---------- */
-function collectCompliance(){
-  const out = {};
-  const saved = getSaved();
-  document.querySelectorAll('[data-param][data-index]:not([data-na])').forEach(ctrl=>{
-    const pid = ctrl.dataset.param, i = ctrl.dataset.index;
-    saved[pid] = saved[pid] || {};
-    const type = ctrl.dataset.type;
-    let v = 0;
-    if(type==="check") v = ctrl.checked ? 1 : 0;
-    else if(type==="scale5") v = parseFloat(ctrl.value||"0");
-    else v = parseFloat(ctrl.value||"0");
-    const naEl = ctrl.closest(".row").querySelector('[data-na="1"]');
-    const na = !!(naEl && naEl.checked);
-    saved[pid][i] = { v, na };
-  });
-  setSaved(saved);
-  visibleParamIds().forEach(pid=>{
-    const def = MODEL.fullModel.parameters[pid];
-    let num=0, den=0;
-    def.checks.forEach((ch,i)=>{
-      const rec = saved[pid]?.[i]; const w = (typeof ch.w==="number")? ch.w : 0;
-      if(rec?.na) return;
-      let val = 0;
-      if(rec){
-        if(ch.type==="check") val = rec.v?1:0;
-        else if(ch.type==="scale5") val = (rec.v||0)/5;
-        else val = (rec.v||0)/100;
-      }
-      num += w * val; den += w;
-    });
-    const idx = den>0 ? (num/den)*100 : 0;
-    out[pid] = { index: idx, scale: indexToScale(idx) };
-  });
-  return out;
-}
-function compute(silent=false){
-  const comp = collectCompliance();
-  if(!silent){
-    Object.keys(comp).forEach(pid=>{
-      const idx=comp[pid].index, scl=comp[pid].scale;
-      const key=b64(pid);
-      const meta=document.getElementById(`meta-${key}`);
-      const bar=document.getElementById(`bar-${key}`);
-      const badge=document.getElementById(`badge-${key}`);
-      if(meta) meta.textContent = `Compliance: ${fmt(idx,0)}% • Index: ${fmt(idx,0)} • Scale: ${fmt(scl,1)}`;
-      if(bar) bar.style.width = `${Math.max(0,Math.min(100,idx))}%`;
-      if(badge){
-        badge.textContent = fmt(scl,1);
-        badge.className = "score-badge " + (scl>=4?"score-good":scl>=3?"score-warn":"score-bad");
-      }
-    });
-  }
-  const byPillar = {};
-  MODEL.fullModel.pillars.forEach(p=>{
-    const ids = p.parameters.filter(id => visibleParamIds().includes(id));
-    if(!ids.length) return;
-    const idxs = ids.map(id => comp[id]?.index).filter(v=>v!=null);
-    const avg = idxs.length ? idxs.reduce((a,c)=>a+c,0)/idxs.length : null;
-    byPillar[p.name] = avg;
-  });
-  let sumW=0, sumWx=0;
-  Object.keys(byPillar).forEach(p=>{
-    const idx = byPillar[p];
-    if(idx!=null){ sumW += MODEL.weights[p]||0; sumWx += (MODEL.weights[p]||0)*idx; }
-  });
-  const overallIndexPre = sumW? (sumWx/sumW) : null;
-  const overallScalePre = indexToScale(overallIndexPre);
-  const gates = MODEL.gates.map(g=>{
-    const vals = g.params.map(pid => comp[pid]?.scale ?? null);
-    const pass = vals.every(v=>v!=null) && ((g.logical==="AND") ? vals.every(v=>v>=g.threshold) : vals.some(v=>v>=g.threshold));
-    return { id:g.id, label:g.label, pass };
-  });
-  const allPass = gates.every(x=>x.pass);
-  let afterGatesScale = overallScalePre;
-  if(afterGatesScale!=null && !allPass) afterGatesScale = Math.min(afterGatesScale,3.0);
-  const caps = MODEL.caps.map(c=>{
-    const vals = c.params.map(pid => comp[pid]?.scale ?? null);
-    let trigger=false;
-    if(vals.every(v=>v!=null)){
-      if(c.logic==="OR"){ trigger = (vals[0] < c.lt) || (vals[1] < c.lt); }
-      else if(c.logic==="LE"){ trigger = (vals[0] <= c.value); }
-    }
-    return { label:c.label, trigger, cap:c.cap };
-  });
-  let finalScale = afterGatesScale;
-  caps.forEach(c=>{ if(c.trigger) finalScale = Math.min(finalScale, c.cap); });
-  const finalIndex = (()=>{
-    if(finalScale==null) return null;
-    if(finalScale<=2) return (finalScale-1)*25;
-    if(finalScale<=3) return 25 + (finalScale-2)*25;
-    if(finalScale<=4) return 50 + (finalScale-3)*30;
-    return 80 + (finalScale-4)*20;
-  })();
-  if(!silent){
-    document.getElementById("overallIndex").textContent = fmt(finalIndex,1);
-    document.getElementById("overallScale").textContent = fmt(finalScale,1);
-    document.getElementById("overallBand").textContent = band(finalScale);
-    document.getElementById("gatesPassed").textContent = allPass ? "All" : `${gates.filter(x=>x.pass).length}/${MODEL.gates.length}`;
-    renderGateCaps(gates,caps); renderBreakdown(byPillar);
-  }
-  return { perParam: comp, byPillar, overallIndexPre, overallScalePre, afterGatesScale, finalScale, finalIndex, gates, caps };
-}
-function renderGateCaps(gates,caps){
-  const box=document.getElementById("gateList"); box.innerHTML="";
-  gates.forEach(g=>{
-    const row=document.createElement("div"); row.className="pillar-card";
-    const cls = g.pass?"score-good":"score-bad";
-    row.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
-      <div>${g.label}</div><span class="score-badge ${cls}">${g.pass?"PASS":"FAIL"}</span></div>`;
-    box.appendChild(row);
-  });
-  const sep=document.createElement("div"); sep.className="tiny"; sep.style.marginTop="8px"; sep.textContent="Caps";
-  box.appendChild(sep);
-  caps.forEach(c=>{
-    const row=document.createElement("div"); row.className="pillar-card";
-    row.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
-      <div>${c.label}</div><span class="score-badge ${c.trigger?"score-bad":"score-good"}">${c.trigger?"ACTIVE":"—"}</span></div>`;
-    box.appendChild(row);
-  });
-}
-function renderBreakdown(byPillar){
-  const cont=document.getElementById("pillarBreakdown"); cont.innerHTML="";
-  Object.keys(MODEL.weights).forEach(p=>{
-    const idx = byPillar[p]; if(idx==null) return;
-    const scl = indexToScale(idx); const pct = Math.max(0,Math.min(100,idx));
-    const state = scl>=4?"score-good":(scl>=3?"score-warn":"score-bad");
-    const card=document.createElement("div"); card.className="pillar-card";
-    card.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div style="display:flex; gap:8px; align-items:baseline">
-          <strong>${p}</strong><span class="pill">Weight: ${MODEL.weights[p]}</span>
-        </div>
-        <span class="score-badge ${state}">${fmt(scl,1)}</span>
-      </div>
-      <div class="progress" style="margin-top:8px"><div class="bar" style="width:${pct}%"></div></div>
-      <div class="tiny">Index: ${fmt(idx,1)}</div>
-    `;
-    cont.appendChild(card);
-  });
-}
-
-/* Init */
-render();
-</script>
-</body>
-</html>
+  const scaleItems = def.checks.map((ch,i)=>({ch,i})).filter(x=> x.ch.type==="scale5" || x.ch.ch
