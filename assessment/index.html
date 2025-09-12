@@ -124,6 +124,17 @@
 .badges{display:flex;gap:8px;flex-wrap:wrap}
 .badge{background:#ffffff26;color:#fff;padding:4px 10px;border-radius:999px;font-weight:700;font-size:.8rem;border:1px solid #ffffff55}
 
+
+/* --- Modular browse UI --- */
+.tile-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.tile{border:1px solid var(--color-neutral-200);background:var(--color-neutral-50);border-radius:12px;padding:12px;display:grid;gap:6px}
+.tile h4{margin:0;font-size:1rem}
+.tile .meta{display:flex;gap:8px;flex-wrap:wrap}
+.tile .meta .pill{background:var(--color-neutral-200);color:var(--color-neutral-800)}
+.stepper{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.stepper .btns{display:flex;gap:8px}
+.hidden{display:none}
+
 </style>
 </head>
 <body class="moderneer">
@@ -150,6 +161,10 @@
       <div class="seg" role="tablist" aria-label="View selector">
         <button id="btnViewPillar" class="active" aria-selected="true">By Pillar</button>
         <button id="btnViewTier" aria-selected="false">By Tier</button>
+      </div>
+      <div class="seg" role="tablist" aria-label="Mode selector">
+        <button id="btnModeAll" class="active" aria-selected="true">All</button>
+        <button id="btnModeSingle" aria-selected="false">One at a time</button>
       </div>
       <div class="btn-group">
         <button class="btn btn-primary" id="btnCompute">Compute</button>
@@ -734,7 +749,7 @@ patchModel();
 
 /* ---------- State & view ---------- */
 const STORAGE_KEYS = { core:"oemm_core24_seq", full:"oemm_full12_seq" };
-let currentModule="core", currentView="pillar";
+let currentModule="core", currentView="pillar", singleMode=false, singleKey=null;
 const formArea = document.getElementById("formArea");
 function b64(s){ return btoa(unescape(encodeURIComponent(s))).replace(/=+$/,''); }
 function fmt(n,d=1){ return (n==null||isNaN(n)) ? "—" : (+n).toFixed(d); }
@@ -759,7 +774,8 @@ function setSaved(S){ localStorage.setItem(STORAGE_KEYS[currentModule], JSON.str
 /* ---------- Render ---------- */
 function render(){
   formArea.innerHTML="";
-  if(currentView==="pillar") renderByPillar(); else renderByTier();
+  if(singleMode){ renderTiles(); }
+  else { if(currentView==="pillar") renderByPillar(); else renderByTier(); }
   attachHandlers();
   compute();
 }
@@ -1123,6 +1139,131 @@ document.getElementById("btnViewTier").addEventListener("click", ()=>{
   render();
 });
 
+// Mode toggle
+document.getElementById("btnModeAll").addEventListener("click", ()=>{
+  singleMode=false;
+  document.getElementById("btnModeAll").classList.add("active");
+  document.getElementById("btnModeSingle").classList.remove("active");
+  render();
+});
+
+document.getElementById("btnModeSingle").addEventListener("click", ()=>{
+  singleMode=true;
+  document.getElementById("btnModeSingle").classList.add("active");
+  document.getElementById("btnModeAll").classList.remove("active");
+  render();
+});
+
+
+/* ---------- Modular single mode ---------- */
+function renderTiles(){
+  const vis = new Set(visibleParamIds());
+  if(currentView==="pillar"){
+    const wrap = document.createElement("div");
+    wrap.innerHTML = `<div class="tile-grid" id="tileGrid"></div>`;
+    const grid = wrap.firstElementChild;
+    MODEL.fullModel.pillars.forEach((block, idx)=>{
+      const params = block.parameters.filter(p=>vis.has(p));
+      if(!params.length) return;
+      const div = document.createElement("div");
+      div.className = "tile";
+      div.innerHTML = `
+        <h4>${block.name}</h4>
+        <div class="meta">
+          <span class="pill">Weight ${MODEL.weights[block.name]}</span>
+          <span class="pill">${params.length} items</span>
+        </div>
+        <button class="btn btn-primary" data-pillar="${block.name}">Open</button>`;
+      grid.appendChild(div);
+    });
+    formArea.appendChild(wrap);
+    grid.addEventListener("click", (e)=>{
+      const btn = e.target.closest("[data-pillar]"); if(!btn) return;
+      singleKey = btn.dataset.pillar;
+      renderSinglePillar(singleKey);
+    });
+  } else {
+    const tiers = {}; vis.forEach(pid=>{ const t=PARAM_META[pid]?.tier||6; (tiers[t]=tiers[t]||[]).push(pid); });
+    const wrap = document.createElement("div"); wrap.innerHTML = `<div class="tile-grid" id="tileGrid"></div>`;
+    const grid = wrap.firstElementChild;
+    Object.keys(tiers).sort((a,b)=>a-b).forEach(t=>{
+      const ids = tiers[t];
+      const div = document.createElement("div");
+      div.className="tile";
+      div.innerHTML = `
+        <h4>Tier ${t}</h4>
+        <div class="meta">
+          <span class="pill">${ids.length} items</span>
+        </div>
+        <button class="btn btn-primary" data-tier="${t}">Open</button>`;
+      grid.appendChild(div);
+    });
+    formArea.appendChild(wrap);
+    grid.addEventListener("click", (e)=>{
+      const btn = e.target.closest("[data-tier]"); if(!btn) return;
+      singleKey = +btn.dataset.tier;
+      renderSingleTier(singleKey);
+    });
+  }
+}
+
+function renderSinglePillar(name){
+  formArea.innerHTML = "";
+  const block = MODEL.fullModel.pillars.find(p=>p.name===name);
+  const vis = new Set(visibleParamIds());
+  const params = block.parameters.filter(p=>vis.has(p));
+  const card = document.createElement("div"); card.className="pillar-card";
+  card.innerHTML = `
+    <header class="stepper">
+      <div class="titleWrap"><h3 class="h3">${block.name}</h3><span class="pill">Weight: ${MODEL.weights[block.name]}</span></div>
+      <div class="btns">
+        <button class="btn" id="btnBackTiles">Back</button>
+        <button class="btn" id="btnPrev">Prev</button>
+        <button class="btn btn-primary" id="btnNext">Next</button>
+      </div>
+    </header>
+    <div id="singleContainer"></div>`;
+  formArea.appendChild(card);
+  const inner = card.querySelector("#singleContainer");
+  params.forEach(pid=> inner.appendChild(renderParam(block.name,pid,false)));
+
+  // Nav handlers
+  document.getElementById("btnBackTiles").onclick = ()=> renderTiles();
+  const blocks = MODEL.fullModel.pillars.filter(p=>p.parameters.some(x=>vis.has(x)));
+  const idx = blocks.findIndex(b=>b.name===name);
+  document.getElementById("btnPrev").onclick = ()=>{ const prev = blocks[(idx-1+blocks.length)%blocks.length]; renderSinglePillar(prev.name); };
+  document.getElementById("btnNext").onclick = ()=>{ const next = blocks[(idx+1)%blocks.length]; renderSinglePillar(next.name); };
+}
+
+function renderSingleTier(t){
+  formArea.innerHTML = "";
+  const vis = new Set(visibleParamIds());
+  const ids = []; vis.forEach(pid=>{ const tt=PARAM_META[pid]?.tier||6; if(tt===t) ids.push(pid); });
+  const card = document.createElement("div"); card.className="pillar-card";
+  card.innerHTML = `
+    <header class="stepper">
+      <div class="titleWrap"><h3 class="h3">Tier ${t}</h3><span class="tierTag">Low→High sequence</span></div>
+      <div class="btns">
+        <button class="btn" id="btnBackTiles">Back</button>
+        <button class="btn" id="btnPrev">Prev</button>
+        <button class="btn btn-primary" id="btnNext">Next</button>
+      </div>
+    </header>
+    <div id="singleContainer"></div>`;
+  formArea.appendChild(card);
+  const inner = card.querySelector("#singleContainer");
+  ids.forEach(pid=>{
+    const pill = MODEL.fullModel.pillars.find(p=>p.parameters.includes(pid))?.name || "—";
+    inner.appendChild(renderParam(pill,pid,true));
+  });
+
+  // Nav handlers
+  document.getElementById("btnBackTiles").onclick = ()=> renderTiles();
+  const tiers = Array.from(new Set(Array.from(vis).map(pid=>PARAM_META[pid]?.tier||6))).sort((a,b)=>a-b);
+  const idx = tiers.indexOf(t);
+  document.getElementById("btnPrev").onclick = ()=>{ const prev = tiers[(idx-1+tiers.length)%tiers.length]; renderSingleTier(prev); };
+  document.getElementById("btnNext").onclick = ()=>{ const next = tiers[(idx+1)%tiers.length]; renderSingleTier(next); };
+}
 /* ---------- Compute ---------- */
 function collectCompliance(){
   const out = {};
