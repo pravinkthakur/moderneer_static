@@ -108,6 +108,22 @@
   .pillars-grid .name{font-weight:600}
   .pillars-grid .val{font-variant-numeric:tabular-nums;text-align:right}
 
+
+/* --- Overall tab designer styles --- */
+.tab-overall .score-card{background:linear-gradient(135deg,var(--color-primary),var(--color-accent));color:#fff;padding:16px;border-radius:16px;display:flex;gap:16px;align-items:center}
+.tab-overall .ring{width:120px;height:120px;border-radius:50%;display:grid;place-items:center;background:#ffffff22;position:relative}
+.tab-overall .ring::before{content:"";position:absolute;inset:6px;border-radius:50%;background:#00000022}
+.tab-overall .ring .num{position:relative;font-size:1.8rem;font-weight:800;line-height:1}
+.tab-overall .meta{display:grid;gap:10px;flex:1}
+.tab-overall .progress.alt{height:10px;background:#ffffff33;border-radius:8px;overflow:hidden}
+.tab-overall .progress.alt .bar{background:#fff}
+.kpi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.kpi-tile{background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:12px;padding:10px}
+.kpi-label{font-size:.8rem;color:var(--color-neutral-600)}
+.kpi-value{font-weight:800;font-size:1.1rem}
+.badges{display:flex;gap:8px;flex-wrap:wrap}
+.badge{background:#ffffff26;color:#fff;padding:4px 10px;border-radius:999px;font-weight:700;font-size:.8rem;border:1px solid #ffffff55}
+
 </style>
 </head>
 <body class="moderneer">
@@ -153,7 +169,7 @@
     <div id="formArea"></div>
   </section>
 
-  <aside class="card">
+  <aside class="card" style="display:none">
     <h2 class="h3">Results</h2>
     <div class="kpis">
       <div class="kpi"><div class="tiny">Overall (index 0–100)</div><strong id="overallIndex">—</strong></div>
@@ -167,7 +183,7 @@
       <div id="gateList" style="display:grid;gap:10px"></div>
     </div>
 
-    <div style="margin-top:10px">
+    <div style="margin-top:10px;display:none">
       <h3 class="h3">Breakdown</h3>
       <div id="pillarBreakdown" style="display:grid;gap:10px"></div>
     </div>
@@ -993,11 +1009,16 @@ function nextStepsHTML(results){
 }
 
 function buildReportTabs(results){
+  
+  
   // Overall
   const overallHTML = `
-    <p><b>Scale ${fmt(results.finalScale,1)}</b> — ${band(results.finalScale)}</p>
-    <p>Index ${fmt(results.finalIndex,1)}</p>
-    <p>Gates passed: <b>${results.gates.filter(g=>g.pass).length}/${results.gates.length}</b></p>
+    <div class="kpis">
+      <div class="kpi"><div class="tiny">Overall (index 0–100)</div><strong>${fmt(results.finalIndex,1)}</strong></div>
+      <div class="kpi"><div class="tiny">Overall (scale 1–5)</div><strong>${fmt(results.finalScale,1)}</strong></div>
+      <div class="kpi"><div class="tiny">Band</div><strong>${band(results.finalScale)}</strong></div>
+      <div class="kpi"><div class="tiny">Gates passed</div><strong>${results.gates.filter(g=>g.pass).length}/${results.gates.length}</strong></div>
+    </div>
   `;
 
   // Gates & Caps
@@ -1014,14 +1035,7 @@ function buildReportTabs(results){
   gatesHTML += `</div>`;
 
   // Pillar overview grid
-  let pillarHTML = `<div class="pillars-grid">`;
-  Object.keys(MODEL.weights).forEach(p=>{
-    const idx = results.byPillar[p];
-    if(idx==null) return;
-    const scale = indexToScale(idx);
-    pillarHTML += `<div class="row"><div class="name">${p}</div><div class="val">Idx ${fmt(idx,1)}</div><div class="val">Sc ${fmt(scale,1)}</div></div>`;
-  });
-  pillarHTML += `</div>`;
+  const pillarHTML = pillarCardsHTML(results.byPillar);
 
   // Further details
   const detailsHTML = nextStepsHTML(results);
@@ -1034,6 +1048,29 @@ function buildReportTabs(results){
   ];
 }
 
+
+function pillarCardsHTML(byPillar){
+  let out = '';
+  Object.keys(MODEL.weights).forEach(p=>{
+    const idx = byPillar[p]; if(idx==null) return;
+    const scl = indexToScale(idx);
+    const pct = Math.max(0, Math.min(100, idx));
+    const state = scl>=4?'score-good':(scl>=3?'score-warn':'score-bad');
+    out += `
+      <div class="pillar-card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="display:flex; gap:8px; align-items:baseline">
+            <strong>${p}</strong><span class="pill">Weight: ${MODEL.weights[p]}</span>
+          </div>
+          <span class="score-badge ${state}">${fmt(scl,1)}</span>
+        </div>
+        <div class="progress" style="margin-top:8px"><div class="bar" style="width:${pct}%"></div></div>
+        <div class="tiny">Index: ${fmt(idx,1)}</div>
+      </div>`;
+  });
+  if(!out) out = '<p>No pillar data.</p>';
+  return out;
+}
 function openTabbedModal(title, tabs){
   modalTitle.textContent = title;
   const tabBtns = tabs.map((t,i)=>`<button class="tab ${i===0?"active":""}" data-tab="${t.id}" role="tab" aria-selected="${i===0}">${t.title}</button>`).join("");
@@ -1185,7 +1222,7 @@ function compute(silent=false){
     document.getElementById("overallScale").textContent = fmt(finalScale,1);
     document.getElementById("overallBand").textContent = band(finalScale);
     document.getElementById("gatesPassed").textContent = allPass ? "All" : `${gates.filter(x=>x.pass).length}/${MODEL.gates.length}`;
-    renderGateCaps(gates,caps); renderBreakdown(byPillar);
+    renderGateCaps(gates,caps);
   }
   return { perParam: comp, byPillar, overallIndexPre, overallScalePre, afterGatesScale, finalScale, finalIndex, gates, caps };
 }
