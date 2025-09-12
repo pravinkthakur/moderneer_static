@@ -95,6 +95,19 @@
 
   /* Buttons (use your classes) */
   .btn-group{display:flex;flex-wrap:wrap;gap:8px}
+
+  /* Tabs inside modal */
+  .tabs{display:flex;flex-direction:column;gap:10px}
+  .tablist{display:flex;gap:6px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:6px}
+  .tablist .tab{border:0;background:transparent;padding:8px 12px;border-radius:8px;cursor:pointer;color:var(--color-neutral-600);font-weight:600}
+  .tablist .tab.active{background:var(--color-primary);color:#fff;box-shadow:0 0 0 2px #ffffff40 inset}
+  .tabpanel{display:none}
+  .tabpanel.active{display:block}
+  .pillars-grid{display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center}
+  .pillars-grid .row{display:contents}
+  .pillars-grid .name{font-weight:600}
+  .pillars-grid .val{font-variant-numeric:tabular-nums;text-align:right}
+
 </style>
 </head>
 <body class="moderneer">
@@ -959,28 +972,9 @@ function resetAll(){ if(!confirm("Clear all selections for this module?")) retur
 
 
 /* ---------- Report Builder ---------- */
-function buildReport(results){
-  let html = `<h3>Overall</h3>
-    <p>You are at <b>Scale ${fmt(results.finalScale,1)}</b> (${band(results.finalScale)}).</p>
-    <p>Overall Index: ${fmt(results.finalIndex,1)}</p>`;
 
-  html += `<h3>Critical Gates & Caps</h3><ul>`;
-  results.gates.forEach(g=>{
-    html += `<li>${g.label}: <b>${g.pass ? "PASS" : "FAIL"}</b></li>`;
-  });
-  results.caps.forEach(c=>{
-    html += `<li>${c.label}: ${c.trigger ? "<b>ACTIVE</b>" : "—"}</li>`;
-  });
-  html += `</ul>`;
-
-  html += `<h3>Pillar Overview</h3>`;
-  Object.keys(results.byPillar).forEach(p=>{
-    const idx = results.byPillar[p];
-    if(idx==null) return;
-    html += `<p><b>${p}</b>: Index ${fmt(idx,1)} (Scale ${fmt(indexToScale(idx),1)})</p>`;
-  });
-
-  html += `<h3>Next Steps</h3>`;
+function nextStepsHTML(results){
+  let html = "";
   const saved = getSaved();
   visibleParamIds().forEach(pid=>{
     const def = MODEL.fullModel.parameters[pid];
@@ -988,26 +982,76 @@ function buildReport(results){
     def.checks.forEach((ch,i)=>{
       const s = saved[pid]?.[i];
       if(!s || s.na) return;
-      if(ch.type==="check" && !s.v){
-        recs.push(`• ${ch.label}`);
-      }
-      if(ch.type==="scale5" && (s.v||0) < 3){
-        recs.push(`• Improve "${ch.label}" (currently ${s.v||0}/5)`);
-      }
-      if(ch.type==="scale100" && (s.v||0) < 60){
-        recs.push(`• Improve "${ch.label}" (currently ${s.v||0}%)`);
-      }
+      if(ch.type==="check" && !s.v){ recs.push(`• ${ch.label}`); }
+      if(ch.type==="scale5" && (s.v||0) < 3){ recs.push(`• Improve "${ch.label}" (currently ${s.v||0}/5)`); }
+      if(ch.type==="scale100" && (s.v||0) < 60){ recs.push(`• Improve "${ch.label}" (currently ${s.v||0}%)`); }
     });
-    if(recs.length){
-      html += `<p><b>${def.label}</b> (${pid})<br/>${recs.join("<br/>")}</p>`;
-    }
+    if(recs.length){ html += `<p><b>${def.label}</b> (${pid})<br/>${recs.join("<br/>")}</p>`; }
   });
-
+  if(!html) html = "<p>No immediate actions detected. Raise thresholds for stretch.</p>";
   return html;
 }
 
+function buildReportTabs(results){
+  // Overall
+  const overallHTML = `
+    <p><b>Scale ${fmt(results.finalScale,1)}</b> — ${band(results.finalScale)}</p>
+    <p>Index ${fmt(results.finalIndex,1)}</p>
+    <p>Gates passed: <b>${results.gates.filter(g=>g.pass).length}/${results.gates.length}</b></p>
+  `;
+
+  // Gates & Caps
+  let gatesHTML = `<div style="display:grid;gap:10px">`;
+  results.gates.forEach(g=>{
+    const cls = g.pass? "score-good" : "score-bad";
+    gatesHTML += `<div class="pillar-card"><div style="display:flex;justify-content:space-between;align-items:center"><div>${g.label}</div><span class="score-badge ${cls}">${g.pass?"PASS":"FAIL"}</span></div></div>`;
+  });
+  gatesHTML += `<div class="tiny">Caps</div>`;
+  results.caps.forEach(c=>{
+    const cls = c.trigger? "score-bad" : "score-good";
+    gatesHTML += `<div class="pillar-card"><div style="display:flex;justify-content:space-between;align-items:center"><div>${c.label}</div><span class="score-badge ${cls}">${c.trigger?"ACTIVE":"—"}</span></div></div>`;
+  });
+  gatesHTML += `</div>`;
+
+  // Pillar overview grid
+  let pillarHTML = `<div class="pillars-grid">`;
+  Object.keys(MODEL.weights).forEach(p=>{
+    const idx = results.byPillar[p];
+    if(idx==null) return;
+    const scale = indexToScale(idx);
+    pillarHTML += `<div class="row"><div class="name">${p}</div><div class="val">Idx ${fmt(idx,1)}</div><div class="val">Sc ${fmt(scale,1)}</div></div>`;
+  });
+  pillarHTML += `</div>`;
+
+  // Further details
+  const detailsHTML = nextStepsHTML(results);
+
+  return [
+    {id:"overall", title:"Overall", html: overallHTML},
+    {id:"gates", title:"Critical Gates & Caps", html: gatesHTML},
+    {id:"pillars", title:"Pillar Overview", html: pillarHTML},
+    {id:"next", title:"Further Details", html: detailsHTML},
+  ];
+}
+
+function openTabbedModal(title, tabs){
+  modalTitle.textContent = title;
+  const tabBtns = tabs.map((t,i)=>`<button class="tab ${i===0?"active":""}" data-tab="${t.id}" role="tab" aria-selected="${i===0}">${t.title}</button>`).join("");
+  const tabPanes = tabs.map((t,i)=>`<section id="tab-${t.id}" class="tabpanel ${i===0?"active":""}" role="tabpanel">${t.html}</section>`).join("");
+  modalContent.innerHTML = `<div class="tabs"><div class="tablist" role="tablist">${tabBtns}</div>${tabPanes}</div>`;
+  overlay.style.display = "flex";
+  modalContent.querySelector(".tablist").addEventListener("click", (e)=>{
+    const btn = e.target.closest(".tab"); if(!btn) return;
+    const id = btn.dataset.tab;
+    modalContent.querySelectorAll(".tab").forEach(b=>{ b.classList.toggle("active", b===btn); b.setAttribute("aria-selected", b===btn ? "true" : "false"); });
+    modalContent.querySelectorAll(".tabpanel").forEach(p=> p.classList.remove("active"));
+    const pane = modalContent.querySelector("#tab-"+id); if(pane) pane.classList.add("active");
+  });
+}
+
+
 document.getElementById("btnCompute").addEventListener("click", ()=>compute());
-document.getElementById("btnReport").addEventListener("click", ()=>{ const results = compute(true); openModal("Detailed Report", buildReport(results)); });
+document.getElementById("btnReport").addEventListener("click", ()=>{ const results = compute(true); openTabbedModal("Detailed Report", buildReportTabs(results)); });
 document.getElementById("btnSave").addEventListener("click", saveAll);
 document.getElementById("btnLoad").addEventListener("click", loadAll);
 document.getElementById("btnReset").addEventListener("click", resetAll);
