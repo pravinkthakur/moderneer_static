@@ -108,32 +108,27 @@
   .pillars-grid .name{font-weight:600}
   .pillars-grid .val{font-variant-numeric:tabular-nums;text-align:right}
 
+  /* Modular browse UI */
+  .tile-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+  .tile{border:1px solid var(--color-neutral-200);background:var(--color-neutral-50);border-radius:12px;padding:12px;display:grid;gap:6px}
+  .tile h4{margin:0;font-size:1rem}
+  .tile .meta{display:flex;gap:8px;flex-wrap:wrap}
+  .tile .meta .pill{background:var(--color-neutral-200);color:var(--color-neutral-800)}
+  .stepper{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .stepper .btns{display:flex;gap:8px}
 
-/* --- Overall tab designer styles --- */
-.tab-overall .score-card{background:linear-gradient(135deg,var(--color-primary),var(--color-accent));color:#fff;padding:16px;border-radius:16px;display:flex;gap:16px;align-items:center}
-.tab-overall .ring{width:120px;height:120px;border-radius:50%;display:grid;place-items:center;background:#ffffff22;position:relative}
-.tab-overall .ring::before{content:"";position:absolute;inset:6px;border-radius:50%;background:#00000022}
-.tab-overall .ring .num{position:relative;font-size:1.8rem;font-weight:800;line-height:1}
-.tab-overall .meta{display:grid;gap:10px;flex:1}
-.tab-overall .progress.alt{height:10px;background:#ffffff33;border-radius:8px;overflow:hidden}
-.tab-overall .progress.alt .bar{background:#fff}
-.kpi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
-.kpi-tile{background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:12px;padding:10px}
-.kpi-label{font-size:.8rem;color:var(--color-neutral-600)}
-.kpi-value{font-weight:800;font-size:1.1rem}
-.badges{display:flex;gap:8px;flex-wrap:wrap}
-.badge{background:#ffffff26;color:#fff;padding:4px 10px;border-radius:999px;font-weight:700;font-size:.8rem;border:1px solid #ffffff55}
+  /* Narrative tab */
+  .narrative{display:grid;gap:12px}
+  .narrative .callout{border:1px dashed var(--color-neutral-200);background:var(--color-neutral-50);border-radius:12px;padding:12px}
+  .copyRow{display:flex;justify-content:flex-end;margin-top:6px}
 
 
-/* --- Modular browse UI --- */
-.tile-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-.tile{border:1px solid var(--color-neutral-200);background:var(--color-neutral-50);border-radius:12px;padding:12px;display:grid;gap:6px}
-.tile h4{margin:0;font-size:1rem}
-.tile .meta{display:flex;gap:8px;flex-wrap:wrap}
-.tile .meta .pill{background:var(--color-neutral-200);color:var(--color-neutral-800)}
-.stepper{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.stepper .btns{display:flex;gap:8px}
-.hidden{display:none}
+/* Executive Summary tab */
+.execsum{display:grid;gap:12px}
+.execsum h4{margin:0}
+.execsum ul{margin:0 0 0 18px}
+.execsum .callout{border:1px dashed var(--color-neutral-200);background:var(--color-neutral-50);border-radius:12px;padding:12px}
+.execsum .copyRow{display:flex;justify-content:flex-end}
 
 </style>
 </head>
@@ -198,7 +193,7 @@
       <div id="gateList" style="display:grid;gap:10px"></div>
     </div>
 
-    <div style="margin-top:10px;display:none">
+    <div style="margin-top:10px">
       <h3 class="h3">Breakdown</h3>
       <div id="pillarBreakdown" style="display:grid;gap:10px"></div>
     </div>
@@ -922,6 +917,257 @@ const modalContent = document.getElementById("modalContent");
 document.getElementById("modalClose").addEventListener("click", ()=> overlay.style.display="none");
 overlay.addEventListener("click", e=>{ if(e.target===overlay) overlay.style.display="none"; });
 
+
+function pillarCardsHTML(byPillar){
+  let out = '';
+  Object.keys(MODEL.weights).forEach(p=>{
+    const idx = byPillar[p]; if(idx==null) return;
+    const scl = indexToScale(idx);
+    const pct = Math.max(0, Math.min(100, idx));
+    const state = scl>=4?'score-good':(scl>=3?'score-warn':'score-bad');
+    out += `
+      <div class="pillar-card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="display:flex; gap:8px; align-items:baseline">
+            <strong>${p}</strong><span class="pill">Weight: ${MODEL.weights[p]}</span>
+          </div>
+          <span class="score-badge ${state}">${fmt(scl,1)}</span>
+        </div>
+        <div class="progress" style="margin-top:8px"><div class="bar" style="width:${pct}%"></div></div>
+        <div class="tiny">Index: ${fmt(idx,1)}</div>
+      </div>`;
+  });
+  if(!out) out = '<p>No pillar data.</p>';
+  return out;
+}
+function nextStepsHTML(results){
+  let html = "";
+  const saved = getSaved();
+  visibleParamIds().forEach(pid=>{
+    const def = MODEL.fullModel.parameters[pid];
+    const recs = [];
+    def.checks.forEach((ch,i)=>{
+      const s = saved[pid]?.[i];
+      if(!s || s.na) return;
+      if(ch.type==="check" && !s.v){ recs.push(`• ${ch.label}`); }
+      if(ch.type==="scale5" && (s.v||0) < 3){ recs.push(`• Improve "${ch.label}" (currently ${s.v||0}/5)`); }
+      if(ch.type==="scale100" && (s.v||0) < 60){ recs.push(`• Improve "${ch.label}" (currently ${s.v||0}%)`); }
+    });
+    if(recs.length){ html += `<p><b>${def.label}</b> (${pid})<br/>${recs.join("<br/>")}</p>`; }
+  });
+  if(!html) html = "<p>No immediate actions detected. Raise thresholds for stretch.</p>";
+  return html;
+}
+
+function scopeLabel(){
+  try { return (currentModule==="core") ? "Core 24" : "Full 12 Pillars"; }
+  catch(e){ return "Core 24"; }
+}
+function nextLevelTarget(finalIndex){
+  if(finalIndex<25) return {level:2, targetIdx:25};
+  if(finalIndex<50) return {level:3, targetIdx:50};
+  if(finalIndex<75) return {level:4, targetIdx:75};
+  if(finalIndex<100) return {level:5, targetIdx:100};
+  return {level:5, targetIdx:finalIndex};
+}
+const PILLAR_OUTCOMES = {
+  "Strategy & Executive Alignment":"Shared priorities, faster decisions, funding aligned to outcomes.",
+  "Customer & Outcome Alignment":"Clear problem statements, better adoption, higher NPS and retention.",
+  "Product Strategy, Discovery & GTM":"Higher hit‑rate, leaner bets, faster market feedback.",
+  "Engineering Effectiveness":"Higher deployment frequency, lower MTTR, quality up with cost under control.",
+  "Architecture & Platform":"Modularity, resilience, and speed for new product work.",
+  "Data & Insights":"Reliable, timely data driving product and commercial choices."
+};
+function generateNarrative(results){
+  const byPillar = results.byPillar;
+  const pairs = Object.keys(byPillar).map(k=>({name:k, idx:byPillar[k], weight:MODEL.weights[k]||0})).filter(x=>x.idx!=null);
+  const strengths = [...pairs].sort((a,b)=>b.idx-a.idx).slice(0,3);
+  const gaps = [...pairs].sort((a,b)=>a.idx-b.idx).slice(0,3);
+  const failedGates = results.gates.filter(g=>!g.pass);
+  const activeCaps = results.caps.filter(c=>c.trigger);
+  const target = nextLevelTarget(results.finalIndex||0);
+  const delta = Math.max(0,(target.targetIdx - (results.finalIndex||0)));
+  const totalW = gaps.reduce((s,g)=>s+(g.weight||1),0) || 1;
+  const alloc = gaps.map(g=>({name:g.name, lift: Math.round(delta * ((g.weight||1)/totalW)) }));
+  function list(items){ return items.map(it=>`<li><b>${it.name}</b> — Index ${fmt(it.idx,1)}${it.weight!=null?` (w${it.weight})`:""}</li>`).join(""); }
+  const outcomes = gaps.map(g=>`<li><b>${g.name}</b>: ${PILLAR_OUTCOMES[g.name] || "Improved flow and business impact."}</li>`).join("");
+  return `
+  <div class="narrative" id="narrText">
+    <div class="callout"><div class="tiny"><i>Preliminary report based on <b>${scopeLabel()}</b>. A thorough report will include deeper analysis and evidence.</i></div>
+      <p>Current maturity: <b>${band(results.finalScale)}</b> (Scale ${fmt(results.finalScale,1)}, Index ${fmt(results.finalIndex,1)}). Next target: <b>Level ${target.level}</b> at Index ~${target.targetIdx} (gap ~${fmt(delta,1)}).</p>
+    </div>
+    <div><b>Key drivers</b><ul>${list(strengths)}</ul></div>
+    <div><b>Primary gaps</b><ul>${list(gaps)}</ul>
+      ${failedGates.length?`<p>Failed gates: ${failedGates.map(g=>g.label).join(", ")}.</p>`:""}
+      ${activeCaps.length?`<p>Active caps: ${activeCaps.map(c=>c.label).join(", ")}.</p>`:""}
+    </div>
+    <div><b>Plan to reach next level</b>
+      <p>Raise pillar indices by approximately:</p>
+      <ul>${alloc.map(x=>`<li><b>${x.name}</b> +${x.lift}</li>`).join("")}</ul>
+      <p>Concrete next steps:</p>
+      ${nextStepsHTML(results)}
+    </div>
+    <div><b>What this unlocks</b><ul>${outcomes}</ul></div>
+    <div class="copyRow"><button class="btn" id="btnCopyNarrative">Copy narrative</button></div>
+  </div>`;
+}
+function generateExecutiveSummary(results){
+  const bandTxt = band(results.finalScale);
+  const idx = results.finalIndex||0;
+  const scale = results.finalScale||0;
+  const target = nextLevelTarget(idx);
+  const gap = Math.max(0, target.targetIdx - idx);
+  const gatesPassCount = results.gates.filter(g=>g.pass).length;
+
+  // Strengths and gaps
+  const pairs = Object.keys(results.byPillar).map(k=>({name:k, idx:results.byPillar[k], weight:MODEL.weights[k]||0})).filter(x=>x.idx!=null);
+  const strengths = [...pairs].sort((a,b)=>b.idx-a.idx).slice(0,3);
+  const gaps = [...pairs].sort((a,b)=>a.idx-b.idx).slice(0,3);
+
+  // Simple lift allocation across bottom 3 by weight
+  const totalW = gaps.reduce((s,g)=>s+(g.weight||1),0) || 1;
+  const lifts = gaps.map(g=>({name:g.name, lift: Math.round(gap * ((g.weight||1)/totalW)) }));
+
+  const failedGates = results.gates.filter(g=>!g.pass).map(g=>g.label);
+  const activeCaps = results.caps.filter(c=>c.trigger).map(c=>c.label);
+
+  // Helper to li items
+  const li = (arr) => arr.map(x=>`<li>${x}</li>`).join("");
+  const liKPI = (items) => items.map(x=>`<li><b>${x.k}</b>: ${x.v}</li>`).join("");
+
+  const html = `
+  <div class="execsum" id="execText">
+    <div class="callout">
+      <h4>TL;DR</h4>
+      <div class="tiny"><i>Preliminary report based on <b>${scopeLabel()}</b>. A thorough report will include deeper analysis, evidence, and the full 12‑pillar view if selected.</i></div>
+      <ul>
+        ${liKPI([
+          {k:"Current", v:`Band ${bandTxt}, Scale ${fmt(scale,1)}/5, Index ${fmt(idx,1)}/100`},
+          {k:"Target", v:`Level ${target.level} (Index ~${target.targetIdx})`},
+          {k:"Gap", v:`~${fmt(gap,1)} points`},
+          {k:"Gates", v:`${gatesPassCount}/${results.gates.length} passed`}
+        ])}
+        <li><b>Ask</b>: £___, ___ FTE, approve ___ policy.</li>
+        <li><b>Payoff</b>: Revenue ↑, risk ↓, speed ↑.</li>
+      </ul>
+    </div>
+
+    <div>
+      <h4>Where we are now</h4>
+      <ul>
+        ${liKPI([
+          {k:"Index", v: fmt(idx,1)},
+          {k:"Scale", v: fmt(scale,1)},
+          {k:"Band", v: bandTxt},
+          {k:"Gates/Caps", v: `${gatesPassCount}/${results.gates.length} gates, ${activeCaps.length} caps active`}
+        ])}
+      </ul>
+    </div>
+
+    <div>
+      <h4>What is working</h4>
+      <ul>${strengths.map(s=>`<li><b>${s.name}</b> — Index ${fmt(s.idx,1)} (w${s.weight})</li>`).join("")}</ul>
+    </div>
+
+    <div>
+      <h4>What is not working</h4>
+      <ul>${gaps.map(s=>`<li><b>${s.name}</b> — Index ${fmt(s.idx,1)} (w${s.weight})</li>`).join("")}</ul>
+      ${failedGates.length?`<p>Failed gates: ${failedGates.join(", ")}.</p>`:""}
+      ${activeCaps.length?`<p>Active caps: ${activeCaps.join(", ")}.</p>`:""}
+    </div>
+
+    <div>
+      <h4>Why gaps exist</h4>
+      <ul>
+        <li>Process: missing or inconsistent practices surfaced in low‑scoring checks.</li>
+        <li>Platform: constraints in automation, testability, or resilience.</li>
+        <li>Data: freshness/coverage issues lowering decision confidence.</li>
+      </ul>
+    </div>
+
+    <div>
+      <h4>Plan to next level (90 days)</h4>
+      <ul>
+        ${lifts.map(x=>`<li>Lift <b>${x.name}</b> by ~${x.lift} index points. Owner [____]. Milestone [____].</li>`).join("")}
+      </ul>
+      <p><b>Concrete next steps</b>:</p>
+      ${nextStepsHTML(results)}
+    </div>
+
+    <div>
+      <h4>Business impact forecast</h4>
+      <ul>
+        ${gaps.map(g=>`<li><b>${g.name}</b>: ${PILLAR_OUTCOMES[g.name] || "Improved flow and business impact."}</li>`).join("")}
+      </ul>
+    </div>
+
+    <div>
+      <h4>Decisions required today</h4>
+      <ul>
+        <li>Funding and roles: approve budget and backfill plan.</li>
+        <li>Sequencing: confirm scope and order of workstreams.</li>
+        <li>Policy: agree release, guardrails, and governance cadence.</li>
+      </ul>
+    </div>
+
+    <div class="copyRow">
+      <button class="btn" id="btnCopyExec" data-target="execText">Copy executive summary</button>
+    </div>
+  </div>`;
+  return html;
+}
+
+function openTabbedModal(title, tabs){
+  modalTitle.textContent = title;
+  const tabBtns = tabs.map((t,i)=>`<button class="tab ${i===0?"active":""}" data-tab="${t.id}" role="tab" aria-selected="${i===0}">${t.title}</button>`).join("");
+  const tabPanes = tabs.map((t,i)=>`<section id="tab-${t.id}" class="tabpanel ${i===0?"active":""}" role="tabpanel">${t.html}</section>`).join("");
+  modalContent.innerHTML = `<div class="tabs"><div class="tablist" role="tablist">${tabBtns}</div>${tabPanes}</div>`;
+  overlay.style.display = "flex";
+  modalContent.querySelector(".tablist").addEventListener("click", (e)=>{
+    const btn = e.target.closest(".tab"); if(!btn) return;
+    const id = btn.dataset.tab;
+    modalContent.querySelectorAll(".tab").forEach(b=>{ b.classList.toggle("active", b===btn); b.setAttribute("aria-selected", b===btn ? "true" : "false"); });
+    modalContent.querySelectorAll(".tabpanel").forEach(p=> p.classList.remove("active"));
+    const pane = modalContent.querySelector("#tab-"+id); if(pane) pane.classList.add("active");
+    const copyBtn = modalContent.querySelector("#btnCopyNarrative");
+    if(copyBtn){ copyBtn.onclick = ()=>{ const pane = document.getElementById('narrText'); const t=document.createElement('textarea'); t.value=pane.innerText; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); copyBtn.textContent='Copied'; setTimeout(()=>copyBtn.textContent='Copy narrative',1200); }; }
+  });
+}
+function buildReportTabs(results){
+  // Overall: simple KPI tiles
+  const overallHTML = `
+    <div class="kpis">
+      <div class="kpi"><div class="tiny">Overall (index 0–100)</div><strong>${fmt(results.finalIndex,1)}</strong></div>
+      <div class="kpi"><div class="tiny">Overall (scale 1–5)</div><strong>${fmt(results.finalScale,1)}</strong></div>
+      <div class="kpi"><div class="tiny">Band</div><strong>${band(results.finalScale)}</strong></div>
+      <div class="kpi"><div class="tiny">Gates passed</div><strong>${results.gates.filter(g=>g.pass).length}/${results.gates.length}</strong></div>
+    </div>
+  `;
+  // Gates & Caps
+  let gatesHTML = `<div style="display:grid;gap:10px">`;
+  results.gates.forEach(g=>{
+    const cls = g.pass? "score-good" : "score-bad";
+    gatesHTML += `<div class="pillar-card"><div style="display:flex;justify-content:space-between;align-items:center"><div>${g.label}</div><span class="score-badge ${cls}">${g.pass?"PASS":"FAIL"}</span></div></div>`;
+  });
+  gatesHTML += `<div class="tiny">Caps</div>`;
+  results.caps.forEach(c=>{
+    const cls = c.trigger? "score-bad" : "score-good";
+    gatesHTML += `<div class="pillar-card"><div style="display:flex;justify-content:space-between;align-items:center"><div>${c.label}</div><span class="score-badge ${cls}">${c.trigger?"ACTIVE":"—"}</span></div></div>`;
+  });
+  gatesHTML += `</div>`;
+  // Pillars block cards
+  const pillarHTML = pillarCardsHTML(results.byPillar);
+  // Next steps detail
+  const detailsHTML = nextStepsHTML(results);
+  return [
+    {id:"overall", title:"Overall", html: overallHTML},
+    {id:"gates", title:"Critical Gates & Caps", html: gatesHTML},
+    {id:"pillars", title:"Pillar Overview", html: pillarHTML},
+    {id:"next", title:"Further Details", html: detailsHTML},
+    {id:"exec", title:"Executive Summary", html: generateExecutiveSummary(results)},
+    {id:"narrative", title:"Narrative", html: generateNarrative(results)}
+  ];
+}
 function openModal(title, html){ modalTitle.textContent = title; modalContent.innerHTML = html; overlay.style.display="flex"; }
 function paramInfoHTML(pid){
   const def = MODEL.fullModel.parameters[pid]; const meta = PARAM_META[pid] || {};
@@ -1004,9 +1250,28 @@ function resetAll(){ if(!confirm("Clear all selections for this module?")) retur
 
 
 /* ---------- Report Builder ---------- */
+function buildReport(results){
+  let html = `<h3>Overall</h3>
+    <p>You are at <b>Scale ${fmt(results.finalScale,1)}</b> (${band(results.finalScale)}).</p>
+    <p>Overall Index: ${fmt(results.finalIndex,1)}</p>`;
 
-function nextStepsHTML(results){
-  let html = "";
+  html += `<h3>Critical Gates & Caps</h3><ul>`;
+  results.gates.forEach(g=>{
+    html += `<li>${g.label}: <b>${g.pass ? "PASS" : "FAIL"}</b></li>`;
+  });
+  results.caps.forEach(c=>{
+    html += `<li>${c.label}: ${c.trigger ? "<b>ACTIVE</b>" : "—"}</li>`;
+  });
+  html += `</ul>`;
+
+  html += `<h3>Pillar Overview</h3>`;
+  Object.keys(results.byPillar).forEach(p=>{
+    const idx = results.byPillar[p];
+    if(idx==null) return;
+    html += `<p><b>${p}</b>: Index ${fmt(idx,1)} (Scale ${fmt(indexToScale(idx),1)})</p>`;
+  });
+
+  html += `<h3>Next Steps</h3>`;
   const saved = getSaved();
   visibleParamIds().forEach(pid=>{
     const def = MODEL.fullModel.parameters[pid];
@@ -1014,94 +1279,23 @@ function nextStepsHTML(results){
     def.checks.forEach((ch,i)=>{
       const s = saved[pid]?.[i];
       if(!s || s.na) return;
-      if(ch.type==="check" && !s.v){ recs.push(`• ${ch.label}`); }
-      if(ch.type==="scale5" && (s.v||0) < 3){ recs.push(`• Improve "${ch.label}" (currently ${s.v||0}/5)`); }
-      if(ch.type==="scale100" && (s.v||0) < 60){ recs.push(`• Improve "${ch.label}" (currently ${s.v||0}%)`); }
+      if(ch.type==="check" && !s.v){
+        recs.push(`• ${ch.label}`);
+      }
+      if(ch.type==="scale5" && (s.v||0) < 3){
+        recs.push(`• Improve "${ch.label}" (currently ${s.v||0}/5)`);
+      }
+      if(ch.type==="scale100" && (s.v||0) < 60){
+        recs.push(`• Improve "${ch.label}" (currently ${s.v||0}%)`);
+      }
     });
-    if(recs.length){ html += `<p><b>${def.label}</b> (${pid})<br/>${recs.join("<br/>")}</p>`; }
+    if(recs.length){
+      html += `<p><b>${def.label}</b> (${pid})<br/>${recs.join("<br/>")}</p>`;
+    }
   });
-  if(!html) html = "<p>No immediate actions detected. Raise thresholds for stretch.</p>";
+
   return html;
 }
-
-function buildReportTabs(results){
-  
-  
-  // Overall
-  const overallHTML = `
-    <div class="kpis">
-      <div class="kpi"><div class="tiny">Overall (index 0–100)</div><strong>${fmt(results.finalIndex,1)}</strong></div>
-      <div class="kpi"><div class="tiny">Overall (scale 1–5)</div><strong>${fmt(results.finalScale,1)}</strong></div>
-      <div class="kpi"><div class="tiny">Band</div><strong>${band(results.finalScale)}</strong></div>
-      <div class="kpi"><div class="tiny">Gates passed</div><strong>${results.gates.filter(g=>g.pass).length}/${results.gates.length}</strong></div>
-    </div>
-  `;
-
-  // Gates & Caps
-  let gatesHTML = `<div style="display:grid;gap:10px">`;
-  results.gates.forEach(g=>{
-    const cls = g.pass? "score-good" : "score-bad";
-    gatesHTML += `<div class="pillar-card"><div style="display:flex;justify-content:space-between;align-items:center"><div>${g.label}</div><span class="score-badge ${cls}">${g.pass?"PASS":"FAIL"}</span></div></div>`;
-  });
-  gatesHTML += `<div class="tiny">Caps</div>`;
-  results.caps.forEach(c=>{
-    const cls = c.trigger? "score-bad" : "score-good";
-    gatesHTML += `<div class="pillar-card"><div style="display:flex;justify-content:space-between;align-items:center"><div>${c.label}</div><span class="score-badge ${cls}">${c.trigger?"ACTIVE":"—"}</span></div></div>`;
-  });
-  gatesHTML += `</div>`;
-
-  // Pillar overview grid
-  const pillarHTML = pillarCardsHTML(results.byPillar);
-
-  // Further details
-  const detailsHTML = nextStepsHTML(results);
-
-  return [
-    {id:"overall", title:"Overall", html: overallHTML},
-    {id:"gates", title:"Critical Gates & Caps", html: gatesHTML},
-    {id:"pillars", title:"Pillar Overview", html: pillarHTML},
-    {id:"next", title:"Further Details", html: detailsHTML},
-  ];
-}
-
-
-function pillarCardsHTML(byPillar){
-  let out = '';
-  Object.keys(MODEL.weights).forEach(p=>{
-    const idx = byPillar[p]; if(idx==null) return;
-    const scl = indexToScale(idx);
-    const pct = Math.max(0, Math.min(100, idx));
-    const state = scl>=4?'score-good':(scl>=3?'score-warn':'score-bad');
-    out += `
-      <div class="pillar-card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div style="display:flex; gap:8px; align-items:baseline">
-            <strong>${p}</strong><span class="pill">Weight: ${MODEL.weights[p]}</span>
-          </div>
-          <span class="score-badge ${state}">${fmt(scl,1)}</span>
-        </div>
-        <div class="progress" style="margin-top:8px"><div class="bar" style="width:${pct}%"></div></div>
-        <div class="tiny">Index: ${fmt(idx,1)}</div>
-      </div>`;
-  });
-  if(!out) out = '<p>No pillar data.</p>';
-  return out;
-}
-function openTabbedModal(title, tabs){
-  modalTitle.textContent = title;
-  const tabBtns = tabs.map((t,i)=>`<button class="tab ${i===0?"active":""}" data-tab="${t.id}" role="tab" aria-selected="${i===0}">${t.title}</button>`).join("");
-  const tabPanes = tabs.map((t,i)=>`<section id="tab-${t.id}" class="tabpanel ${i===0?"active":""}" role="tabpanel">${t.html}</section>`).join("");
-  modalContent.innerHTML = `<div class="tabs"><div class="tablist" role="tablist">${tabBtns}</div>${tabPanes}</div>`;
-  overlay.style.display = "flex";
-  modalContent.querySelector(".tablist").addEventListener("click", (e)=>{
-    const btn = e.target.closest(".tab"); if(!btn) return;
-    const id = btn.dataset.tab;
-    modalContent.querySelectorAll(".tab").forEach(b=>{ b.classList.toggle("active", b===btn); b.setAttribute("aria-selected", b===btn ? "true" : "false"); });
-    modalContent.querySelectorAll(".tabpanel").forEach(p=> p.classList.remove("active"));
-    const pane = modalContent.querySelector("#tab-"+id); if(pane) pane.classList.add("active");
-  });
-}
-
 
 document.getElementById("btnCompute").addEventListener("click", ()=>compute());
 document.getElementById("btnReport").addEventListener("click", ()=>{ const results = compute(true); openTabbedModal("Detailed Report", buildReportTabs(results)); });
@@ -1132,13 +1326,7 @@ document.getElementById("btnViewPillar").addEventListener("click", ()=>{
   document.getElementById("btnViewTier").classList.remove("active");
   render();
 });
-document.getElementById("btnViewTier").addEventListener("click", ()=>{
-  currentView="tier";
-  document.getElementById("btnViewTier").classList.add("active");
-  document.getElementById("btnViewPillar").classList.remove("active");
-  render();
-});
-
+document.getElementById("btnViewTier").addEventListener
 // Mode toggle
 document.getElementById("btnModeAll").addEventListener("click", ()=>{
   singleMode=false;
@@ -1146,11 +1334,16 @@ document.getElementById("btnModeAll").addEventListener("click", ()=>{
   document.getElementById("btnModeSingle").classList.remove("active");
   render();
 });
-
 document.getElementById("btnModeSingle").addEventListener("click", ()=>{
   singleMode=true;
   document.getElementById("btnModeSingle").classList.add("active");
   document.getElementById("btnModeAll").classList.remove("active");
+  render();
+});
+("click", ()=>{
+  currentView="tier";
+  document.getElementById("btnViewTier").classList.add("active");
+  document.getElementById("btnViewPillar").classList.remove("active");
   render();
 });
 
@@ -1162,7 +1355,7 @@ function renderTiles(){
     const wrap = document.createElement("div");
     wrap.innerHTML = `<div class="tile-grid" id="tileGrid"></div>`;
     const grid = wrap.firstElementChild;
-    MODEL.fullModel.pillars.forEach((block, idx)=>{
+    MODEL.fullModel.pillars.forEach(block=>{
       const params = block.parameters.filter(p=>vis.has(p));
       if(!params.length) return;
       const div = document.createElement("div");
@@ -1192,9 +1385,7 @@ function renderTiles(){
       div.className="tile";
       div.innerHTML = `
         <h4>Tier ${t}</h4>
-        <div class="meta">
-          <span class="pill">${ids.length} items</span>
-        </div>
+        <div class="meta"><span class="pill">${ids.length} items</span></div>
         <button class="btn btn-primary" data-tier="${t}">Open</button>`;
       grid.appendChild(div);
     });
@@ -1206,7 +1397,6 @@ function renderTiles(){
     });
   }
 }
-
 function renderSinglePillar(name){
   formArea.innerHTML = "";
   const block = MODEL.fullModel.pillars.find(p=>p.name===name);
@@ -1226,15 +1416,12 @@ function renderSinglePillar(name){
   formArea.appendChild(card);
   const inner = card.querySelector("#singleContainer");
   params.forEach(pid=> inner.appendChild(renderParam(block.name,pid,false)));
-
-  // Nav handlers
   document.getElementById("btnBackTiles").onclick = ()=> renderTiles();
   const blocks = MODEL.fullModel.pillars.filter(p=>p.parameters.some(x=>vis.has(x)));
   const idx = blocks.findIndex(b=>b.name===name);
   document.getElementById("btnPrev").onclick = ()=>{ const prev = blocks[(idx-1+blocks.length)%blocks.length]; renderSinglePillar(prev.name); };
   document.getElementById("btnNext").onclick = ()=>{ const next = blocks[(idx+1)%blocks.length]; renderSinglePillar(next.name); };
 }
-
 function renderSingleTier(t){
   formArea.innerHTML = "";
   const vis = new Set(visibleParamIds());
@@ -1256,8 +1443,6 @@ function renderSingleTier(t){
     const pill = MODEL.fullModel.pillars.find(p=>p.parameters.includes(pid))?.name || "—";
     inner.appendChild(renderParam(pill,pid,true));
   });
-
-  // Nav handlers
   document.getElementById("btnBackTiles").onclick = ()=> renderTiles();
   const tiers = Array.from(new Set(Array.from(vis).map(pid=>PARAM_META[pid]?.tier||6))).sort((a,b)=>a-b);
   const idx = tiers.indexOf(t);
@@ -1363,7 +1548,7 @@ function compute(silent=false){
     document.getElementById("overallScale").textContent = fmt(finalScale,1);
     document.getElementById("overallBand").textContent = band(finalScale);
     document.getElementById("gatesPassed").textContent = allPass ? "All" : `${gates.filter(x=>x.pass).length}/${MODEL.gates.length}`;
-    renderGateCaps(gates,caps);
+    renderGateCaps(gates,caps); renderBreakdown(byPillar);
   }
   return { perParam: comp, byPillar, overallIndexPre, overallScalePre, afterGatesScale, finalScale, finalIndex, gates, caps };
 }
