@@ -8,6 +8,11 @@ import { UIRenderer } from './ui-renderer.js';
 import { ReportGenerator } from './report-generator.js';
 import { MODEL } from './models.js';
 
+// Global state (like original)
+let currentModule = "core";
+let currentView = "pillar";
+let singleMode = false;
+
 class ModerneerAssessment {
   constructor() {
     this.engine = new AssessmentEngine();
@@ -21,12 +26,14 @@ class ModerneerAssessment {
   initializeEventHandlers() {
     // Module toggle buttons
     document.getElementById("btnCore")?.addEventListener("click", () => {
+      currentModule = "core";
       this.engine.currentModule = "core";
       this.updateModuleButtons();
       this.renderer.render();
     });
 
     document.getElementById("btnFull")?.addEventListener("click", () => {
+      currentModule = "full";
       this.engine.currentModule = "full";
       this.updateModuleButtons();
       this.renderer.render();
@@ -34,12 +41,14 @@ class ModerneerAssessment {
 
     // View toggle buttons
     document.getElementById("btnViewPillar")?.addEventListener("click", () => {
+      currentView = "pillar";
       this.renderer.currentView = "pillar";
       this.updateViewButtons();
       this.renderer.render();
     });
 
     document.getElementById("btnViewTier")?.addEventListener("click", () => {
+      currentView = "tier";
       this.renderer.currentView = "tier";
       this.updateViewButtons();
       this.renderer.render();
@@ -47,12 +56,14 @@ class ModerneerAssessment {
 
     // Mode toggle buttons
     document.getElementById("btnModeAll")?.addEventListener("click", () => {
+      singleMode = false;
       this.renderer.singleMode = false;
       this.updateModeButtons();
       this.renderer.render();
     });
 
     document.getElementById("btnModeSingle")?.addEventListener("click", () => {
+      singleMode = true;
       this.renderer.singleMode = true;
       this.updateModeButtons();
       this.renderer.render();
@@ -109,11 +120,11 @@ class ModerneerAssessment {
     const btnFull = document.getElementById("btnFull");
     
     if (btnCore && btnFull) {
-      btnCore.classList.toggle("active", this.engine.currentModule === "core");
-      btnFull.classList.toggle("active", this.engine.currentModule === "full");
+      btnCore.classList.toggle("active", currentModule === "core");
+      btnFull.classList.toggle("active", currentModule === "full");
       
-      btnCore.setAttribute("aria-selected", this.engine.currentModule === "core");
-      btnFull.setAttribute("aria-selected", this.engine.currentModule === "full");
+      btnCore.setAttribute("aria-selected", currentModule === "core");
+      btnFull.setAttribute("aria-selected", currentModule === "full");
     }
   }
 
@@ -122,11 +133,11 @@ class ModerneerAssessment {
     const btnViewTier = document.getElementById("btnViewTier");
     
     if (btnViewPillar && btnViewTier) {
-      btnViewPillar.classList.toggle("active", this.renderer.currentView === "pillar");
-      btnViewTier.classList.toggle("active", this.renderer.currentView === "tier");
+      btnViewPillar.classList.toggle("active", currentView === "pillar");
+      btnViewTier.classList.toggle("active", currentView === "tier");
       
-      btnViewPillar.setAttribute("aria-selected", this.renderer.currentView === "pillar");
-      btnViewTier.setAttribute("aria-selected", this.renderer.currentView === "tier");
+      btnViewPillar.setAttribute("aria-selected", currentView === "pillar");
+      btnViewTier.setAttribute("aria-selected", currentView === "tier");
     }
   }
 
@@ -135,11 +146,11 @@ class ModerneerAssessment {
     const btnModeSingle = document.getElementById("btnModeSingle");
     
     if (btnModeAll && btnModeSingle) {
-      btnModeAll.classList.toggle("active", !this.renderer.singleMode);
-      btnModeSingle.classList.toggle("active", this.renderer.singleMode);
+      btnModeAll.classList.toggle("active", !singleMode);
+      btnModeSingle.classList.toggle("active", singleMode);
       
-      btnModeAll.setAttribute("aria-selected", !this.renderer.singleMode);
-      btnModeSingle.setAttribute("aria-selected", this.renderer.singleMode);
+      btnModeAll.setAttribute("aria-selected", !singleMode);
+      btnModeSingle.setAttribute("aria-selected", singleMode);
     }
   }
 

@@ -6,6 +6,11 @@
 import { MODEL, PARAM_META, SCALE_CATALOG } from './models.js';
 import { AssessmentEngine } from './assessment-engine.js';
 
+// Global state (matches main.js)
+let currentModule = "core";
+let currentView = "pillar";
+let singleMode = false;
+
 export class UIRenderer {
   constructor(engine) {
     this.engine = engine;
@@ -14,6 +19,16 @@ export class UIRenderer {
     this.singleKey = null;
     this.formArea = document.getElementById("formArea");
   }
+  
+  // Getters that use global state
+  get currentModule() { return currentModule; }
+  set currentModule(val) { currentModule = val; }
+  
+  get currentViewState() { return currentView; }
+  set currentViewState(val) { currentView = val; }
+  
+  get singleModeState() { return singleMode; }
+  set singleModeState(val) { singleMode = val; }
 
   renderParam(pillarName, pid, showPillarChip = false) {
     const def = MODEL.fullModel.parameters[pid];
@@ -185,10 +200,10 @@ export class UIRenderer {
   render() {
     this.formArea.innerHTML = "";
     
-    if (this.singleMode) {
+    if (singleMode) {
       this.renderTiles();
     } else {
-      if (this.currentView === "pillar") this.renderByPillar();
+      if (currentView === "pillar") this.renderByPillar();
       else this.renderByTier();
     }
     
@@ -200,7 +215,7 @@ export class UIRenderer {
     // Implementation for tile view (single mode)
     const vis = new Set(this.engine.visibleParamIds());
     
-    if (this.currentView === "pillar") {
+    if (currentView === "pillar") {
       const wrap = document.createElement("div");
       wrap.innerHTML = `<div class="tile-grid" id="tileGrid"></div>`;
       const grid = wrap.firstElementChild;
