@@ -1,0 +1,109 @@
+/* ===================================================
+   Moderneer Design System - Header & Navigation
+   File: header.css
+   =================================================== */
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-neutral-0);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.brandbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.brand-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.logo {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  flex: 0 0 38px;
+  background: conic-gradient(from 180deg, var(--color-primary), var(--color-accent));
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: var(--font-size-lg);
+}
+
+.wordmark h1 {
+  font-size: var(--font-size-lg);
+  letter-spacing: 0.2px;
+  margin: 0;
+  color: var(--color-neutral-800);
+}
+
+.wordmark .sub {
+  color: var(--color-neutral-600);
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+/* Navigation */
+nav ul {
+  display: flex;
+  list-style: none;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+}
+
+nav a {
+  color: var(--color-neutral-600);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--duration-base) var(--ease-default);
+}
+
+nav a:hover,
+nav a.active {
+  color: var(--color-primary);
+}
+
+/* Mobile Menu */
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-2);
+  color: var(--color-neutral-600);
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-toggle {
+    display: block;
+  }
+  
+  nav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-bottom: 1px solid var(--border-color);
+    display: none;
+  }
+  
+  nav.open {
+    display: block;
+  }
+  
+  nav ul {
+    flex-direction: column;
+    padding: var(--space-4);
+  }
+}

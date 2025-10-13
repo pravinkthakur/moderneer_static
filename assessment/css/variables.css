@@ -1,0 +1,73 @@
+/* ===================================================
+   Moderneer Design System - CSS Variables
+   File: variables.css
+   =================================================== */
+
+:root {
+  /* Primary Colours */
+  --color-primary: #3B82F6;   /* Bright Blue */
+  --color-secondary: #2C2C2C; /* Graphite Grey */
+  --color-accent: #22D3EE;    /* Mint / Bright Cyan */
+
+  /* Neutral Palette */
+  --color-neutral-0: #FFFFFF;
+  --color-neutral-50: #F9FAFB;
+  --color-neutral-200: #E5E7EB;
+  --color-neutral-400: #9CA3AF;
+  --color-neutral-600: #4B5563;
+  --color-neutral-800: #1F2937;
+
+  /* Semantic Colours */
+  --color-success: #22C55E;  /* Bright Green */
+  --color-error: #EF4444;    /* Bright Red */
+  --color-warning: #FACC15;  /* Bright Yellow */
+  --color-info: #06B6D4;     /* Bright Cyan */
+
+  /* Typography */
+  --font-heading: 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;   /* 14px */
+  --font-size-md: 1rem;       /* 16px */
+  --font-size-lg: 1.125rem;   /* 18px */
+  --font-size-xl: 1.25rem;    /* 20px */
+  --font-size-2xl: 1.5rem;    /* 24px */
+  --font-size-3xl: 1.875rem;  /* 30px */
+
+  /* Spacing (8px scale) */
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-6: 1.5rem;   /* 24px */
+  --space-8: 2rem;     /* 32px */
+  --space-12: 3rem;    /* 48px */
+  --space-16: 4rem;    /* 64px */
+
+  /* Borders & Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Border Colors */
+  --border-color: var(--color-neutral-200);
+  --border-color-light: var(--color-neutral-200);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.15);
+
+  /* Motion */
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-slow: 500ms;
+
+  /* Component-specific variables */
+  --chip-bg: var(--color-neutral-50);
+  --chip-fg: var(--color-neutral-600);
+}
