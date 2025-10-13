@@ -117,18 +117,37 @@
   .stepper{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
   .stepper .btns{display:flex;gap:8px}
 
-  /* Narrative tab */
+  /* Narrative + Exec + Full Report */
   .narrative{display:grid;gap:12px}
   .narrative .callout{border:1px dashed var(--color-neutral-200);background:var(--color-neutral-50);border-radius:12px;padding:12px}
   .copyRow{display:flex;justify-content:flex-end;margin-top:6px}
+  .execsum{display:grid;gap:12px}
+  .execsum h4{margin:0}
+  .execsum ul{margin:0 0 0 18px}
+  .execsum .callout{border:1px dashed var(--color-neutral-200);background:var(--color-neutral-50);border-radius:12px;padding:12px}
+  .execsum .copyRow{display:flex;justify-content:flex-end}
+  .fullreport{display:grid;gap:12px}
+  .fullreport .toolbar{display:flex;gap:8px;justify-content:flex-end}
+  .fullreport .report{white-space:pre-wrap;line-height:1.45}
 
 
-/* Executive Summary tab */
-.execsum{display:grid;gap:12px}
-.execsum h4{margin:0}
-.execsum ul{margin:0 0 0 18px}
-.execsum .callout{border:1px dashed var(--color-neutral-200);background:var(--color-neutral-50);border-radius:12px;padding:12px}
-.execsum .copyRow{display:flex;justify-content:flex-end}
+/* Analyst Lens */
+.analyst{display:grid;gap:16px}
+.analyst h4{margin:0}
+.analyst .copyRow{display:flex;justify-content:flex-end}
+.quad{background:var(--color-neutral-50);border:1px solid var(--color-neutral-200);border-radius:12px;padding:8px}
+.quad svg{width:100%;height:260px}
+.heat-grid{display:grid;grid-template-columns:160px repeat(3,1fr);gap:6px;align-items:center}
+.heat-grid .hdr{font-weight:700}
+.bar{height:10px;border-radius:8px;background:var(--color-neutral-200);overflow:hidden}
+.bar .fill{height:100%}
+.tag{display:inline-block;font-size:.8rem;padding:2px 8px;border-radius:999px;background:var(--color-neutral-200);color:var(--color-neutral-800);margin-right:6px}
+.board{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.board .cell{border:1px dashed var(--line);border-radius:10px;padding:8px;min-height:80px}
+.board .cell h5{margin:0 0 6px 0}
+.spider{display:grid;grid-template-columns:160px 1fr;gap:6px;align-items:center}
+.spider .track{height:10px;background:var(--color-neutral-200);border-radius:8px;overflow:hidden}
+.spider .track .fill{height:100%}
 
 </style>
 </head>
@@ -958,17 +977,16 @@ function nextStepsHTML(results){
   if(!html) html = "<p>No immediate actions detected. Raise thresholds for stretch.</p>";
   return html;
 }
-
-function scopeLabel(){
-  try { return (currentModule==="core") ? "Core 24" : "Full 12 Pillars"; }
-  catch(e){ return "Core 24"; }
-}
 function nextLevelTarget(finalIndex){
   if(finalIndex<25) return {level:2, targetIdx:25};
   if(finalIndex<50) return {level:3, targetIdx:50};
   if(finalIndex<75) return {level:4, targetIdx:75};
   if(finalIndex<100) return {level:5, targetIdx:100};
   return {level:5, targetIdx:finalIndex};
+}
+function scopeLabel(){
+  try { return (currentModule==="core") ? "Core 24" : "Full 12 Pillars"; }
+  catch(e){ return "Core 24"; }
 }
 const PILLAR_OUTCOMES = {
   "Strategy & Executive Alignment":"Shared priorities, faster decisions, funding aligned to outcomes.",
@@ -1008,7 +1026,7 @@ function generateNarrative(results){
       ${nextStepsHTML(results)}
     </div>
     <div><b>What this unlocks</b><ul>${outcomes}</ul></div>
-    <div class="copyRow"><button class="btn" id="btnCopyNarrative">Copy narrative</button></div>
+    <div class="copyRow"><button class="btn" id="btnCopyNarrative" data-target="narrText">Copy narrative</button></div>
   </div>`;
 }
 function generateExecutiveSummary(results){
@@ -1019,19 +1037,16 @@ function generateExecutiveSummary(results){
   const gap = Math.max(0, target.targetIdx - idx);
   const gatesPassCount = results.gates.filter(g=>g.pass).length;
 
-  // Strengths and gaps
   const pairs = Object.keys(results.byPillar).map(k=>({name:k, idx:results.byPillar[k], weight:MODEL.weights[k]||0})).filter(x=>x.idx!=null);
   const strengths = [...pairs].sort((a,b)=>b.idx-a.idx).slice(0,3);
   const gaps = [...pairs].sort((a,b)=>a.idx-b.idx).slice(0,3);
 
-  // Simple lift allocation across bottom 3 by weight
   const totalW = gaps.reduce((s,g)=>s+(g.weight||1),0) || 1;
   const lifts = gaps.map(g=>({name:g.name, lift: Math.round(gap * ((g.weight||1)/totalW)) }));
 
   const failedGates = results.gates.filter(g=>!g.pass).map(g=>g.label);
   const activeCaps = results.caps.filter(c=>c.trigger).map(c=>c.label);
 
-  // Helper to li items
   const li = (arr) => arr.map(x=>`<li>${x}</li>`).join("");
   const liKPI = (items) => items.map(x=>`<li><b>${x.k}</b>: ${x.v}</li>`).join("");
 
@@ -1116,7 +1131,61 @@ function generateExecutiveSummary(results){
   </div>`;
   return html;
 }
+/* ---------- Nano LLM: heuristic text realiser (no external APIs) ---------- */
+const NanoLLM = { sent(s){ if(!s) return ""; s = s.trim(); if(!s) return ""; const last = s[s.length-1]; return /[.!?]$/.test(last) ? s : s + "."; } };
 
+/* ---------- Full report composer ---------- */
+function llmStyleReport(results){
+  const scope = scopeLabel();
+  const bandTxt = band(results.finalScale);
+  const idx = results.finalIndex||0;
+  const scale = results.finalScale||0;
+  const target = nextLevelTarget(idx);
+  const gap = Math.max(0, target.targetIdx - idx);
+  const gatesPass = results.gates.filter(g=>g.pass).length;
+  const failedGates = results.gates.filter(g=>!g.pass).map(g=>g.label);
+  const activeCaps = results.caps.filter(c=>c.trigger).map(c=>c.label);
+
+  const pairs = Object.keys(results.byPillar).map(k=>({name:k, idx:results.byPillar[k], weight:MODEL.weights[k]||0})).filter(x=>x.idx!=null);
+  const strengths = [...pairs].sort((a,b)=>b.idx-a.idx).slice(0,3);
+  const gaps = [...pairs].sort((a,b)=>a.idx-b.idx).slice(0,3);
+
+  const totalW = gaps.reduce((s,g)=>s+(g.weight||1),0) || 1;
+  const lifts = gaps.map(g=>({name:g.name, lift: Math.round(gap * ((g.weight||1)/totalW)), idx:g.idx }));
+
+  const stepsHTML = nextStepsHTML(results);
+  const stepsTxt = stepsHTML.replace(/<[^>]+>/g," ").replace(/\s+/g," ").split("• ").map(s=>s.trim()).filter(s=>s);
+
+  const intro = [
+    NanoLLM.sent(`Preliminary report based on ${scope}`),
+    NanoLLM.sent(`The organisation is currently assessed at Band ${bandTxt} with a scale score of ${scale.toFixed(1)} out of 5 and an index of ${idx.toFixed(1)} out of 100`),
+    NanoLLM.sent(`The target is Level ${target.level}, approximated as an index of ${target.targetIdx}, which implies a gap of about ${gap.toFixed(1)} points`),
+    NanoLLM.sent(`Critical gate status: ${gatesPass}/${results.gates.length} passed${failedGates.length?`, with the following outstanding: ${failedGates.join(", ")}`:""}`),
+    activeCaps.length ? NanoLLM.sent(`The following caps are currently limiting the score: ${activeCaps.join(", ")}`) : ""
+  ].filter(Boolean).join(" ");
+
+  const strengthsPara = strengths.length ?
+    NanoLLM.sent(`Key strengths include ${strengths.map((s,i)=>`${s.name} (index ${s.idx.toFixed(1)})`).join(", ")}, which provide a solid base for the next phase`) : "";
+
+  const gapsPara = gaps.length ?
+    NanoLLM.sent(`Primary maturity gaps are ${gaps.map((g,i)=>`${g.name} (index ${g.idx.toFixed(1)})`).join(", ")}, which materially affect predictability, speed, and business outcomes`) : "";
+
+  const whyPara = "These gaps typically stem from a blend of process inconsistency, platform constraints that reduce automation or resilience, and data freshness or coverage issues that lower decision confidence.";
+
+  const planLead = NanoLLM.sent("To reach the next level over the next 90 days, the plan focuses on concentrated lifts in the lowest‑scoring pillars");
+  const planLifts = lifts.length ? NanoLLM.sent(lifts.map(x=>`Increase ${x.name} by roughly ${x.lift} index points`).join("; ")) : "";
+  const planSteps = stepsTxt.length ? NanoLLM.sent(`Concretely: ${stepsTxt.slice(0,12).join("; ")}`) : "";
+
+  const outcomes = gaps.map(g=>`${g.name}: ${PILLAR_OUTCOMES[g.name] || "Improved flow, quality, and commercial impact."}`).join("; ");
+  const outcomesPara = NanoLLM.sent(`Expected outcomes include ${outcomes}`);
+
+  const decisions = NanoLLM.sent("Decisions requested: confirm funding and roles, approve sequencing and scope trade‑offs, and agree policy changes on release, guardrails, and governance cadence");
+
+  const closing = NanoLLM.sent("With these actions, we anticipate measurable improvements in deployment frequency, lead time, and MTTR alongside higher adoption and reduced operational risk");
+
+  const text = [intro, strengthsPara, gapsPara, whyPara, planLead, planLifts, planSteps, outcomesPara, decisions, closing].filter(Boolean).join("\\n\\n");
+  return text;
+}
 function openTabbedModal(title, tabs){
   modalTitle.textContent = title;
   const tabBtns = tabs.map((t,i)=>`<button class="tab ${i===0?"active":""}" data-tab="${t.id}" role="tab" aria-selected="${i===0}">${t.title}</button>`).join("");
@@ -1129,12 +1198,167 @@ function openTabbedModal(title, tabs){
     modalContent.querySelectorAll(".tab").forEach(b=>{ b.classList.toggle("active", b===btn); b.setAttribute("aria-selected", b===btn ? "true" : "false"); });
     modalContent.querySelectorAll(".tabpanel").forEach(p=> p.classList.remove("active"));
     const pane = modalContent.querySelector("#tab-"+id); if(pane) pane.classList.add("active");
-    const copyBtn = modalContent.querySelector("#btnCopyNarrative");
-    if(copyBtn){ copyBtn.onclick = ()=>{ const pane = document.getElementById('narrText'); const t=document.createElement('textarea'); t.value=pane.innerText; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); copyBtn.textContent='Copied'; setTimeout(()=>copyBtn.textContent='Copy narrative',1200); }; }
+    // Copy buttons
+    ["#btnCopyNarrative","#btnCopyExec","#btnCopyFull"].forEach(sel=>{
+      const b = modalContent.querySelector(sel);
+      if(b){ b.onclick = ()=>{
+        const targetId = b.getAttribute("data-target");
+        const target = modalContent.querySelector("#"+targetId);
+        const t=document.createElement("textarea"); t.value = target ? target.innerText : "";
+        document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove();
+        b.textContent='Copied'; setTimeout(()=>b.textContent=b.textContent.replace('Copied','Copy'),1200);
+      }; }
+    });
+    // Generate full report
+    const genBtn = modalContent.querySelector("#btnGenFull");
+    if(genBtn){
+      genBtn.onclick = ()=>{
+        const res = compute(true);
+        const txt = llmStyleReport(res);
+        const el = modalContent.querySelector("#fullText");
+        if(el){ el.textContent = txt; }
+      };
+    }
+    // Download .md
+    const dlBtn = modalContent.querySelector("#btnDownloadFull");
+    if(dlBtn){
+      dlBtn.onclick = ()=>{
+        const el = modalContent.querySelector("#fullText");
+        const blob = new Blob([el?el.textContent:""], {type:"text/markdown"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = "executive_full_report.md"; a.click();
+        setTimeout(()=>URL.revokeObjectURL(url), 2000);
+      };
+    }
   });
 }
+
+/* ---------- Analyst Lens helpers ---------- */
+const PILLAR_EXECUTE = ["Engineering Effectiveness","Architecture & Platform","Data & Insights"];
+const PILLAR_VISION  = ["Strategy & Executive Alignment","Product Strategy, Discovery & GTM","Customer & Outcome Alignment"];
+const PILLAR_LAYER = {
+  "Strategy & Executive Alignment":"Differentiation",
+  "Customer & Outcome Alignment":"Differentiation",
+  "Product Strategy, Discovery & GTM":"Innovation",
+  "Engineering Effectiveness":"Differentiation",
+  "Architecture & Platform":"Record",
+  "Data & Insights":"Record"
+};
+const SEVEN_S_MAP = {
+  "Strategy & Executive Alignment":"Strategy",
+  "Customer & Outcome Alignment":"Shared Values",
+  "Product Strategy, Discovery & GTM":"Skills",
+  "Engineering Effectiveness":"Systems",
+  "Architecture & Platform":"Structure",
+  "Data & Insights":"Systems"
+};
+function avgPillars(byPillar, names){
+  const w = (window.MODEL && window.MODEL.weights) || {};
+  let s=0, sw=0;
+  names.forEach(n=>{ if(byPillar[n]!=null){ const wt = Math.max(1, w[n]||1); s += byPillar[n]*wt; sw += wt; }});
+  return sw? s/sw : 0;
+}
+function analystMetrics(results){
+  const exec = avgPillars(results.byPillar, PILLAR_EXECUTE);
+  const vis  = avgPillars(results.byPillar, PILLAR_VISION);
+  return {execute:exec, vision:vis};
+}
+function layerAverages(results){
+  const by = results.byPillar || {};
+  const buckets = {Record:[],Differentiation:[],Innovation:[]};
+  Object.keys(by).forEach(k=>{ const layer = PILLAR_LAYER[k]||"Differentiation"; buckets[layer].push(by[k]); });
+  const avg = k=> buckets[k].length? buckets[k].reduce((a,b)=>a+b,0)/buckets[k].length : 0;
+  return {Record:avg("Record"),Differentiation:avg("Differentiation"),Innovation:avg("Innovation")};
+}
+function sevenS(results){
+  const by = results.byPillar || {};
+  const acc = {};
+  Object.keys(by).forEach(k=>{ const s = SEVEN_S_MAP[k]||"Systems"; (acc[s]=acc[s]||[]).push(by[k]); });
+  const out = {};
+  Object.keys(acc).forEach(k=> out[k] = acc[k].reduce((a,b)=>a+b,0)/acc[k].length);
+  const order = ["Strategy","Structure","Systems","Skills","Staff","Style","Shared Values"];
+  return order.map(k=>({name:k, idx: out[k]||0}));
+}
+function valueEffortBoard(results){
+  const by = results.byPillar || {};
+  const w = (window.MODEL && window.MODEL.weights) || {};
+  const pairs = Object.keys(by).map(k=>({name:k, idx:by[k], weight:w[k]||1})).filter(x=>x.idx!=null);
+  const sortedAsc = [...pairs].sort((a,b)=>a.idx-b.idx);
+  const gaps = sortedAsc.slice(0,4);
+  const tgt = (window.nextLevelTarget? window.nextLevelTarget(results.finalIndex||0) : {targetIdx: Math.min(100,(results.finalIndex||0)+10)});
+  const gap = Math.max(0,(tgt.targetIdx - (results.finalIndex||0)));
+  const totalW = gaps.reduce((s,g)=>s+(g.weight||1),0) || 1;
+  return gaps.map(g=>{
+    const lift = Math.round(gap * ((g.weight||1)/totalW));
+    const value = (g.weight||1) * lift;
+    const effort = 100 - g.idx;
+    let bucket = "fillins";
+    if(value>=effort && effort<40) bucket="quick";
+    else if(value>=effort && effort>=40) bucket="bigbets";
+    else if(value<effort && effort<40) bucket="fillins";
+    else bucket="avoid";
+    return {name:g.name, value, effort, bucket};
+  });
+}
+function analystHTML(results){
+  const m = analystMetrics(results);
+  const layers = layerAverages(results);
+  const seven = sevenS(results);
+  const board = valueEffortBoard(results);
+  const quadSVG = `
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <rect x="0" y="0" width="100" height="100" fill="white" stroke="#ddd"></rect>
+    <line x1="50" y1="0" x2="50" y2="100" stroke="#ccc" stroke-width="0.5"></line>
+    <line x1="0" y1="50" x2="100" y2="50" stroke="#ccc" stroke-width="0.5"></line>
+    <text x="95" y="98" font-size="4" text-anchor="end" fill="#666">Vision</text>
+    <text x="2" y="5" font-size="4" fill="#666" transform="rotate(-90 2,5)">Execute</text>
+    <circle cx="${Math.max(2, Math.min(98, m.vision))}" cy="${100 - Math.max(2, Math.min(98, m.execute))}" r="3" fill="var(--color-primary)"></circle>
+  </svg>`;
+  const boardBuckets = {
+    quick: board.filter(x=>x.bucket==="quick"),
+    bigbets: board.filter(x=>x.bucket==="bigbets"),
+    fillins: board.filter(x=>x.bucket==="fillins"),
+    avoid: board.filter(x=>x.bucket==="avoid")
+  };
+  return `
+  <div class="analyst" id="analystText">
+    <div>
+      <h4>MQ-style Quadrant (internal)</h4>
+      <div class="quad">${quadSVG}</div>
+      <div class="tiny">Point = average of Execute pillars (${PILLAR_EXECUTE.join(", ")}) vs Vision pillars (${PILLAR_VISION.join(", ")}).</div>
+    </div>
+    <div>
+      <h4>Pace-Layered heatmap</h4>
+      <div class="heat-grid">
+        <div class="hdr">Layer</div><div class="hdr">Index</div><div class="hdr">Tags</div><div class="hdr">Guidance</div>
+        <div>Record</div><div><div class="bar"><div class="fill" style="width:${layers.Record.toFixed(0)}%;background:var(--color-success)"></div></div></div><div><span class="tag">stability</span></div><div>Protect & Modernize</div>
+        <div>Differentiation</div><div><div class="bar"><div class="fill" style="width:${layers.Differentiation.toFixed(0)}%;background:var(--color-primary)"></div></div></div><div><span class="tag">flow</span></div><div>Exploit</div>
+        <div>Innovation</div><div><div class="bar"><div class="fill" style="width:${layers.Innovation.toFixed(0)}%;background:var(--color-accent)"></div></div></div><div><span class="tag">bets</span></div><div>Experiment</div>
+      </div>
+    </div>
+    <div>
+      <h4>McKinsey 7‑S mapping</h4>
+      <div class="spider">
+        ${seven.map(s=>`<div>${s.name}</div><div class="track"><div class="fill" style="width:${s.idx.toFixed(0)}%;background:var(--color-primary)"></div></div>`).join("")}
+      </div>
+      <div class="tiny">Mapping is heuristic. Adjust SEVEN_S_MAP for your context.</div>
+    </div>
+    <div>
+      <h4>Value vs Effort</h4>
+      <div class="board">
+        <div class="cell"><h5>Quick wins</h5>${boardBuckets.quick.map(i=>`<div>• ${i.name}</div>`).join("") || "<div>—</div>"}</div>
+        <div class="cell"><h5>Big bets</h5>${boardBuckets.bigbets.map(i=>`<div>• ${i.name}</div>`).join("") || "<div>—</div>"}</div>
+        <div class="cell"><h5>Fill‑ins</h5>${boardBuckets.fillins.map(i=>`<div>• ${i.name}</div>`).join("") || "<div>—</div>"}</div>
+        <div class="cell"><h5>Avoid</h5>${boardBuckets.avoid.map(i=>`<div>• ${i.name}</div>`).join("") || "<div>—</div>"}</div>
+      </div>
+    </div>
+    <div class="copyRow">
+      <button class="btn" id="btnCopyAnalyst" data-target="analystText">Copy analyst lens</button>
+    </div>
+  </div>`;
+}
 function buildReportTabs(results){
-  // Overall: simple KPI tiles
   const overallHTML = `
     <div class="kpis">
       <div class="kpi"><div class="tiny">Overall (index 0–100)</div><strong>${fmt(results.finalIndex,1)}</strong></div>
@@ -1143,7 +1367,6 @@ function buildReportTabs(results){
       <div class="kpi"><div class="tiny">Gates passed</div><strong>${results.gates.filter(g=>g.pass).length}/${results.gates.length}</strong></div>
     </div>
   `;
-  // Gates & Caps
   let gatesHTML = `<div style="display:grid;gap:10px">`;
   results.gates.forEach(g=>{
     const cls = g.pass? "score-good" : "score-bad";
@@ -1155,17 +1378,27 @@ function buildReportTabs(results){
     gatesHTML += `<div class="pillar-card"><div style="display:flex;justify-content:space-between;align-items:center"><div>${c.label}</div><span class="score-badge ${cls}">${c.trigger?"ACTIVE":"—"}</span></div></div>`;
   });
   gatesHTML += `</div>`;
-  // Pillars block cards
   const pillarHTML = pillarCardsHTML(results.byPillar);
-  // Next steps detail
   const detailsHTML = nextStepsHTML(results);
+  const fullTab = `
+    <div class="fullreport">
+      <div class="toolbar">
+        <button class="btn" id="btnGenFull">Generate full report</button>
+        <button class="btn" id="btnCopyFull" data-target="fullText">Copy full report</button>
+        <button class="btn" id="btnDownloadFull">Download .md</button>
+      </div>
+      <div class="report" id="fullText">(click "Generate full report")</div>
+    </div>`;
   return [
     {id:"overall", title:"Overall", html: overallHTML},
     {id:"gates", title:"Critical Gates & Caps", html: gatesHTML},
     {id:"pillars", title:"Pillar Overview", html: pillarHTML},
     {id:"next", title:"Further Details", html: detailsHTML},
     {id:"exec", title:"Executive Summary", html: generateExecutiveSummary(results)},
-    {id:"narrative", title:"Narrative", html: generateNarrative(results)}
+    {id:"narrative", title:"Narrative", html: generateNarrative(results)},
+    {id:"full", title:"Full Report", html: fullTab}
+  ,
+    {id:"analyst", title:"Analyst Lens", html: analystHTML(results)}
   ];
 }
 function openModal(title, html){ modalTitle.textContent = title; modalContent.innerHTML = html; overlay.style.display="flex"; }
@@ -1326,7 +1559,13 @@ document.getElementById("btnViewPillar").addEventListener("click", ()=>{
   document.getElementById("btnViewTier").classList.remove("active");
   render();
 });
-document.getElementById("btnViewTier").addEventListener
+document.getElementById("btnViewTier").addEventListener("click", ()=>{
+  currentView="tier";
+  document.getElementById("btnViewTier").classList.add("active");
+  document.getElementById("btnViewPillar").classList.remove("active");
+  render();
+});
+
 // Mode toggle
 document.getElementById("btnModeAll").addEventListener("click", ()=>{
   singleMode=false;
@@ -1338,12 +1577,6 @@ document.getElementById("btnModeSingle").addEventListener("click", ()=>{
   singleMode=true;
   document.getElementById("btnModeSingle").classList.add("active");
   document.getElementById("btnModeAll").classList.remove("active");
-  render();
-});
-("click", ()=>{
-  currentView="tier";
-  document.getElementById("btnViewTier").classList.add("active");
-  document.getElementById("btnViewPillar").classList.remove("active");
   render();
 });
 
@@ -1594,5 +1827,19 @@ function renderBreakdown(byPillar){
 /* Init */
 render();
 </script>
+
+<script>
+document.addEventListener("click", function(e){
+  const btn = e.target.closest && e.target.closest("#btnCopyAnalyst");
+  if(!btn) return;
+  const targetId = btn.getAttribute("data-target");
+  const pane = document.getElementById(targetId);
+  if(!pane) return;
+  const t = document.createElement("textarea");
+  t.value = pane.innerText; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove();
+  btn.textContent = "Copied"; setTimeout(()=> btn.textContent = "Copy analyst lens", 1200);
+});
+</script>
+
 </body>
 </html>
