@@ -3,7 +3,7 @@
  * Handles all report generation and export functionality
  */
 
-import AssessmentEngine from './assessment-engine.js';
+import { AssessmentEngine } from './assessment-engine.js';
 import { MODEL } from './models.js';
 
 export class ReportGenerator {

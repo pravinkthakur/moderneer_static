@@ -3,9 +3,9 @@
  * Initializes and coordinates all modules
  */
 
-import AssessmentEngine from './assessment-engine.js';
-import UIRenderer from './ui-renderer.js';
-import ReportGenerator from './report-generator.js';
+import { AssessmentEngine } from './assessment-engine.js';
+import { UIRenderer } from './ui-renderer.js';
+import { ReportGenerator } from './report-generator.js';
 import { MODEL } from './models.js';
 
 class ModerneerAssessment {

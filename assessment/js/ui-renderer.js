@@ -4,7 +4,7 @@
  */
 
 import { MODEL, PARAM_META, SCALE_CATALOG } from './models.js';
-import AssessmentEngine from './assessment-engine.js';
+import { AssessmentEngine } from './assessment-engine.js';
 
 export class UIRenderer {
   constructor(engine) {
