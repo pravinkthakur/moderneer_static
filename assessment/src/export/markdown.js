@@ -1,0 +1,1 @@
+export function generateMarkdown(text){ return String(text||''); }
