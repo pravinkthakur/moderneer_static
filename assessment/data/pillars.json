@@ -1,0 +1,265 @@
+{
+  "version": "3.0.0",
+  "pillars": [
+    {
+      "id": "strategy-exec",
+      "name": "Strategy & Executive Alignment",
+      "description": "Strategic alignment and executive leadership practices",
+      "weight": 8,
+      "color": "#3B82F6",
+      "icon": "strategy",
+      "order": 1,
+      "parameters": [
+        "strat.okr_link",
+        "strat.portfolio_review", 
+        "strat.exec_narrative",
+        "strat.decision_reversible"
+      ],
+      "outcomes": {
+        "description": "Clear strategy execution with measurable outcomes and aligned decision-making processes",
+        "kpis": ["OKR alignment percentage", "Strategy execution velocity", "Decision quality metrics"]
+      }
+    },
+    {
+      "id": "customer-outcome", 
+      "name": "Customer & Outcome Alignment",
+      "description": "Customer-centric practices and outcome measurement",
+      "weight": 12,
+      "color": "#10B981",
+      "icon": "users",
+      "order": 2,
+      "parameters": [
+        "cust.proximity",
+        "cust.kpi_literacy",
+        "cust.problem_framing", 
+        "cust.outcome_trace"
+      ],
+      "outcomes": {
+        "description": "Deep customer understanding driving product decisions with measurable outcome tracking",
+        "kpis": ["Customer satisfaction scores", "Feature adoption rates", "Problem-solution fit metrics"]
+      }
+    },
+    {
+      "id": "product-strategy",
+      "name": "Product Strategy, Discovery & GTM", 
+      "description": "Product discovery, strategy, and go-to-market practices",
+      "weight": 10,
+      "color": "#F59E0B",
+      "icon": "lightbulb",
+      "order": 3,
+      "parameters": [
+        "prod.discovery",
+        "prod.prioritisation",
+        "prod.roadmapping",
+        "prod.gtm_readiness"
+      ],
+      "outcomes": {
+        "description": "Systematic product discovery with data-driven prioritization and effective market entry",
+        "kpis": ["Feature success rate", "Time to market", "Market fit validation"]
+      }
+    },
+    {
+      "id": "architecture-extensibility", 
+      "name": "Architecture & Extensibility",
+      "description": "System architecture and platform extensibility",
+      "weight": 8,
+      "color": "#8B5CF6",
+      "icon": "building-blocks",
+      "order": 4,
+      "parameters": [
+        "arch.modularity",
+        "arch.evolutionary", 
+        "arch.api_product",
+        "arch.obs_by_design"
+      ],
+      "outcomes": {
+        "description": "Scalable, maintainable architecture enabling rapid feature development and system evolution",
+        "kpis": ["System modularity metrics", "API adoption", "Architecture fitness scores"]
+      }
+    },
+    {
+      "id": "engineering-platform",
+      "name": "Engineering & Platform Automation",
+      "description": "Engineering practices and platform automation capabilities",
+      "weight": 12,
+      "color": "#06B6D4", 
+      "icon": "cog",
+      "order": 5,
+      "parameters": [
+        "eng.test_strategy",
+        "eng.code_review_gates",
+        "eng.dev_workflow",
+        "eng.cicd",
+        "eng.iac_gitops",
+        "eng.cloud_enable"
+      ],
+      "outcomes": {
+        "description": "Automated engineering practices with robust platform capabilities supporting developer productivity",
+        "kpis": ["Deployment frequency", "Code quality scores", "Developer experience metrics"]
+      }
+    },
+    {
+      "id": "delivery-flow",
+      "name": "Delivery Flow & Velocity",
+      "description": "Delivery pipeline efficiency and flow optimization", 
+      "weight": 12,
+      "color": "#EF4444",
+      "icon": "truck",
+      "order": 6,
+      "parameters": [
+        "deliv.lead_time",
+        "deliv.release_safety",
+        "deliv.flow_efficiency", 
+        "deliv.planning_adapt"
+      ],
+      "outcomes": {
+        "description": "Optimized delivery flow with predictable velocity and continuous improvement",
+        "kpis": ["Lead time for changes", "Deployment frequency", "Flow efficiency ratio"]
+      }
+    },
+    {
+      "id": "reliability-security",
+      "name": "Reliability, Security & Compliance",
+      "description": "System reliability, security practices, and compliance management",
+      "weight": 14,
+      "color": "#DC2626", 
+      "icon": "shield",
+      "order": 7,
+      "parameters": [
+        "reliab.incident_mgmt",
+        "reliab.mttr_budget",
+        "reliab.slos_product",
+        "reliab.anomaly",
+        "sec.secure_coding",
+        "sec.privacy_data", 
+        "sec.compliance_evidence",
+        "sec.runtime_ir"
+      ],
+      "outcomes": {
+        "description": "Robust security posture with reliable systems and proactive compliance management",
+        "kpis": ["System uptime", "Security incident rate", "Compliance coverage"]
+      }
+    },
+    {
+      "id": "docs-traceability",
+      "name": "Documentation, Decisioning & Traceability", 
+      "description": "Knowledge management and decision traceability",
+      "weight": 4,
+      "color": "#6B7280",
+      "icon": "document",
+      "order": 8,
+      "parameters": [
+        "docs.code_api_docs",
+        "docs.knowledge_onboarding",
+        "docs.adrs_quality",
+        "docs.audit_trace"
+      ],
+      "outcomes": {
+        "description": "Comprehensive documentation with clear decision trails and efficient knowledge sharing",
+        "kpis": ["Documentation coverage", "Onboarding time", "Decision traceability"]
+      }
+    },
+    {
+      "id": "org-leadership",
+      "name": "Organisation, Leadership & Autonomy",
+      "description": "Organizational structure and leadership practices",
+      "weight": 6,
+      "color": "#7C3AED",
+      "icon": "users-group", 
+      "order": 9,
+      "parameters": [
+        "org.role_triad",
+        "org.team_autonomy",
+        "org.growth_calibration",
+        "org.leadership_behaviour"
+      ],
+      "outcomes": {
+        "description": "Autonomous teams with clear leadership and effective organizational structure",
+        "kpis": ["Team autonomy index", "Leadership effectiveness", "Role clarity scores"]
+      }
+    },
+    {
+      "id": "outcome-economics",
+      "name": "Outcome Economics & Finance",
+      "description": "Financial management and outcome-based economics",
+      "weight": 4,
+      "color": "#059669",
+      "icon": "currency-dollar",
+      "order": 10,
+      "parameters": [
+        "econ.cost_to_serve", 
+        "econ.squad_budget",
+        "econ.pricing_levers",
+        "econ.finops"
+      ],
+      "outcomes": {
+        "description": "Clear cost management with outcome-driven financial decisions and transparent economics",
+        "kpis": ["Cost per outcome", "Budget efficiency", "Financial transparency"]
+      }
+    },
+    {
+      "id": "data-ai",
+      "name": "Data & AI Lifecycle",
+      "description": "Data management and AI/ML lifecycle practices",
+      "weight": 6,
+      "color": "#7C2D12",
+      "icon": "chart-bar",
+      "order": 11,
+      "parameters": [
+        "data.data_sla_lineage",
+        "data.model_lifecycle", 
+        "data.responsible_ai",
+        "data.analytics_selfserve"
+      ],
+      "outcomes": {
+        "description": "Mature data practices with responsible AI governance and self-service analytics",
+        "kpis": ["Data quality scores", "Model performance", "Analytics adoption"]
+      }
+    },
+    {
+      "id": "experience-quality",
+      "name": "Experience Quality & Market Readiness",
+      "description": "User experience quality and market readiness practices",
+      "weight": 4,
+      "color": "#BE185D",
+      "icon": "star",
+      "order": 12,
+      "parameters": [
+        "xp.perf_budgets_rum",
+        "xp.accessibility",
+        "xp.i18n_l10n",
+        "xp.support_integration"
+      ],
+      "outcomes": {
+        "description": "Exceptional user experience with comprehensive market readiness and accessibility",
+        "kpis": ["User experience scores", "Performance metrics", "Accessibility compliance"]
+      }
+    }
+  ],
+  "pillarGroups": {
+    "vision": {
+      "name": "Vision & Strategy",
+      "description": "Strategic alignment and customer focus",
+      "pillars": ["strategy-exec", "customer-outcome", "product-strategy"],
+      "color": "#3B82F6"
+    },
+    "execution": {
+      "name": "Execution & Delivery", 
+      "description": "Technical execution and delivery capabilities",
+      "pillars": ["engineering-platform", "architecture-extensibility", "data-ai"],
+      "color": "#10B981"
+    },
+    "systems": {
+      "name": "Systems & Operations",
+      "description": "Operational excellence and system quality",
+      "pillars": ["delivery-flow", "reliability-security", "experience-quality"],
+      "color": "#F59E0B"
+    },
+    "enablement": {
+      "name": "Enablement & Governance", 
+      "description": "Organizational enablement and governance",
+      "pillars": ["docs-traceability", "org-leadership", "outcome-economics"],
+      "color": "#8B5CF6"
+    }
+  }
+}

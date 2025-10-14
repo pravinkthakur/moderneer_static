@@ -1,0 +1,343 @@
+{
+  "version": "3.0.0",
+  "scaleTypes": {
+    "checkbox": {
+      "name": "Checkbox",
+      "description": "Binary yes/no selection",
+      "inputType": "checkbox",
+      "valueType": "boolean",
+      "scoring": {
+        "true": 1.0,
+        "false": 0.0
+      }
+    },
+    "scale5": {
+      "name": "5-Point Scale", 
+      "description": "Standard 1-5 Likert scale",
+      "inputType": "slider",
+      "valueType": "number",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "scoring": {
+        "direct": true
+      }
+    },
+    "scale100": {
+      "name": "Percentage Scale",
+      "description": "0-100 percentage scale",
+      "inputType": "slider", 
+      "valueType": "number",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "suffix": "%",
+      "scoring": {
+        "normalize": {
+          "from": [0, 100],
+          "to": [1, 5]
+        }
+      }
+    }
+  },
+  "scales": {
+    "p95_lead_time": {
+      "id": "p95_lead_time",
+      "type": "scale5",
+      "name": "P95 Lead Time Scale",
+      "description": "95th percentile lead time from commit to production",
+      "purpose": "Measure deployment flow efficiency - lower time enables faster learning cycles",
+      "unit": "time",
+      "lowerIsBetter": true,
+      "anchors": [
+        {
+          "value": 5,
+          "label": "< 1 day",
+          "description": "Exceptional: Sub-day deployment capability with full automation",
+          "examples": ["Hotfixes deploy in minutes", "Feature flags enable instant rollout"]
+        },
+        {
+          "value": 4,
+          "label": "1-7 days", 
+          "description": "Good: Weekly deployment rhythm with reliable automation",
+          "examples": ["Regular weekly releases", "Automated deployment pipeline"]
+        },
+        {
+          "value": 3,
+          "label": "1-4 weeks",
+          "description": "Moderate: Monthly deployment cycle with some automation", 
+          "examples": ["Monthly release trains", "Semi-automated deployments"]
+        },
+        {
+          "value": 2,
+          "label": "1-6 months",
+          "description": "Poor: Quarterly or slower deployments with manual processes",
+          "examples": ["Quarterly releases", "Manual deployment procedures"]
+        },
+        {
+          "value": 1,
+          "label": "> 6 months", 
+          "description": "Critical: Very slow deployment capability, largely manual",
+          "examples": ["Annual releases", "Complex manual deployment processes"]
+        }
+      ]
+    },
+    "deploy_frequency": {
+      "id": "deploy_frequency",
+      "type": "scale5", 
+      "name": "Deployment Frequency Scale",
+      "description": "How often code deployments occur to production",
+      "purpose": "Measure delivery velocity and batch size optimization",
+      "unit": "frequency",
+      "lowerIsBetter": false,
+      "anchors": [
+        {
+          "value": 5,
+          "label": "Multiple per day",
+          "description": "Elite: On-demand deployments multiple times daily",
+          "examples": ["Continuous deployment", "Feature flags", "Canary releases"]
+        },
+        {
+          "value": 4,
+          "label": "Daily",
+          "description": "High: Daily deployment capability and practice", 
+          "examples": ["Daily release cycle", "Automated quality gates"]
+        },
+        {
+          "value": 3,
+          "label": "Weekly",
+          "description": "Medium: Regular weekly deployment schedule",
+          "examples": ["Weekly release trains", "Sprint-based releases"]
+        },
+        {
+          "value": 2,
+          "label": "Monthly", 
+          "description": "Low: Monthly or bi-weekly deployment cycle",
+          "examples": ["Monthly releases", "Coordinated deployment windows"]
+        },
+        {
+          "value": 1,
+          "label": "Quarterly or less",
+          "description": "Poor: Infrequent deployments with large batch sizes",
+          "examples": ["Quarterly releases", "Major version releases only"]
+        }
+      ]
+    },
+    "change_failure_rate": {
+      "id": "change_failure_rate",
+      "type": "scale100",
+      "name": "Change Failure Rate",
+      "description": "Percentage of deployments causing production issues",
+      "purpose": "Measure deployment quality and risk management",
+      "unit": "percentage",
+      "lowerIsBetter": true,
+      "anchors": [
+        {
+          "value": 95,
+          "label": "0-15%",
+          "description": "Elite: Very low failure rate with excellent quality practices"
+        },
+        {
+          "value": 75,
+          "label": "16-30%", 
+          "description": "High: Good quality with occasional issues"
+        },
+        {
+          "value": 50,
+          "label": "31-45%",
+          "description": "Medium: Moderate failure rate requiring improvement"
+        },
+        {
+          "value": 25,
+          "label": "46-60%",
+          "description": "Low: High failure rate indicating quality issues"
+        },
+        {
+          "value": 5,
+          "label": "> 60%",
+          "description": "Poor: Very high failure rate, significant quality problems"
+        }
+      ]
+    },
+    "mttr_scale": {
+      "id": "mttr_scale", 
+      "type": "scale5",
+      "name": "Mean Time to Recovery",
+      "description": "Average time to recover from production incidents",
+      "purpose": "Measure incident response capability and system resilience",
+      "unit": "time",
+      "lowerIsBetter": true,
+      "anchors": [
+        {
+          "value": 5,
+          "label": "< 1 hour",
+          "description": "Elite: Sub-hour recovery with automated detection and response"
+        },
+        {
+          "value": 4,
+          "label": "1-24 hours",
+          "description": "High: Same-day recovery with good monitoring and processes"
+        },
+        {
+          "value": 3, 
+          "label": "1-7 days",
+          "description": "Medium: Recovery within a week with established procedures"
+        },
+        {
+          "value": 2,
+          "label": "1-4 weeks",
+          "description": "Low: Extended recovery time indicating process gaps"
+        },
+        {
+          "value": 1,
+          "label": "> 1 month",
+          "description": "Poor: Very slow recovery indicating significant capability gaps"
+        }
+      ]
+    },
+    "slo_coverage_pct": {
+      "id": "slo_coverage_pct",
+      "type": "scale100", 
+      "name": "SLO Coverage Percentage",
+      "description": "Percentage of critical services with defined SLOs",
+      "purpose": "Measure reliability engineering maturity and service coverage",
+      "unit": "percentage",
+      "lowerIsBetter": false,
+      "anchors": [
+        {
+          "value": 95,
+          "label": "90-100%",
+          "description": "Excellent: Comprehensive SLO coverage across all critical services"
+        },
+        {
+          "value": 75,
+          "label": "70-89%",
+          "description": "Good: Most critical services have defined SLOs"
+        },
+        {
+          "value": 50, 
+          "label": "50-69%",
+          "description": "Moderate: Some services have SLOs, gaps remain"
+        },
+        {
+          "value": 25,
+          "label": "25-49%",
+          "description": "Limited: Few services have defined SLOs"
+        },
+        {
+          "value": 5,
+          "label": "0-24%",
+          "description": "Poor: Minimal or no SLO coverage"
+        }
+      ]
+    },
+    "eng_cust_hours": {
+      "id": "eng_cust_hours",
+      "type": "scale5",
+      "name": "Engineer-Customer Interaction Hours",
+      "description": "Weekly hours engineers spend directly with customers",
+      "purpose": "Measure customer proximity and feedback loop effectiveness",
+      "unit": "hours/week",
+      "lowerIsBetter": false,
+      "anchors": [
+        {
+          "value": 5,
+          "label": "> 4 hours/week",
+          "description": "Excellent: Regular, substantial customer interaction"
+        },
+        {
+          "value": 4,
+          "label": "2-4 hours/week", 
+          "description": "Good: Regular customer interaction sessions"
+        },
+        {
+          "value": 3,
+          "label": "1-2 hours/week",
+          "description": "Moderate: Some direct customer exposure"
+        },
+        {
+          "value": 2,
+          "label": "< 1 hour/week",
+          "description": "Limited: Minimal direct customer interaction"
+        },
+        {
+          "value": 1,
+          "label": "None",
+          "description": "Poor: No direct customer interaction"
+        }
+      ]
+    },
+    "ci_feedback_time": {
+      "id": "ci_feedback_time",
+      "type": "scale5",
+      "name": "CI Feedback Time",
+      "description": "Median time for CI pipeline to provide test results",
+      "purpose": "Measure development feedback loop speed for quality and productivity",
+      "unit": "time", 
+      "lowerIsBetter": true,
+      "anchors": [
+        {
+          "value": 5,
+          "label": "< 10 minutes",
+          "description": "Excellent: Very fast feedback enabling tight development loops"
+        },
+        {
+          "value": 4,
+          "label": "10-30 minutes",
+          "description": "Good: Fast enough for effective development flow"
+        },
+        {
+          "value": 3,
+          "label": "30-60 minutes",
+          "description": "Moderate: Acceptable feedback time with some delays"
+        },
+        {
+          "value": 2,
+          "label": "1-4 hours",
+          "description": "Slow: Feedback delays impact development productivity"
+        },
+        {
+          "value": 1,
+          "label": "> 4 hours",
+          "description": "Poor: Very slow feedback significantly impacts flow"
+        }
+      ]
+    },
+    "generic_0_100": {
+      "id": "generic_0_100",
+      "type": "scale100",
+      "name": "Generic Percentage Scale",
+      "description": "General purpose 0-100% scale for coverage metrics",
+      "purpose": "Measure coverage, adoption, or completion percentages",
+      "unit": "percentage",
+      "lowerIsBetter": false,
+      "anchors": [
+        {
+          "value": 95,
+          "label": "90-100%",
+          "description": "Excellent: Near-complete or complete coverage"
+        },
+        {
+          "value": 75,
+          "label": "70-89%", 
+          "description": "Good: High coverage with minor gaps"
+        },
+        {
+          "value": 50,
+          "label": "50-69%",
+          "description": "Moderate: Partial coverage, improvement needed"
+        },
+        {
+          "value": 25,
+          "label": "25-49%",
+          "description": "Limited: Low coverage, significant gaps"
+        },
+        {
+          "value": 5,
+          "label": "0-24%", 
+          "description": "Poor: Minimal or no coverage"
+        }
+      ]
+    }
+  }
+}
