@@ -3,8 +3,8 @@
  * Adds minimal runtime validation.
  */
 
-import weights from './weights.json' assert { type: 'json' };
-import schema from './schema.json' assert { type: 'json' };
+import weights from './weights.json' with { type: 'json' };
+import schema from './schema.json' with { type: 'json' };
 
 /** @returns {{weights:Record<string,number>, schema:any}} */
 export function getConfig(){
