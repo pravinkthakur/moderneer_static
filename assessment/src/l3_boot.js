@@ -175,6 +175,3 @@ document.addEventListener('click', async (e)=>{
     mod.openPrint(res);
   }
 });
-
-import './plugins/radio_enhance.js';
-import './plugins/pillar_chart_boot.js';
