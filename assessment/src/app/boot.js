@@ -928,35 +928,158 @@ function llmStyleReport(results){
   const stepsHTML = nextStepsHTML(results);
   const stepsTxt = stepsHTML.replace(/<[^>]+>/g," ").replace(/\s+/g," ").split("• ").map(s=>s.trim()).filter(s=>s);
 
-  const intro = [
-    NanoLLM.sent(`Preliminary report based on ${scope}`),
-    NanoLLM.sent(`The organisation is currently assessed at Band ${bandTxt} with a scale score of ${scale.toFixed(1)} out of 5 and an index of ${idx.toFixed(1)} out of 100`),
-    NanoLLM.sent(`The target is Level ${target.level}, approximated as an index of ${target.targetIdx}, which implies a gap of about ${gap.toFixed(1)} points`),
-    NanoLLM.sent(`Critical gate status: ${gatesPass}/${results.gates.length} passed${failedGates.length?`, with the following outstanding: ${failedGates.join(", ")}`:""}`),
-    activeCaps.length ? NanoLLM.sent(`The following caps are currently limiting the score: ${activeCaps.join(", ")}`) : ""
-  ].filter(Boolean).join(" ");
+  // Get current date for report
+  const reportDate = new Date().toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
 
-  const strengthsPara = strengths.length ?
-    NanoLLM.sent(`Key strengths include ${strengths.map((s,i)=>`${s.name} (index ${s.idx.toFixed(1)})`).join(", ")}, which provide a solid base for the next phase`) : "";
+  return `
+<div class="structured-report">
+  <!-- Report Header -->
+  <div class="report-header">
+    <h1>Engineering Excellence Maturity Assessment</h1>
+    <div class="report-meta">
+      <p><strong>Assessment Scope:</strong> ${scope}</p>
+      <p><strong>Report Date:</strong> ${reportDate}</p>
+      <p><strong>Overall Band:</strong> ${bandTxt} (${scale.toFixed(1)}/5.0, Index: ${idx.toFixed(1)}/100)</p>
+    </div>
+  </div>
 
-  const gapsPara = gaps.length ?
-    NanoLLM.sent(`Primary maturity gaps are ${gaps.map((g,i)=>`${g.name} (index ${g.idx.toFixed(1)})`).join(", ")}, which materially affect predictability, speed, and business outcomes`) : "";
+  <!-- Executive Summary -->
+  <section class="report-section">
+    <h2>📊 Executive Summary</h2>
+    <div class="summary-grid">
+      <div class="summary-card">
+        <h3>Current State</h3>
+        <p>The organisation is currently assessed at <strong>Band ${bandTxt}</strong> with a scale score of <strong>${scale.toFixed(1)} out of 5</strong> and an index of <strong>${idx.toFixed(1)} out of 100</strong>.</p>
+      </div>
+      
+      <div class="summary-card">
+        <h3>Target & Gap</h3>
+        <p>The target is <strong>Level ${target.level}</strong>, approximated as an index of <strong>${target.targetIdx}</strong>, which implies a gap of about <strong>${gap.toFixed(1)} points</strong>.</p>
+      </div>
+      
+      <div class="summary-card">
+        <h3>Gate Status</h3>
+        <p><strong>${gatesPass}/${results.gates.length} gates passed</strong>${failedGates.length ? `. Outstanding: ${failedGates.join(", ")}` : " ✅"}</p>
+        ${activeCaps.length ? `<p><strong>Active caps:</strong> ${activeCaps.join(", ")}</p>` : ""}
+      </div>
+    </div>
+  </section>
 
-  const whyPara = "These gaps typically stem from a blend of process inconsistency, platform constraints that reduce automation or resilience, and data freshness or coverage issues that lower decision confidence.";
+  <!-- Strengths & Gaps Analysis -->
+  <section class="report-section">
+    <h2>🎯 Maturity Analysis</h2>
+    
+    <div class="analysis-grid">
+      <div class="strengths-panel">
+        <h3>💪 Key Strengths</h3>
+        ${strengths.length ? `
+        <ul class="strength-list">
+          ${strengths.map(s => `
+            <li>
+              <strong>${s.name}</strong>
+              <span class="score">Index: ${s.idx.toFixed(1)}</span>
+            </li>
+          `).join('')}
+        </ul>
+        <p class="insight">These strengths provide a solid foundation for the next phase of maturity development.</p>
+        ` : '<p>No significant strengths identified in current assessment.</p>'}
+      </div>
+      
+      <div class="gaps-panel">
+        <h3>🔍 Primary Gaps</h3>
+        ${gaps.length ? `
+        <ul class="gaps-list">
+          ${gaps.map(g => `
+            <li>
+              <strong>${g.name}</strong>
+              <span class="score">Index: ${g.idx.toFixed(1)}</span>
+            </li>
+          `).join('')}
+        </ul>
+        <p class="insight">These gaps materially affect predictability, speed, and business outcomes.</p>
+        ` : '<p>No significant gaps identified in current assessment.</p>'}
+      </div>
+    </div>
+    
+    <div class="root-causes">
+      <h4>🔧 Root Cause Analysis</h4>
+      <p>These gaps typically stem from a blend of process inconsistency, platform constraints that reduce automation or resilience, and data freshness or coverage issues that lower decision confidence.</p>
+    </div>
+  </section>
 
-  const planLead = NanoLLM.sent("To reach the next level over the next 90 days, the plan focuses on concentrated lifts in the lowest‑scoring pillars");
-  const planLifts = lifts.length ? NanoLLM.sent(lifts.map(x=>`Increase ${x.name} by roughly ${x.lift} index points`).join("; ")) : "";
-  const planSteps = stepsTxt.length ? NanoLLM.sent(`Concretely: ${stepsTxt.slice(0,12).join("; ")}`) : "";
+  <!-- 90-Day Action Plan -->
+  <section class="report-section">
+    <h2>🚀 90-Day Action Plan</h2>
+    
+    <div class="plan-overview">
+      <p><strong>Focus Strategy:</strong> Concentrated lifts in the lowest-scoring pillars to achieve maximum impact.</p>
+    </div>
+    
+    ${lifts.length ? `
+    <div class="pillar-lifts">
+      <h3>Pillar Improvement Targets</h3>
+      <ul class="lift-targets">
+        ${lifts.map(x => `
+          <li>
+            <strong>${x.name}:</strong> Increase by roughly <strong>${x.lift} index points</strong>
+            <small>(Current: ${x.idx.toFixed(1)})</small>
+          </li>
+        `).join('')}
+      </ul>
+    </div>
+    ` : ''}
+    
+    ${stepsTxt.length ? `
+    <div class="concrete-actions">
+      <h3>Concrete Next Steps</h3>
+      <ul class="action-list">
+        ${stepsTxt.slice(0, 12).map(step => `<li>${step}</li>`).join('')}
+      </ul>
+    </div>
+    ` : ''}
+  </section>
 
-  const outcomes = gaps.map(g=>`${g.name}: ${PILLAR_OUTCOMES[g.name] || "Improved flow, quality, and commercial impact."}`).join("; ");
-  const outcomesPara = NanoLLM.sent(`Expected outcomes include ${outcomes}`);
+  <!-- Expected Outcomes -->
+  <section class="report-section">
+    <h2>📈 Expected Outcomes</h2>
+    ${gaps.length ? `
+    <div class="outcomes-grid">
+      ${gaps.map(g => `
+        <div class="outcome-card">
+          <h4>${g.name}</h4>
+          <p>${PILLAR_OUTCOMES[g.name] || "Improved flow, quality, and commercial impact."}</p>
+        </div>
+      `).join('')}
+    </div>
+    ` : '<p>Improved flow, quality, and commercial impact across all areas.</p>'}
+    
+    <div class="overall-impact">
+      <h4>Overall Impact</h4>
+      <p>With these actions, we anticipate measurable improvements in deployment frequency, lead time, and MTTR alongside higher adoption and reduced operational risk.</p>
+    </div>
+  </section>
 
-  const decisions = NanoLLM.sent("Decisions requested: confirm funding and roles, approve sequencing and scope trade‑offs, and agree policy changes on release, guardrails, and governance cadence");
+  <!-- Decisions Required -->
+  <section class="report-section">
+    <h2>⚡ Decisions Required</h2>
+    <ul class="decisions-list">
+      <li><strong>Funding & Roles:</strong> Confirm budget allocation and team assignments</li>
+      <li><strong>Sequencing & Trade-offs:</strong> Approve prioritization and scope decisions</li>
+      <li><strong>Policy Changes:</strong> Agree on release, guardrails, and governance cadence updates</li>
+    </ul>
+  </section>
 
-  const closing = NanoLLM.sent("With these actions, we anticipate measurable improvements in deployment frequency, lead time, and MTTR alongside higher adoption and reduced operational risk");
-
-  const text = [intro, strengthsPara, gapsPara, whyPara, planLead, planLifts, planSteps, outcomesPara, decisions, closing].filter(Boolean).join("\\n\\n");
-  return text;
+  <!-- Report Footer -->
+  <div class="report-footer">
+    <hr>
+    <p><em>This preliminary report is based on ${scope}. For detailed analysis and implementation guidance, consult the full assessment results and supporting documentation.</em></p>
+  </div>
+</div>
+  `.trim();
 }
 function openTabbedModal(title, tabs){
   modalTitle.textContent = title;
@@ -1002,11 +1125,11 @@ function openTabbedModal(title, tabs){
         console.log(">>> Generate Report CLICKED! <<<");
         try {
           const res = compute(true);
-          const txt = llmStyleReport(res);
+          const reportHTML = llmStyleReport(res);
           const el = modal.querySelector("#fullText");
-          console.log("Report generated, length:", txt.length);
+          console.log("Report generated, length:", reportHTML.length);
           if(el) { 
-            el.textContent = txt; 
+            el.innerHTML = reportHTML; 
             console.log("Report content set to #fullText");
           }
         } catch (err) {
@@ -1022,9 +1145,11 @@ function openTabbedModal(title, tabs){
         console.log(">>> Copy Report CLICKED! <<<");
         try {
           const el = modal.querySelector("#fullText");
-          if (el && el.textContent) {
+          if (el && el.innerHTML) {
+            // Convert HTML to markdown-like text for copying
+            const textContent = el.innerText || el.textContent || "";
             const textarea = document.createElement("textarea");
-            textarea.value = el.textContent;
+            textarea.value = textContent;
             document.body.appendChild(textarea);
             textarea.select();
             document.execCommand("copy");
@@ -1048,7 +1173,8 @@ function openTabbedModal(title, tabs){
         console.log(">>> Download CLICKED! <<<");
         try {
           const el = modal.querySelector("#fullText");
-          const content = el ? el.textContent : "No report generated";
+          // Convert HTML to markdown-like text for download
+          const content = el ? (el.innerText || el.textContent || "No report generated") : "No report generated";
           const blob = new Blob([content], {type: "text/markdown"});
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
