@@ -1209,39 +1209,33 @@ function analystHTML(results){
 
 function generateRadarChart(results) {
   console.log('Generating radar chart with results:', results);
+  console.log('Available pillars in byPillar:', Object.keys(results.byPillar || {}));
   
-  // Get the 12 pillars and their scores (using actual pillar names from MODEL)
-  const pillars = [
-    'Strategy & Executive Alignment',
-    'Customer & Outcome Alignment', 
-    'Product Strategy, Discovery & GTM',
-    'Architecture & Extensibility',
-    'Engineering & Platform Automation',
-    'Delivery Flow & Velocity',
-    'Reliability, Security & Compliance',
-    'Documentation, Decisioning & Traceability',
-    'Organisation, Leadership & Autonomy',
-    'Outcome Economics & Finance',
-    'Data & AI Lifecycle',
-    'Experience Quality & Market Readiness'
-  ];
+  // Get the actual pillar names from the results.byPillar object
+  const pillarNames = Object.keys(results.byPillar || {});
   
-  // Map pillar names to their scores, defaulting to 0 if not found
-  const pillarScores = pillars.map(pillar => {
+  // Map pillar names to their scores
+  const pillarScores = pillarNames.map(pillar => {
     const score = results.byPillar[pillar] || 0;
     console.log(`Pillar: ${pillar}, Score: ${score}`);
     return { name: pillar, score: score };
   });
   
-  console.log('Pillar scores:', pillarScores);
+  // Ensure we have exactly 12 pillars for the radar chart
+  while (pillarScores.length < 12) {
+    pillarScores.push({ name: `Pillar ${pillarScores.length + 1}`, score: 0 });
+  }
+  
+  console.log('Final pillar scores:', pillarScores);
   
   // SVG dimensions
   const size = 400;
   const center = size / 2;
   const maxRadius = 160;
   
-  // Calculate points for radar chart (12 sides)
-  const angleStep = (2 * Math.PI) / 12;
+  // Calculate points for radar chart
+  const numPillars = pillarScores.length;
+  const angleStep = (2 * Math.PI) / numPillars;
   
   // Generate radar grid circles
   const circles = [1, 2, 3, 4, 5].map(level => 
@@ -1249,8 +1243,8 @@ function generateRadarChart(results) {
      fill="none" stroke="#E2E8F0" stroke-width="1" />`
   ).join('');
   
-  // Generate radar grid lines
-  const gridLines = pillars.map((pillar, i) => {
+  // Generate radar grid lines  
+  const gridLines = pillarScores.map((pillar, i) => {
     const angle = i * angleStep - Math.PI / 2; // Start from top
     const x = center + Math.cos(angle) * maxRadius;
     const y = center + Math.sin(angle) * maxRadius;
@@ -1259,7 +1253,7 @@ function generateRadarChart(results) {
   }).join('');
   
   // Generate labels
-  const labels = pillars.map((pillar, i) => {
+  const labels = pillarScores.map((pillar, i) => {
     const angle = i * angleStep - Math.PI / 2;
     const labelRadius = maxRadius + 20;
     const x = center + Math.cos(angle) * labelRadius;
@@ -1270,9 +1264,12 @@ function generateRadarChart(results) {
     if (x < center - 10) anchor = 'end';
     else if (x > center + 10) anchor = 'start';
     
+    // Shorten text for better display
+    const shortName = pillar.name.length > 25 ? pillar.name.substring(0, 22) + "..." : pillar.name;
+    
     return `<text x="${x}" y="${y}" text-anchor="${anchor}" 
-            font-size="11" font-weight="600" fill="#475569" 
-            dominant-baseline="middle">${pillar}</text>`;
+            font-size="10" font-weight="600" fill="#475569" 
+            dominant-baseline="middle">${shortName}</text>`;
   }).join('');
   
   // Generate score points and polygon
@@ -1291,12 +1288,12 @@ function generateRadarChart(results) {
   const scoreDots = scorePoints.map((point, i) => 
     `<circle cx="${point.x}" cy="${point.y}" r="4" 
      fill="url(#radarGradient)" stroke="white" stroke-width="2" />
-     <title>${pillars[i]}: ${point.score.toFixed(1)}</title>`
+     <title>${pillarScores[i].name}: ${point.score.toFixed(1)}</title>`
   ).join('');
   
   const radarSvg = `
     <div class="radar-chart-container" style="text-align: center; margin: 20px 0;">
-      <h3>12-Pillar Maturity Radar</h3>
+      <h3>${numPillars}-Pillar Maturity Radar</h3>
       <svg viewBox="0 0 ${size} ${size}" style="max-width: 500px; height: auto;">
         <defs>
           <linearGradient id="radarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
