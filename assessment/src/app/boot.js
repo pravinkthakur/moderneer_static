@@ -1210,12 +1210,20 @@ function analystHTML(results){
 function generateRadarChart(results) {
   console.log('Generating radar chart with results:', results);
   
-  // Get the 12 pillars and their scores
+  // Get the 12 pillars and their scores (using actual pillar names from MODEL)
   const pillars = [
-    'Strategy & Governance', 'Customer Insight', 'Product Management', 
-    'Architecture', 'Delivery', 'Reliability', 'Security', 
-    'Data & Insights', 'Documentation', 'Org & Ways of Working', 
-    'Financials', 'UX & Accessibility'
+    'Strategy & Executive Alignment',
+    'Customer & Outcome Alignment', 
+    'Product Strategy, Discovery & GTM',
+    'Architecture & Extensibility',
+    'Engineering & Platform Automation',
+    'Delivery Flow & Velocity',
+    'Reliability, Security & Compliance',
+    'Documentation, Decisioning & Traceability',
+    'Organisation, Leadership & Autonomy',
+    'Outcome Economics & Finance',
+    'Data & AI Lifecycle',
+    'Experience Quality & Market Readiness'
   ];
   
   // Map pillar names to their scores, defaulting to 0 if not found
