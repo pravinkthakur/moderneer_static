@@ -968,35 +968,46 @@ function openTabbedModal(title, tabs){
     ["#btnCopyNarrative","#btnCopyExec","#btnCopyFull"].forEach(sel=>{
       const b = modalContent.querySelector(sel);
       console.log(`Found button ${sel}:`, b);
-      if(b){ b.onclick = ()=>{
-        console.log(`${sel} clicked!`);
-        const targetId = b.getAttribute("data-target");
-        const target = modalContent.querySelector("#"+targetId);
-        const t=document.createElement("textarea"); t.value = target ? target.innerText : "";
-        document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove();
-        b.textContent='Copied'; setTimeout(()=>b.textContent=b.textContent.replace('Copied','Copy'),1200);
-      }; }
+      if(b){ 
+        // Remove any existing listeners
+        b.replaceWith(b.cloneNode(true));
+        const newBtn = modalContent.querySelector(sel);
+        newBtn.addEventListener("click", ()=>{
+          console.log(`${sel} clicked!`);
+          const targetId = newBtn.getAttribute("data-target");
+          const target = modalContent.querySelector("#"+targetId);
+          const t=document.createElement("textarea"); t.value = target ? target.innerText : "";
+          document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove();
+          newBtn.textContent='Copied'; setTimeout(()=>newBtn.textContent=newBtn.textContent.replace('Copied','Copy'),1200);
+        });
+      }
     });
     
     // Generate full report
     const genBtn = modalContent.querySelector("#btnGenFull");
     console.log("Found btnGenFull:", genBtn);
     if(genBtn){
-      genBtn.onclick = ()=>{
+      // Remove any existing listeners
+      genBtn.replaceWith(genBtn.cloneNode(true));
+      const newGenBtn = modalContent.querySelector("#btnGenFull");
+      newGenBtn.addEventListener("click", ()=>{
         console.log("Generate full report clicked!");
         const res = compute(true);
         const txt = llmStyleReport(res);
         const el = modalContent.querySelector("#fullText");
         console.log("Generated report:", txt.substring(0, 100) + "...");
         if(el){ el.textContent = txt; }
-      };
+      });
     }
     
     // Download .md
     const dlBtn = modalContent.querySelector("#btnDownloadFull");
     console.log("Found btnDownloadFull:", dlBtn);
     if(dlBtn){
-      dlBtn.onclick = ()=>{
+      // Remove any existing listeners
+      dlBtn.replaceWith(dlBtn.cloneNode(true));
+      const newDlBtn = modalContent.querySelector("#btnDownloadFull");
+      newDlBtn.addEventListener("click", ()=>{
         console.log("Download .md clicked!");
         const el = modalContent.querySelector("#fullText");
         const blob = new Blob([el?el.textContent:""], {type:"text/markdown"});
@@ -1004,12 +1015,13 @@ function openTabbedModal(title, tabs){
         const a = document.createElement("a");
         a.href = url; a.download = "executive_full_report.md"; a.click();
         setTimeout(()=>URL.revokeObjectURL(url), 2000);
-      };
+      });
     }
   }
   
-  // Call setup immediately
+  // Call setup immediately and with a small delay to ensure DOM is ready
   setupButtonHandlers();
+  setTimeout(setupButtonHandlers, 100);
   
   modalContent.querySelector(".tablist").addEventListener("click", (e)=>{
     const btn = e.target.closest(".tab"); if(!btn) return;
