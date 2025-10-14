@@ -25,10 +25,10 @@ class AssessmentIncludeSystem {
   }
 
   async init() {
-    // Load header and footer in parallel (assessment-specific paths)
+    // Load header and footer in parallel (use main site partials)
     const [headerLoaded, footerLoaded] = await Promise.all([
-      this.loadPartial('partials/header.html', 'header-include'),
-      this.loadPartial('partials/footer.html', 'footer-include')
+      this.loadPartial('../partials/header.html', 'header-include'),
+      this.loadPartial('../partials/footer.html', 'footer-include')
     ]);
 
     this.headerLoaded = headerLoaded;
