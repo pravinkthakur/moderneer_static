@@ -960,63 +960,104 @@ function openTabbedModal(title, tabs){
   modalContent.innerHTML = `<div class="tabs"><div class="tablist" role="tablist">${tabBtns}</div>${tabPanes}</div>`;
   overlay.style.display = "flex";
   
-  // Setup button handlers immediately after modal content is created
+  // Simple direct button binding with detailed logging
   function setupButtonHandlers(){
-    console.log("Setting up button handlers...");
+    console.log("=== Setting up button handlers ===");
+    console.log("modalContent:", modalContent);
     
-    // Copy buttons
-    ["#btnCopyNarrative","#btnCopyExec","#btnCopyFull"].forEach(sel=>{
-      const b = modalContent.querySelector(sel);
-      console.log(`Found button ${sel}:`, b);
-      if(b){ 
-        // Remove any existing listeners
-        b.replaceWith(b.cloneNode(true));
-        const newBtn = modalContent.querySelector(sel);
-        newBtn.addEventListener("click", ()=>{
-          console.log(`${sel} clicked!`);
-          const targetId = newBtn.getAttribute("data-target");
-          const target = modalContent.querySelector("#"+targetId);
-          const t=document.createElement("textarea"); t.value = target ? target.innerText : "";
-          document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove();
-          newBtn.textContent='Copied'; setTimeout(()=>newBtn.textContent=newBtn.textContent.replace('Copied','Copy'),1200);
-        });
-      }
-    });
+    // Check if Full Report tab is active
+    const fullTab = modalContent.querySelector("#tab-full");
+    console.log("Full tab found:", fullTab);
     
-    // Generate full report
-    const genBtn = modalContent.querySelector("#btnGenFull");
-    console.log("Found btnGenFull:", genBtn);
-    if(genBtn){
-      // Remove any existing listeners
-      genBtn.replaceWith(genBtn.cloneNode(true));
-      const newGenBtn = modalContent.querySelector("#btnGenFull");
-      newGenBtn.addEventListener("click", ()=>{
-        console.log("Generate full report clicked!");
-        const res = compute(true);
-        const txt = llmStyleReport(res);
-        const el = modalContent.querySelector("#fullText");
-        console.log("Generated report:", txt.substring(0, 100) + "...");
-        if(el){ el.textContent = txt; }
-      });
+    // Try to find buttons immediately
+    const genBtn = document.getElementById("btnGenFull");
+    const copyBtn = document.getElementById("btnCopyFull");  
+    const dlBtn = document.getElementById("btnDownloadFull");
+    
+    console.log("Buttons found directly by ID:");
+    console.log("- btnGenFull:", genBtn);
+    console.log("- btnCopyFull:", copyBtn);
+    console.log("- btnDownloadFull:", dlBtn);
+    
+    // Try to find buttons within modalContent
+    const genBtnModal = modalContent ? modalContent.querySelector("#btnGenFull") : null;
+    const copyBtnModal = modalContent ? modalContent.querySelector("#btnCopyFull") : null;
+    const dlBtnModal = modalContent ? modalContent.querySelector("#btnDownloadFull") : null;
+    
+    console.log("Buttons found in modalContent:");
+    console.log("- btnGenFull:", genBtnModal);
+    console.log("- btnCopyFull:", copyBtnModal); 
+    console.log("- btnDownloadFull:", dlBtnModal);
+    
+    // Set up Generate Report button
+    if (genBtnModal) {
+      console.log("Setting up Generate Report button handler");
+      genBtnModal.onclick = function(e) {
+        console.log(">>> Generate Report CLICKED! <<<");
+        try {
+          const res = compute(true);
+          const txt = llmStyleReport(res);
+          const el = modalContent.querySelector("#fullText");
+          console.log("Report generated, length:", txt.length);
+          if(el) { 
+            el.textContent = txt; 
+            console.log("Report content set to #fullText");
+          }
+        } catch (err) {
+          console.error("Generate report error:", err);
+        }
+      };
     }
     
-    // Download .md
-    const dlBtn = modalContent.querySelector("#btnDownloadFull");
-    console.log("Found btnDownloadFull:", dlBtn);
-    if(dlBtn){
-      // Remove any existing listeners
-      dlBtn.replaceWith(dlBtn.cloneNode(true));
-      const newDlBtn = modalContent.querySelector("#btnDownloadFull");
-      newDlBtn.addEventListener("click", ()=>{
-        console.log("Download .md clicked!");
-        const el = modalContent.querySelector("#fullText");
-        const blob = new Blob([el?el.textContent:""], {type:"text/markdown"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url; a.download = "executive_full_report.md"; a.click();
-        setTimeout(()=>URL.revokeObjectURL(url), 2000);
-      });
+    // Set up Copy button  
+    if (copyBtnModal) {
+      console.log("Setting up Copy Report button handler");
+      copyBtnModal.onclick = function(e) {
+        console.log(">>> Copy Report CLICKED! <<<");
+        try {
+          const el = modalContent.querySelector("#fullText");
+          if (el && el.textContent) {
+            const textarea = document.createElement("textarea");
+            textarea.value = el.textContent;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textarea);
+            copyBtnModal.textContent = "Copied!";
+            setTimeout(() => copyBtnModal.textContent = "Copy full report", 1200);
+            console.log("Text copied to clipboard");
+          } else {
+            console.log("No text to copy - generate report first");
+          }
+        } catch (err) {
+          console.error("Copy error:", err);
+        }
+      };
     }
+    
+    // Set up Download button
+    if (dlBtnModal) {
+      console.log("Setting up Download button handler"); 
+      dlBtnModal.onclick = function(e) {
+        console.log(">>> Download CLICKED! <<<");
+        try {
+          const el = modalContent.querySelector("#fullText");
+          const content = el ? el.textContent : "No report generated";
+          const blob = new Blob([content], {type: "text/markdown"});
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "moderneer-report.md";
+          a.click();
+          URL.revokeObjectURL(url);
+          console.log("Download initiated");
+        } catch (err) {
+          console.error("Download error:", err);
+        }
+      };
+    }
+    
+    console.log("=== Button setup complete ===");
   }
   
   // Call setup immediately and with a small delay to ensure DOM is ready
