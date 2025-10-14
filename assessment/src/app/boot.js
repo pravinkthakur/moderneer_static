@@ -1129,8 +1129,19 @@ function openTabbedModal(title, tabs){
           const el = modal.querySelector("#fullText");
           console.log("Report generated, length:", reportHTML.length);
           if(el) { 
-            el.innerHTML = reportHTML; 
-            console.log("Report content set to #fullText");
+            // Clear any existing content and styling issues
+            el.innerHTML = "";
+            el.style.whiteSpace = "normal";
+            el.style.fontFamily = "inherit";
+            
+            // Create a new div to hold the structured report
+            const reportDiv = document.createElement("div");
+            reportDiv.className = "html-report-container";
+            reportDiv.innerHTML = reportHTML;
+            
+            // Append to the container
+            el.appendChild(reportDiv);
+            console.log("Report content set to #fullText with proper HTML rendering");
           }
         } catch (err) {
           console.error("Generate report error:", err);

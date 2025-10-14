@@ -308,7 +308,9 @@ code, pre {
   .execsum .copyRow{display:flex;justify-content:flex-end}
   .fullreport{display:grid;gap:12px}
   .fullreport .toolbar{display:flex;gap:8px;justify-content:flex-end}
-  .fullreport .report{white-space:normal;line-height:1.45;overflow-y:auto;max-height:70vh}
+  .fullreport .report{white-space:normal !important;line-height:1.45;overflow-y:auto;max-height:70vh}
+  .fullreport .report *{white-space:normal !important}
+  .html-report-container{white-space:normal !important;font-family:inherit !important}
 
 
 /* Analyst Lens */
