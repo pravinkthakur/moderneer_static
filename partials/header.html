@@ -1,63 +1,23 @@
 <header class="site" role="banner">
   <div class="container nav" aria-label="Primary">
-    <a class="brand" id="brand-link">
-      <img id="logo-img" alt="Moderneer logo" />
+    <a class="brand" href="/index.html">
+      <img src="/assets/logo.jpg" alt="Moderneer logo" />
       <span>Moderneer</span>
     </a>
     <nav role="navigation" aria-label="Main navigation">
       <ul>
-        <li><a id="nav-home">Home</a></li>
-        <li><a id="nav-about">About</a></li>
-        <li><a id="nav-maturity">Maturity Model</a></li>
-        <li><a id="nav-assessment">Assessment</a></li>
-        <li><a id="nav-ai">AI Reverse Engineering</a></li>
-        <li><a id="nav-shift">Shift‑Left QE</a></li>
-        <li><a id="nav-bootcamps">Bootcamps</a></li>
-        <li><a id="nav-advisory">Advisory</a></li>
-        <li><a id="nav-operating">Operating Models</a></li>
-        <li><a id="nav-trends">Future Trends</a></li>
-        <li><a id="nav-contact">Contact</a></li>
+        <li><a href="/index.html">Home</a></li>
+        <li><a href="/about.html">About</a></li>
+        <li><a href="/maturity.html">Maturity Model</a></li>
+        <li><a href="/assessment/">Assessment</a></li>
+        <li><a href="/ai-reverse-engineering.html">AI Reverse Engineering</a></li>
+        <li><a href="/shift-left.html">Shift‑Left QE</a></li>
+        <li><a href="/bootcamps.html">Bootcamps</a></li>
+        <li><a href="/advisory.html">Advisory</a></li>
+        <li><a href="/operating-models.html">Operating Models</a></li>
+        <li><a href="/future-trends.html">Future Trends</a></li>
+        <li><a href="/contact.html">Contact</a></li>
       </ul>
     </nav>
   </div>
 </header>
-
-<script>
-(function() {
-  // Detect if we're in assessment subdirectory
-  const isInAssessment = window.location.pathname.includes('/assessment/');
-  const pathPrefix = isInAssessment ? '../' : '';
-  
-  // Set brand link and logo
-  document.getElementById('brand-link').href = pathPrefix + 'index.html';
-  document.getElementById('logo-img').src = pathPrefix + 'assets/logo.jpg';
-  
-  // Set navigation links
-  const navLinks = {
-    'nav-home': 'index.html',
-    'nav-about': 'about.html', 
-    'nav-maturity': 'maturity.html',
-    'nav-assessment': isInAssessment ? './' : 'assessment/',
-    'nav-ai': 'ai-reverse-engineering.html',
-    'nav-shift': 'shift-left.html',
-    'nav-bootcamps': 'bootcamps.html',
-    'nav-advisory': 'advisory.html',
-    'nav-operating': 'operating-models.html',
-    'nav-trends': 'future-trends.html',
-    'nav-contact': 'contact.html'
-  };
-  
-  for (const [id, path] of Object.entries(navLinks)) {
-    const element = document.getElementById(id);
-    if (element) {
-      element.href = (id === 'nav-assessment' && isInAssessment) ? './' : pathPrefix + path;
-      
-      // Set active page
-      if ((id === 'nav-assessment' && isInAssessment) ||
-          (window.location.pathname.includes(path) && !isInAssessment)) {
-        element.setAttribute('aria-current', 'page');
-      }
-    }
-  }
-})();
-</script>
