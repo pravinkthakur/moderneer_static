@@ -63,10 +63,22 @@
   <div class="container">
     <div class="footer-links">
       <a href="contact.html">Contact</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
     </div>
-    <div>© 2025 Moderneer. Transforming ideas into outcomes.</div>
+    <div>© <span id="yr">2025</span> Moderneer. Transforming ideas into outcomes.</div>
   </div>
 </footer>
+
+<script>
+// Set current year
+document.addEventListener('DOMContentLoaded', function() {
+  const yearEl = document.getElementById('yr');
+  if (yearEl) {
+    yearEl.textContent = new Date().getFullYear().toString();
+  }
+});
+</script>
 
 </body>
 </html>
