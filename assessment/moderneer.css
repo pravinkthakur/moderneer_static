@@ -328,3 +328,104 @@ code, pre {
 .spider{display:grid;grid-template-columns:160px 1fr;gap:6px;align-items:center}
 .spider .track{height:10px;background:var(--color-neutral-200);border-radius:8px;overflow:hidden}
 .spider .track .fill{height:100%}
+
+/* Main Site Header Styles (scoped) */
+header.site {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: rgba(255,255,255,.85);
+  backdrop-filter: saturate(180%) blur(10px);
+  border-bottom: 1px solid #E2E8F0;
+}
+
+header.site .container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 0 16px;
+}
+
+header.site .nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+}
+
+header.site .brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+header.site .brand img {
+  height: 38px;
+  width: auto;
+  border-radius: 10px;
+}
+
+header.site .brand span {
+  font-weight: 800;
+  letter-spacing: .2px;
+}
+
+header.site nav ul {
+  display: flex;
+  gap: 18px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+header.site nav a {
+  color: #0F172A;
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+header.site nav a[aria-current="page"],
+header.site nav a:hover {
+  background: #EEF2FF;
+}
+
+/* Assessment Header Section */
+.assessment-header {
+  background: var(--color-neutral-50);
+  border-bottom: 1px solid var(--color-neutral-200);
+  padding: var(--space-8) 0;
+}
+
+.assessment-header .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
+.assessment-header h1 {
+  margin: var(--space-4) 0 var(--space-2) 0;
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--color-secondary);
+}
+
+.assessment-header .lead {
+  margin: 0 0 var(--space-6) 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-neutral-600);
+}
+
+.assessment-header .badge {
+  display: inline-block;
+  background: var(--color-primary);
+  color: white;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+

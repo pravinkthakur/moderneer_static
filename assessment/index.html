@@ -1,29 +1,51 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://api.openai.com">
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Moderneer • Outcome Engineering Maturity</title>
-<meta name="theme-color" content="#3B82F6" />
-<link rel="stylesheet" href="moderneer.css" />
-
-<!-- Minimal site-specific styles using your Moderneer tokens latest test  -->
-
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Assessment — Moderneer</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="moderneer.css" />
+  <meta name="description" content="Outcome Engineering Maturity Assessment | Moderneer">
+  <meta name="theme-color" content="#3B82F6" />
 </head>
-<body class="moderneer">
-<header>
-  <div class="wrap brandbar">
-    <div class="brand-left">
-      <div class="logo" aria-hidden="true"></div>
-      <div class="wordmark">
-        <h1>Moderneer • Outcome Engineering Maturity</h1>
-        <div class="sub">Core 24 • Full 12 Pillarddddddds • Sequenced tiers • Auto-scoring with gates/caps • Universal ⓘ</div>
-      </div>
-    </div>
-    <button id="btnHelp" class="btn btn-secondary" aria-label="Open help and legend">Help / Legend</button>
+<body>
+
+<header class="site" role="banner">
+  <div class="container nav" aria-label="Primary">
+    <a class="brand" href="../index.html">
+      <img src="../assets/logo.jpg" alt="Moderneer logo" />
+      <span>Moderneer</span>
+    </a>
+    <nav role="navigation" aria-label="Main navigation">
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../about.html">About</a></li>
+        <li><a href="../maturity.html">Maturity Model</a></li>
+        <li><a href="../ai-reverse-engineering.html">AI Reverse Engineering</a></li>
+        <li><a href="../shift-left.html">Shift‑Left QE</a></li>
+        <li><a href="../bootcamps.html">Bootcamps</a></li>
+        <li><a href="../advisory.html">Advisory</a></li>
+        <li><a href="../operating-models.html">Operating Models</a></li>
+        <li><a href="../future-trends.html">Future Trends</a></li>
+        <li><a href="../contact.html">Contact</a></li>
+      </ul>
+    </nav>
   </div>
 </header>
+
+<!-- Assessment Header Section -->
+<section class="assessment-header">
+  <div class="container">
+    <div class="assessment-info">
+      <span class="badge">Outcome Engineering</span>
+      <h1>Moderneer • Outcome Engineering Maturity</h1>
+      <p class="lead">Core 24 • Full 12 Pillars • Sequenced tiers • Auto-scoring with gates/caps • Universal ⓘ</p>
+      <button id="btnHelp" class="button secondary" aria-label="Open help and legend">Help / Legend</button>
+    </div>
+  </div>
+</section>
 
 <main class="grid grid-cols-3" data-testid="main">
   <section class="card">
