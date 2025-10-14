@@ -1,63 +1,86 @@
-// Common header/footer includes
-document.addEventListener('DOMContentLoaded', function() {
-  // Set current year in footer
-  const yearEl = document.getElementById('yr');
-  if (yearEl) {
-    yearEl.textContent = new Date().getFullYear().toString();
+// Common includes system for header and footer
+class IncludeSystem {
+  constructor() {
+    this.headerLoaded = false;
+    this.footerLoaded = false;
   }
 
-  // Set active navigation state
-  setActiveNavigation();
+  async loadPartial(file, containerId) {
+    try {
+      const response = await fetch(file);
+      if (!response.ok) {
+        throw new Error(`Failed to load ${file}`);
+      }
+      const html = await response.text();
+      const container = document.getElementById(containerId);
+      if (container) {
+        container.innerHTML = html;
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error(`Error loading ${file}:`, error);
+      return false;
+    }
+  }
+
+  async init() {
+    // Load header and footer in parallel
+    const [headerLoaded, footerLoaded] = await Promise.all([
+      this.loadPartial('partials/header.html', 'header-include'),
+      this.loadPartial('partials/footer.html', 'footer-include')
+    ]);
+
+    this.headerLoaded = headerLoaded;
+    this.footerLoaded = footerLoaded;
+
+    if (headerLoaded) {
+      this.setActiveNavigation();
+      this.setCurrentYear();
+    }
+
+    return headerLoaded && footerLoaded;
+  }
+
+  setActiveNavigation() {
+    const currentPath = window.location.pathname;
+    const currentPage = currentPath.split('/').pop() || 'index.html';
+    
+    // Wait a tick for the DOM to be updated
+    setTimeout(() => {
+      const navLinks = document.querySelectorAll('nav a');
+      navLinks.forEach(link => {
+        link.removeAttribute('aria-current');
+        const linkHref = link.getAttribute('href');
+        
+        if ((currentPage === 'index.html' && linkHref === 'index.html') ||
+            (currentPage !== 'index.html' && linkHref === currentPage) ||
+            (currentPath.includes('assessment') && linkHref.includes('assessment'))) {
+          link.setAttribute('aria-current', 'page');
+        }
+      });
+    }, 0);
+  }
+
+  setCurrentYear() {
+    setTimeout(() => {
+      const yearEl = document.getElementById('yr');
+      if (yearEl) {
+        yearEl.textContent = new Date().getFullYear().toString();
+      }
+    }, 0);
+  }
+}
+
+// Initialize the include system when DOM is loaded
+document.addEventListener('DOMContentLoaded', async function() {
+  const includeSystem = new IncludeSystem();
+  const success = await includeSystem.init();
+  
+  if (!success) {
+    console.warn('Failed to load header/footer includes');
+  }
 });
 
-function setActiveNavigation() {
-  const currentPath = window.location.pathname;
-  const navLinks = document.querySelectorAll('nav a');
-  
-  navLinks.forEach(link => {
-    const linkPath = new URL(link.href).pathname;
-    
-    // Remove any existing aria-current
-    link.removeAttribute('aria-current');
-    
-    // Check if this is the current page
-    if (currentPath === linkPath || 
-        (currentPath === '/' && linkPath.includes('index.html')) ||
-        (currentPath.includes('assessment') && linkPath.includes('assessment')) ||
-        (currentPath.endsWith('.html') && linkPath.endsWith(currentPath.split('/').pop()))) {
-      link.setAttribute('aria-current', 'page');
-    }
-  });
-}
-
-// Function to load header and footer via JavaScript
-async function loadPartials() {
-  try {
-    // Load header
-    const headerResponse = await fetch('partials/header.html');
-    const headerHtml = await headerResponse.text();
-    const headerPlaceholder = document.getElementById('header-placeholder');
-    if (headerPlaceholder) {
-      headerPlaceholder.innerHTML = headerHtml;
-    }
-
-    // Load footer  
-    const footerResponse = await fetch('partials/footer.html');
-    const footerHtml = await footerResponse.text();
-    const footerPlaceholder = document.getElementById('footer-placeholder');
-    if (footerPlaceholder) {
-      footerPlaceholder.innerHTML = footerHtml;
-    }
-
-    // Set active navigation after loading
-    setActiveNavigation();
-    
-  } catch (error) {
-    console.error('Error loading partials:', error);
-  }
-}
-
-// Auto-load partials if placeholders exist
-if (document.getElementById('header-placeholder') || document.getElementById('footer-placeholder')) {
-  loadPartials();
-}
+// Export for potential use in other scripts
+window.IncludeSystem = IncludeSystem;
