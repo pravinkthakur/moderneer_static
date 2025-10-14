@@ -1,0 +1,13 @@
+{
+  "name": "moderneer-static-site",
+  "version": "1.0.0",
+  "description": "Moderneer static website with unified header/footer system",
+  "scripts": {
+    "standardize": "node standardize-pages.js",
+    "serve": "npx http-server -p 8080",
+    "build": "npm run standardize"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
