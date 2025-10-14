@@ -962,10 +962,14 @@ function openTabbedModal(title, tabs){
   
   // Setup button handlers immediately after modal content is created
   function setupButtonHandlers(){
+    console.log("Setting up button handlers...");
+    
     // Copy buttons
     ["#btnCopyNarrative","#btnCopyExec","#btnCopyFull"].forEach(sel=>{
       const b = modalContent.querySelector(sel);
+      console.log(`Found button ${sel}:`, b);
       if(b){ b.onclick = ()=>{
+        console.log(`${sel} clicked!`);
         const targetId = b.getAttribute("data-target");
         const target = modalContent.querySelector("#"+targetId);
         const t=document.createElement("textarea"); t.value = target ? target.innerText : "";
@@ -973,20 +977,27 @@ function openTabbedModal(title, tabs){
         b.textContent='Copied'; setTimeout(()=>b.textContent=b.textContent.replace('Copied','Copy'),1200);
       }; }
     });
+    
     // Generate full report
     const genBtn = modalContent.querySelector("#btnGenFull");
+    console.log("Found btnGenFull:", genBtn);
     if(genBtn){
       genBtn.onclick = ()=>{
+        console.log("Generate full report clicked!");
         const res = compute(true);
         const txt = llmStyleReport(res);
         const el = modalContent.querySelector("#fullText");
+        console.log("Generated report:", txt.substring(0, 100) + "...");
         if(el){ el.textContent = txt; }
       };
     }
+    
     // Download .md
     const dlBtn = modalContent.querySelector("#btnDownloadFull");
+    console.log("Found btnDownloadFull:", dlBtn);
     if(dlBtn){
       dlBtn.onclick = ()=>{
+        console.log("Download .md clicked!");
         const el = modalContent.querySelector("#fullText");
         const blob = new Blob([el?el.textContent:""], {type:"text/markdown"});
         const url = URL.createObjectURL(blob);
