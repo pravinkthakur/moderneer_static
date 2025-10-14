@@ -1206,6 +1206,135 @@ function analystHTML(results){
     </div>
   </div>`;
 }
+
+function generateRadarChart(results) {
+  // Get the 12 pillars and their scores
+  const pillars = [
+    'Strategy & Governance', 'Customer Insight', 'Product Management', 
+    'Architecture', 'Delivery', 'Reliability', 'Security', 
+    'Data & Insights', 'Documentation', 'Org & Ways of Working', 
+    'Financials', 'UX & Accessibility'
+  ];
+  
+  // Map pillar names to their scores, defaulting to 0 if not found
+  const pillarScores = pillars.map(pillar => {
+    const score = results.byPillar[pillar] || 0;
+    return { name: pillar, score: score };
+  });
+  
+  // SVG dimensions
+  const size = 400;
+  const center = size / 2;
+  const maxRadius = 160;
+  
+  // Calculate points for radar chart (12 sides)
+  const angleStep = (2 * Math.PI) / 12;
+  
+  // Generate radar grid circles
+  const circles = [1, 2, 3, 4, 5].map(level => 
+    `<circle cx="${center}" cy="${center}" r="${(level * maxRadius) / 5}" 
+     fill="none" stroke="#E2E8F0" stroke-width="1" />`
+  ).join('');
+  
+  // Generate radar grid lines
+  const gridLines = pillars.map((pillar, i) => {
+    const angle = i * angleStep - Math.PI / 2; // Start from top
+    const x = center + Math.cos(angle) * maxRadius;
+    const y = center + Math.sin(angle) * maxRadius;
+    return `<line x1="${center}" y1="${center}" x2="${x}" y2="${y}" 
+            stroke="#E2E8F0" stroke-width="1" />`;
+  }).join('');
+  
+  // Generate labels
+  const labels = pillars.map((pillar, i) => {
+    const angle = i * angleStep - Math.PI / 2;
+    const labelRadius = maxRadius + 20;
+    const x = center + Math.cos(angle) * labelRadius;
+    const y = center + Math.sin(angle) * labelRadius;
+    
+    // Adjust text anchor based on position
+    let anchor = 'middle';
+    if (x < center - 10) anchor = 'end';
+    else if (x > center + 10) anchor = 'start';
+    
+    return `<text x="${x}" y="${y}" text-anchor="${anchor}" 
+            font-size="11" font-weight="600" fill="#475569" 
+            dominant-baseline="middle">${pillar}</text>`;
+  }).join('');
+  
+  // Generate score points and polygon
+  const scorePoints = pillarScores.map((pillar, i) => {
+    const angle = i * angleStep - Math.PI / 2;
+    const radius = (pillar.score / 100) * maxRadius; // Assuming scores are 0-100
+    const x = center + Math.cos(angle) * radius;
+    const y = center + Math.sin(angle) * radius;
+    return { x, y, score: pillar.score };
+  });
+  
+  // Create polygon path
+  const polygonPath = scorePoints.map(point => `${point.x},${point.y}`).join(' ');
+  
+  // Generate score dots
+  const scoreDots = scorePoints.map((point, i) => 
+    `<circle cx="${point.x}" cy="${point.y}" r="4" 
+     fill="url(#radarGradient)" stroke="white" stroke-width="2" />
+     <title>${pillars[i]}: ${point.score.toFixed(1)}</title>`
+  ).join('');
+  
+  const radarSvg = `
+    <div class="radar-chart-container" style="text-align: center; margin: 20px 0;">
+      <h3>12-Pillar Maturity Radar</h3>
+      <svg viewBox="0 0 ${size} ${size}" style="max-width: 500px; height: auto;">
+        <defs>
+          <linearGradient id="radarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#2563EB" />
+            <stop offset="100%" stop-color="#06B6D4" />
+          </linearGradient>
+          <linearGradient id="radarFill" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#2563EB" stop-opacity="0.2" />
+            <stop offset="100%" stop-color="#06B6D4" stop-opacity="0.1" />
+          </linearGradient>
+        </defs>
+        
+        <!-- Grid circles -->
+        ${circles}
+        
+        <!-- Grid lines -->
+        ${gridLines}
+        
+        <!-- Score level labels -->
+        <text x="${center - maxRadius + 10}" y="${center - 5}" font-size="10" fill="#64748B">0</text>
+        <text x="${center - maxRadius * 0.6 + 10}" y="${center - 5}" font-size="10" fill="#64748B">25</text>
+        <text x="${center - maxRadius * 0.2 + 10}" y="${center - 5}" font-size="10" fill="#64748B">50</text>
+        <text x="${center + maxRadius * 0.2 + 10}" y="${center - 5}" font-size="10" fill="#64748B">75</text>
+        <text x="${center + maxRadius * 0.6 + 10}" y="${center - 5}" font-size="10" fill="#64748B">100</text>
+        
+        <!-- Score polygon -->
+        <polygon points="${polygonPath}" 
+         fill="url(#radarFill)" stroke="url(#radarGradient)" stroke-width="2" />
+        
+        <!-- Score dots -->
+        ${scoreDots}
+        
+        <!-- Labels -->
+        ${labels}
+      </svg>
+      
+      <!-- Legend/scores table -->
+      <div class="radar-legend" style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; font-size: 0.85rem;">
+        ${pillarScores.map(pillar => `
+          <div style="display: flex; justify-content: space-between; padding: 4px 8px; background: #F8FAFC; border-radius: 6px;">
+            <span>${pillar.name}</span>
+            <strong style="color: #2563EB;">${pillar.score.toFixed(1)}</strong>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  
+  return radarSvg;
+}
+
 function buildReportTabs(results){
   const overallHTML = `
     <div class="kpis">
@@ -1241,11 +1370,11 @@ function buildReportTabs(results){
     {id:"overall", title:"Overall", html: overallHTML},
     {id:"gates", title:"Critical Gates & Caps", html: gatesHTML},
     {id:"pillars", title:"Pillar Overview", html: pillarHTML},
+    {id:"radar", title:"Radar Chart", html: generateRadarChart(results)},
     {id:"next", title:"Further Details", html: detailsHTML},
     {id:"exec", title:"Executive Summary", html: generateExecutiveSummary(results)},
     {id:"narrative", title:"Narrative", html: generateNarrative(results)},
-    {id:"full", title:"Full Report", html: fullTab}
-  ,
+    {id:"full", title:"Full Report", html: fullTab},
     {id:"analyst", title:"Analyst Lens", html: analystHTML(results)}
   ];
 }
