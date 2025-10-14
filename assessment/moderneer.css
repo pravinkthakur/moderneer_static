@@ -329,6 +329,46 @@ code, pre {
 .spider .track{height:10px;background:var(--color-neutral-200);border-radius:8px;overflow:hidden}
 .spider .track .fill{height:100%}
 
+/* Assessment Layout Integration with Main Site */
+.assessment-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--s4);
+  margin-top: var(--s6);
+}
+
+.assessment-card {
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: var(--s5);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--line);
+}
+
+/* Override main site styles that might conflict */
+.assessment-grid .assessment-card {
+  max-width: none;
+  margin: 0;
+}
+
+/* Ensure proper spacing and typography */
+.assessment-card h2,
+.assessment-card h3 {
+  color: var(--color-secondary);
+  margin-top: 0;
+}
+
+/* Footer styling to match main site */
+footer {
+  margin-top: var(--s6);
+  padding: var(--s4) 0;
+  text-align: center;
+}
+
+footer small {
+  color: var(--muted);
+}
+
 /* Main Site Header Styles (scoped) */
 header.site {
   position: sticky;

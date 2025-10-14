@@ -6,6 +6,7 @@
   <title>Assessment — Moderneer</title>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/modern-2025.css">
   <link rel="stylesheet" href="moderneer.css" />
   <meta name="description" content="Outcome Engineering Maturity Assessment | Moderneer">
   <meta name="theme-color" content="#3B82F6" />
@@ -35,8 +36,9 @@
   </div>
 </header>
 
-<main class="grid grid-cols-3" data-testid="main">
-  <section class="card">
+<main class="container" role="main">
+  <div class="assessment-grid" data-testid="main">
+    <section class="assessment-card">
     <div class="toolbar">
       <div class="seg" role="tablist" aria-label="Module selector">
         <button id="btnCore" class="active" aria-selected="true" data-testid="mode-core">Core 24</button>
@@ -70,7 +72,7 @@
     <div id="formArea"></div>
   </section>
 
-  <aside class="card" style="display:none">
+    <aside class="assessment-card" style="display:none">
     <h2 class="h3">Results</h2>
     <div class="kpis">
       <div class="kpi"><div class="tiny">Overall (index 0–100)</div><strong id="overallIndex" data-testid="overall-index">—</strong></div>
@@ -88,7 +90,8 @@
       <h3 class="h3">Breakdown</h3>
       <div id="pillarBreakdown" style="display:grid;gap:10px"></div>
     </div>
-  </aside>
+    </aside>
+  </div>
 </main>
 
 <!-- Modal -->
@@ -99,8 +102,10 @@
   </div>
 </div>
 
-<footer class="wrap" style="margin-top:24px">
-  <small>© <span id="yr"></span> <strong>Moderneer</strong>. Outcome Engineering Maturity • v3.3</small>
+<footer role="contentinfo">
+  <div class="container">
+    <small>© <span id="yr"></span> <strong>Moderneer</strong>. Outcome Engineering Maturity • v3.3</small>
+  </div>
 </footer>
 <script src="src/app/inline_legacy.js"></script>
 
