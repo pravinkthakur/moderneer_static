@@ -963,10 +963,11 @@ function openTabbedModal(title, tabs){
   // Simple direct button binding with detailed logging
   function setupButtonHandlers(){
     console.log("=== Setting up button handlers ===");
-    console.log("modalContent:", modalContent);
+    const modal = document.getElementById("modalContent");
+    console.log("modalContent:", modal);
     
     // Check if Full Report tab is active
-    const fullTab = modalContent.querySelector("#tab-full");
+    const fullTab = modal.querySelector("#tab-full");
     console.log("Full tab found:", fullTab);
     
     // Try to find buttons immediately
@@ -980,9 +981,9 @@ function openTabbedModal(title, tabs){
     console.log("- btnDownloadFull:", dlBtn);
     
     // Try to find buttons within modalContent
-    const genBtnModal = modalContent ? modalContent.querySelector("#btnGenFull") : null;
-    const copyBtnModal = modalContent ? modalContent.querySelector("#btnCopyFull") : null;
-    const dlBtnModal = modalContent ? modalContent.querySelector("#btnDownloadFull") : null;
+    const genBtnModal = modal ? modal.querySelector("#btnGenFull") : null;
+    const copyBtnModal = modal ? modal.querySelector("#btnCopyFull") : null;
+    const dlBtnModal = modal ? modal.querySelector("#btnDownloadFull") : null;
     
     console.log("Buttons found in modalContent:");
     console.log("- btnGenFull:", genBtnModal);
@@ -997,7 +998,7 @@ function openTabbedModal(title, tabs){
         try {
           const res = compute(true);
           const txt = llmStyleReport(res);
-          const el = modalContent.querySelector("#fullText");
+          const el = modal.querySelector("#fullText");
           console.log("Report generated, length:", txt.length);
           if(el) { 
             el.textContent = txt; 
@@ -1015,7 +1016,7 @@ function openTabbedModal(title, tabs){
       copyBtnModal.onclick = function(e) {
         console.log(">>> Copy Report CLICKED! <<<");
         try {
-          const el = modalContent.querySelector("#fullText");
+          const el = modal.querySelector("#fullText");
           if (el && el.textContent) {
             const textarea = document.createElement("textarea");
             textarea.value = el.textContent;
@@ -1041,7 +1042,7 @@ function openTabbedModal(title, tabs){
       dlBtnModal.onclick = function(e) {
         console.log(">>> Download CLICKED! <<<");
         try {
-          const el = modalContent.querySelector("#fullText");
+          const el = modal.querySelector("#fullText");
           const content = el ? el.textContent : "No report generated";
           const blob = new Blob([content], {type: "text/markdown"});
           const url = URL.createObjectURL(blob);
@@ -1064,18 +1065,19 @@ function openTabbedModal(title, tabs){
   setupButtonHandlers();
   setTimeout(setupButtonHandlers, 100);
   
-  modalContent.querySelector(".tablist").addEventListener("click", (e)=>{
-    const btn = e.target.closest(".tab"); if(!btn) return;
-    const id = btn.dataset.tab;
-    modalContent.querySelectorAll(".tab").forEach(b=>{ b.classList.toggle("active", b===btn); b.setAttribute("aria-selected", b===btn ? "true" : "false"); });
-    modalContent.querySelectorAll(".tabpanel").forEach(p=> p.classList.remove("active"));
-    const pane = modalContent.querySelector("#tab-"+id); if(pane) pane.classList.add("active");
-    // Re-setup button handlers after tab switch to ensure they work
-    setupButtonHandlers();
-  });
-}
-
-/* ---------- Analyst Lens helpers ---------- */
+  const modal = document.getElementById("modalContent");
+  if (modal) {
+    modal.querySelector(".tablist").addEventListener("click", (e)=>{
+      const btn = e.target.closest(".tab"); if(!btn) return;
+      const id = btn.dataset.tab;
+      modal.querySelectorAll(".tab").forEach(b=>{ b.classList.toggle("active", b===btn); b.setAttribute("aria-selected", b===btn ? "true" : "false"); });
+      modal.querySelectorAll(".tabpanel").forEach(p=> p.classList.remove("active"));
+      const pane = modal.querySelector("#tab-"+id); if(pane) pane.classList.add("active");
+      // Re-setup button handlers after tab switch to ensure they work
+      setupButtonHandlers();
+    });
+  }
+}/* ---------- Analyst Lens helpers ---------- */
 const PILLAR_EXECUTE = ["Engineering Effectiveness","Architecture & Platform","Data & Insights"];
 const PILLAR_VISION  = ["Strategy & Executive Alignment","Product Strategy, Discovery & GTM","Customer & Outcome Alignment"];
 const PILLAR_LAYER = {
