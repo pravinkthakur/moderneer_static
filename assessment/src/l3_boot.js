@@ -178,4 +178,3 @@ document.addEventListener('click', async (e)=>{
 
 import './plugins/radio_enhance.js';
 import './plugins/pillar_chart_boot.js';
-import './plugins/partials_boot.js';
