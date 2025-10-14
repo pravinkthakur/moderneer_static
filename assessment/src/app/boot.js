@@ -1208,6 +1208,8 @@ function analystHTML(results){
 }
 
 function generateRadarChart(results) {
+  console.log('Generating radar chart with results:', results);
+  
   // Get the 12 pillars and their scores
   const pillars = [
     'Strategy & Governance', 'Customer Insight', 'Product Management', 
@@ -1219,8 +1221,11 @@ function generateRadarChart(results) {
   // Map pillar names to their scores, defaulting to 0 if not found
   const pillarScores = pillars.map(pillar => {
     const score = results.byPillar[pillar] || 0;
+    console.log(`Pillar: ${pillar}, Score: ${score}`);
     return { name: pillar, score: score };
   });
+  
+  console.log('Pillar scores:', pillarScores);
   
   // SVG dimensions
   const size = 400;
