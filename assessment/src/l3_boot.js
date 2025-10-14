@@ -10,7 +10,7 @@ import { h, openModal, Tabbed, qs } from "./components/index.js";
     
   // Robust exporter button injection
   (function(){
-    const container = document.querySelector('#modalContent, .modal-content, .popup, [role="dialog"], #overlay') || modalContent || document;
+    const container = document.querySelector('#modalContent, .modal-content, .popup, [role="dialog"], #overlay') || document.getElementById('modalContent') || document;
     const fullBtn = container.querySelector('#btnDownloadFull, [id*="DownloadFull"], .btn');
     const host = (fullBtn && fullBtn.parentElement) || container.querySelector('.tablist, .tabs, .tab-header') || container;
     if (host && !host.querySelector('#btnDownloadMD')){
@@ -25,7 +25,9 @@ import { h, openModal, Tabbed, qs } from "./components/index.js";
       else host.appendChild(row);
     }
   })();
-// add Word/PPT export buttons if missing
+    const modalContent = root || document;
+    
+    // add Word/PPT export buttons if missing
     let dlWord = modalContent.querySelector("#btnDownloadWord");
     let dlPpt = modalContent.querySelector("#btnDownloadPpt");
     if(!dlWord || !dlPpt){
@@ -34,8 +36,6 @@ import { h, openModal, Tabbed, qs } from "./components/index.js";
       row.innerHTML = '<button class="btn" id="btnDownloadWord">Download Word (.doc)</button> <button class="btn" id="btnDownloadPpt">Download PPT Outline (.rtf)</button>';
       modalContent.prepend(row);
     }
-    
-    const modalContent = root || document;
     const buttons = ["#btnCopyNarrative","#btnCopyExec","#btnCopyFull","#btnCopyAnalyst"];
     buttons.forEach(sel=>{
       const b = modalContent.querySelector(sel);
