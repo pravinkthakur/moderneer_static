@@ -959,12 +959,9 @@ function openTabbedModal(title, tabs){
   const tabPanes = tabs.map((t,i)=>`<section id="tab-${t.id}" class="tabpanel ${i===0?"active":""}" role="tabpanel">${t.html}</section>`).join("");
   modalContent.innerHTML = `<div class="tabs"><div class="tablist" role="tablist">${tabBtns}</div>${tabPanes}</div>`;
   overlay.style.display = "flex";
-  modalContent.querySelector(".tablist").addEventListener("click", (e)=>{
-    const btn = e.target.closest(".tab"); if(!btn) return;
-    const id = btn.dataset.tab;
-    modalContent.querySelectorAll(".tab").forEach(b=>{ b.classList.toggle("active", b===btn); b.setAttribute("aria-selected", b===btn ? "true" : "false"); });
-    modalContent.querySelectorAll(".tabpanel").forEach(p=> p.classList.remove("active"));
-    const pane = modalContent.querySelector("#tab-"+id); if(pane) pane.classList.add("active");
+  
+  // Setup button handlers immediately after modal content is created
+  function setupButtonHandlers(){
     // Copy buttons
     ["#btnCopyNarrative","#btnCopyExec","#btnCopyFull"].forEach(sel=>{
       const b = modalContent.querySelector(sel);
@@ -998,6 +995,19 @@ function openTabbedModal(title, tabs){
         setTimeout(()=>URL.revokeObjectURL(url), 2000);
       };
     }
+  }
+  
+  // Call setup immediately
+  setupButtonHandlers();
+  
+  modalContent.querySelector(".tablist").addEventListener("click", (e)=>{
+    const btn = e.target.closest(".tab"); if(!btn) return;
+    const id = btn.dataset.tab;
+    modalContent.querySelectorAll(".tab").forEach(b=>{ b.classList.toggle("active", b===btn); b.setAttribute("aria-selected", b===btn ? "true" : "false"); });
+    modalContent.querySelectorAll(".tabpanel").forEach(p=> p.classList.remove("active"));
+    const pane = modalContent.querySelector("#tab-"+id); if(pane) pane.classList.add("active");
+    // Re-setup button handlers after tab switch to ensure they work
+    setupButtonHandlers();
   });
 }
 
@@ -1297,16 +1307,26 @@ function buildReport(results){
   return html;
 }
 
-document.getElementById("btnCompute").addEventListener("click", ()=>compute());
-document.getElementById("btnReport").addEventListener("click", ()=>{ const results = compute(true); openTabbedModal("Detailed Report", buildReportTabs(results)); });
-document.getElementById("btnSave").addEventListener("click", saveAll);
-document.getElementById("btnLoad").addEventListener("click", loadAll);
-document.getElementById("btnReset").addEventListener("click", resetAll);
-document.getElementById("btnExport").addEventListener("click", ()=>{
-  const payload = { module:currentModule, view:currentView, ts:new Date().toISOString(), selections:getSaved(), results:compute(true) };
-  const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
-  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`moderneer_oemm_${currentModule}_${Date.now()}.json`;
-  a.click(); URL.revokeObjectURL(a.href);
+// Wait for DOM to be fully loaded before adding event listeners
+document.addEventListener('DOMContentLoaded', function() {
+  const btnCompute = document.getElementById("btnCompute");
+  const btnReport = document.getElementById("btnReport");
+  const btnSave = document.getElementById("btnSave");
+  const btnLoad = document.getElementById("btnLoad");
+  const btnReset = document.getElementById("btnReset");
+  const btnExport = document.getElementById("btnExport");
+
+  if (btnCompute) btnCompute.addEventListener("click", ()=>compute());
+  if (btnReport) btnReport.addEventListener("click", ()=>{ const results = compute(true); openTabbedModal("Detailed Report", buildReportTabs(results)); });
+  if (btnSave) btnSave.addEventListener("click", saveAll);
+  if (btnLoad) btnLoad.addEventListener("click", loadAll);
+  if (btnReset) btnReset.addEventListener("click", resetAll);
+  if (btnExport) btnExport.addEventListener("click", ()=>{
+    const payload = { module:currentModule, view:currentView, ts:new Date().toISOString(), selections:getSaved(), results:compute(true) };
+    const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
+    const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`moderneer_oemm_${currentModule}_${Date.now()}.json`;
+    a.click(); URL.revokeObjectURL(a.href);
+  });
 });
 document.getElementById("btnCore").addEventListener("click", ()=>{
   currentModule="core";
