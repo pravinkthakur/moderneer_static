@@ -1,5 +1,10 @@
 /* Year */
-document.getElementById('yr').textContent = new Date().getFullYear();
+document.addEventListener('DOMContentLoaded', function() {
+  const yearEl = document.getElementById('yr');
+  if (yearEl) {
+    yearEl.textContent = new Date().getFullYear().toString();
+  }
+});
 
 /* ---------- Scales (with purpose/anchors) ---------- */
 const SCALE_CATALOG = {
