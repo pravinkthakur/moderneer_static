@@ -331,9 +331,7 @@ code, pre {
 
 /* Assessment Layout Integration with Main Site */
 .assessment-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: var(--s4);
+  display: block;
   margin-top: var(--s6);
 }
 
@@ -343,10 +341,7 @@ code, pre {
   padding: var(--s5);
   box-shadow: var(--shadow);
   border: 1px solid var(--line);
-}
-
-/* Override main site styles that might conflict */
-.assessment-grid .assessment-card {
+  width: 100%;
   max-width: none;
   margin: 0;
 }
@@ -361,9 +356,10 @@ code, pre {
 /* Modern Toolbar Styling */
 .modern-toolbar {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: var(--s4);
   margin-bottom: var(--s5);
+  width: 100%;
 }
 
 .control-card {
@@ -597,6 +593,28 @@ header.site nav a {
 header.site nav a[aria-current="page"],
 header.site nav a:hover {
   background: #EEF2FF;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .modern-toolbar {
+    grid-template-columns: 1fr;
+    gap: var(--s3);
+  }
+  
+  .toggle-group {
+    flex-wrap: wrap;
+  }
+  
+  .control-card {
+    min-width: 0;
+  }
+}
+
+/* Ensure full width utilization */
+.assessment-card {
+  width: 100% !important;
+  max-width: none !important;
 }
 
 
