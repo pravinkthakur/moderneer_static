@@ -73,6 +73,12 @@ jobs:
       - name: 🎭 Install Playwright browsers
         run: npx playwright install --with-deps
 
+      - name: 🚀 Start web server
+        run: npx http-server -p 8080 -c-1 &
+        
+      - name: ⏳ Wait for server
+        run: npx wait-on http://localhost:8080 --timeout 30000
+
       - name: 🏃‍♂️ Run smoke tests
         run: npm run test:smoke
 
@@ -117,6 +123,12 @@ jobs:
       - name: 🎭 Install Playwright browsers
         run: npx playwright install --with-deps ${{ matrix.browser }}
 
+      - name: 🚀 Start web server
+        run: npx http-server -p 8080 -c-1 &
+        
+      - name: ⏳ Wait for server
+        run: npx wait-on http://localhost:8080 --timeout 30000
+
       - name: 🧪 Run critical tests
         run: npx playwright test --project=${{ matrix.project }} --grep="@critical"
 
@@ -150,7 +162,13 @@ jobs:
       - name: 🎭 Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: 📱 Run mobile tests
+      - name: � Start web server
+        run: npx http-server -p 8080 -c-1 &
+        
+      - name: ⏳ Wait for server
+        run: npx wait-on http://localhost:8080 --timeout 30000
+
+      - name: �📱 Run mobile tests
         run: npx playwright test --project="Mobile Chrome" --project="Mobile Safari"
 
       - name: 📊 Upload mobile test results
@@ -182,6 +200,12 @@ jobs:
 
       - name: 🎭 Install Playwright browsers
         run: npx playwright install --with-deps
+
+      - name: 🚀 Start web server
+        run: npx http-server -p 8080 -c-1 &
+        
+      - name: ⏳ Wait for server
+        run: npx wait-on http://localhost:8080 --timeout 30000
 
       - name: 🎯 Run assessment tests
         run: npm run test:assessment
@@ -216,6 +240,12 @@ jobs:
       - name: 🎭 Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      - name: 🚀 Start web server
+        run: npx http-server -p 8080 -c-1 &
+        
+      - name: ⏳ Wait for server
+        run: npx wait-on http://localhost:8080 --timeout 30000
+
       - name: ⚡ Run performance tests
         run: npm run test:performance
 
@@ -249,7 +279,13 @@ jobs:
       - name: 🎭 Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: 📸 Run visual regression tests
+      - name: � Start web server
+        run: npx http-server -p 8080 -c-1 &
+        
+      - name: ⏳ Wait for server
+        run: npx wait-on http://localhost:8080 --timeout 30000
+
+      - name: �📸 Run visual regression tests
         run: npm run test:visual
 
       - name: 🖼️ Upload visual test results
@@ -282,6 +318,12 @@ jobs:
 
       - name: 🎭 Install Playwright browsers
         run: npx playwright install --with-deps
+
+      - name: 🚀 Start web server
+        run: npx http-server -p 8080 -c-1 &
+        
+      - name: ⏳ Wait for server
+        run: npx wait-on http://localhost:8080 --timeout 30000
 
       - name: ♿ Run accessibility tests
         run: npx playwright test --grep="@accessibility"
@@ -316,7 +358,13 @@ jobs:
       - name: 🎭 Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: 🚨 Run error handling tests
+      - name: � Start web server
+        run: npx http-server -p 8080 -c-1 &
+        
+      - name: ⏳ Wait for server
+        run: npx wait-on http://localhost:8080 --timeout 30000
+
+      - name: �🚨 Run error handling tests
         run: npx playwright test tests/error-handling/
 
       - name: 📊 Upload error handling results
@@ -350,7 +398,13 @@ jobs:
       - name: 🎭 Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: 🔄 Run full test suite
+      - name: � Start web server
+        run: npx http-server -p 8080 -c-1 &
+        
+      - name: ⏳ Wait for server
+        run: npx wait-on http://localhost:8080 --timeout 30000
+
+      - name: �🔄 Run full test suite
         run: npm test
 
       - name: 📊 Upload full regression results
