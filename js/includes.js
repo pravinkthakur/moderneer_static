@@ -80,6 +80,18 @@ document.addEventListener('DOMContentLoaded', async function() {
   if (!success) {
     console.warn('Failed to load header/footer includes');
   }
+
+  // Load version display system after includes are loaded
+  if (success) {
+    try {
+      const versionScript = document.createElement('script');
+      versionScript.src = '/js/version.js';
+      versionScript.defer = true;
+      document.head.appendChild(versionScript);
+    } catch (error) {
+      console.warn('Failed to load version display:', error);
+    }
+  }
 });
 
 // Export for potential use in other scripts

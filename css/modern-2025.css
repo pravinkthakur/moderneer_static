@@ -169,6 +169,26 @@ footer{
   color: var(--brand);
   transform: translateY(-1px);
 }
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--s3);
+}
+.version-info {
+  font-size: 0.8rem;
+  color: rgba(75, 85, 99, 0.7);
+  font-family: var(--font-mono, monospace);
+  background: rgba(255,255,255,0.5);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+.version-label {
+  font-weight: 600;
+  margin-right: 4px;
+}
 /* Header Responsive Design */
 @media (max-width: 1200px) {
   .nav-list a {

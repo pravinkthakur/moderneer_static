@@ -1,13 +1,54 @@
 {
   "name": "moderneer-static-site",
-  "version": "1.0.0",
-  "description": "Moderneer static website with unified header/footer system",
+  "version": "3.1.0",
+  "description": "Moderneer static website with unified header/footer system and comprehensive testing",
   "scripts": {
     "standardize": "node standardize-pages.js",
-    "serve": "npx http-server -p 8080",
-    "build": "npm run standardize"
+    "serve": "npx http-server -p 8080 -c-1",
+    "serve:silent": "npx http-server -p 8080 -c-1 --silent",
+    "build": "npm run standardize",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report",
+    "test:codegen": "playwright codegen localhost:8080",
+    "test:install": "playwright install",
+    "test:update-snapshots": "playwright test --update-snapshots",
+    "test:assessment": "playwright test tests/assessment/",
+    "test:navigation": "playwright test tests/navigation/",
+    "test:content": "playwright test tests/content/",
+    "test:performance": "playwright test tests/performance/",
+    "test:visual": "playwright test tests/visual/",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:critical": "playwright test --grep @critical",
+    "lint": "eslint tests/**/*.js",
+    "validate-html": "node scripts/validate-html.js"
   },
   "devDependencies": {
-    "http-server": "^14.1.1"
-  }
+    "http-server": "^14.1.1",
+    "@playwright/test": "^1.40.0",
+    "eslint": "^8.50.0",
+    "eslint-plugin-playwright": "^0.18.0",
+    "html-validator": "^6.0.1",
+    "lighthouse": "^11.0.0",
+    "axe-playwright": "^1.2.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pravinkthakur/moderneer_static.git"
+  },
+  "keywords": [
+    "testing",
+    "playwright",
+    "e2e",
+    "automation",
+    "moderneer",
+    "static-site"
+  ],
+  "author": "Moderneer Team",
+  "license": "MIT"
 }
