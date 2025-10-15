@@ -1,13 +1,20 @@
 
 :root{
-  --brand:#2563EB; /* deeper blue for contrast */
-  --brand-2:#06B6D4; /* cyan accent */
+  --brand:#3B82F6; /* bright blue matching assessment */
+  --brand-2:#22D3EE; /* bright cyan/mint accent */
   --brand-3:#A855F7; /* purple accent for AI/futurism */
   --ink:#0F172A; --muted:#475569;
   --line:#E2E8F0; --bg:#FFFFFF; --bg-soft:#F8FAFC;
   --radius:16px; --shadow:0 12px 28px rgba(2,6,23,.10);
   --s1:8px; --s2:12px; --s3:16px; --s4:24px; --s5:32px; --s6:48px; --s7:72px;
   --fz-s:.95rem; --fz-m:1.05rem; --fz-l:1.25rem; --fz-xl:2.2rem; --fz-xxl:3.2rem;
+  /* Additional design tokens from assessment */
+  --color-primary: #3B82F6;
+  --color-accent: #22D3EE;
+  --color-success: #22C55E;
+  --color-error: #EF4444;
+  --color-warning: #FACC15;
+  --color-info: #06B6D4;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -88,13 +95,13 @@ header.site{
 }
 
 .nav-list a[aria-current="page"] {
-  background: #2563EB;
+  background: #3B82F6;
   color: white;
 }
 /* Buttons */
 .button{display:inline-block; background:linear-gradient(135deg,var(--brand),var(--brand-2));
-  color:#fff; padding:12px 18px; border-radius:999px; border:1px solid rgba(37,99,235,.5);
-  font-weight:700; text-decoration:none; box-shadow:0 8px 18px rgba(37,99,235,.28)}
+  color:#fff; padding:12px 18px; border-radius:999px; border:1px solid rgba(59,130,246,.5);
+  font-weight:700; text-decoration:none; box-shadow:0 8px 18px rgba(59,130,246,.28)}
 .button.secondary{background:transparent; color:var(--brand); border:1px solid var(--brand); box-shadow:none}
 .button.ghost{background:transparent; border:1px solid var(--line); color:var(--ink)}
 /* Hero with subtle animated grid */
