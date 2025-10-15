@@ -4,10 +4,9 @@
   "description": "Moderneer static website with unified header/footer system and comprehensive testing",
   "scripts": {
     "version:update": "node scripts/update-version.js",
-    "standardize": "node standardize-pages.js",
     "serve": "npx http-server -p 8080 -c-1",
     "serve:silent": "npx http-server -p 8080 -c-1 --silent",
-    "build": "npm run version:update && npm run standardize",
+    "build": "npm run version:update",
   "test": "start /b npx http-server -p 8080 -c-1 && npx playwright test --config=playwright.skim.config.js && taskkill /f /im http-server.exe",
   "test:full": "start /b npx http-server -p 8080 -c-1 && npx playwright test --config=playwright.full.config.js && taskkill /f /im http-server.exe",
     "test:headed": "playwright test --headed",

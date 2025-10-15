@@ -2,6 +2,35 @@
 
 This testing suite provides comprehensive end-to-end, unit, integration, performance, and visual regression testing for the Moderneer static website using Playwright and modern testing best practices.
 
+## 🎯 Test Packs
+
+### Skim Pack (Fast Build - ≤3 minutes)
+Runs only critical smoke and navigation tests for fast feedback:
+```bash
+npx playwright test --config=playwright.skim.config.js --reporter=line
+```
+- Uses `@smoke` and `@critical` tags
+- 2 parallel workers
+- 60s timeout per test
+- Ideal for CI/CD pipelines and quick validation
+
+### Full Pack (Comprehensive E2E)
+Runs complete test suite including regression, visual, performance, interactive, and error-handling tests:
+```bash
+npx playwright test --reporter=line
+```
+- All tests included
+- 2 parallel workers
+- 120s timeout per test
+- Run manually or after major changes for deep validation
+
+### Customization
+- To add tests to skim pack: Add `@smoke` or `@critical` tags in test files
+- To run specific test files:
+  ```bash
+  npx playwright test tests/assessment/assessment.spec.js --config=playwright.skim.config.js
+  ```
+
 ## ✅ Current Status (Updated October 2024)
 
 ### ✅ Working Test Suites:
