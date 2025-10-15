@@ -53,3 +53,57 @@ coverage/
 # Temporary files
 *.tmp
 *.temp
+
+# Playwright and Testing
+test-results/
+playwright-report/
+playwright/.cache/
+test-results.xml
+junit.xml
+coverage/
+.nyc_output/
+screenshots/
+videos/
+
+# Test artifacts that change frequently
+**/test-results/
+**/playwright-report/
+**/coverage/
+**/.nyc_output/
+
+# Browser downloads (Playwright installs these)
+ms-playwright/
+
+# Test state and cache
+.playwright-state/
+.test-state/
+
+# Performance benchmarks (regenerated each run)
+performance-results/
+lighthouse-results/
+
+# Visual regression baselines (should be committed, but diffs should not)
+**/test-results/
+**/actual-screenshots/
+**/diff-screenshots/
+
+# Local server files
+.serve/
+serve-build/
+
+# Backup files
+*.bak
+*.backup
+*.orig
+
+# Cache directories
+.cache/
+.parcel-cache/
+
+# Debug files
+debug.log
+error.log
+
+# Local environment overrides
+.local/
+local/
