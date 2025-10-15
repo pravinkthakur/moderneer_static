@@ -64,15 +64,18 @@ class VersionDisplay {
       }
       
     } catch (error) {
-      // Fallback version data
+      // Fallback version data with readable date/time
+      const now = new Date();
+      const buildNumber = now.toISOString().slice(0, 16).replace(/[-:T]/g, '').slice(0, 12); // YYYYMMDDHHMM
+      
       this.versionData = {
         version: '3.1.0',
-        buildNumber: 'dev',
-        buildDate: new Date().toISOString(),
-        gitCommit: 'unknown',
+        buildNumber: buildNumber,
+        buildDate: now.toISOString(),
+        gitCommit: 'local',
         environment: 'development'
       };
-      throw error;
+      console.log('Using fallback version data:', this.versionData);
     }
   }
 
