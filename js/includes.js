@@ -39,6 +39,10 @@ class IncludeSystem {
       this.setCurrentYear();
     }
 
+    if (footerLoaded) {
+      this.loadVersion();
+    }
+
     return headerLoaded && footerLoaded;
   }
 
@@ -70,6 +74,42 @@ class IncludeSystem {
       }
     }, 0);
   }
+
+  async loadVersion() {
+    setTimeout(async () => {
+      const versionElement = document.getElementById('app-version');
+      if (!versionElement) return;
+
+      try {
+        const response = await fetch('/version.json');
+        if (!response.ok) throw new Error('Failed to load version');
+        
+        const data = await response.json();
+        const buildDate = new Date(data.buildDate);
+        const dateStr = buildDate.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        versionElement.textContent = `v${data.version} • ${dateStr}`;
+        versionElement.title = `Build: ${data.buildNumber}\nCommit: ${data.gitCommit}\nEnvironment: ${data.environment}`;
+        
+      } catch (error) {
+        // Fallback to current date/time
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric'
+        });
+        versionElement.textContent = `v3.1.0 • ${dateStr}`;
+        console.warn('Could not load version.json, using fallback');
+      }
+    }, 100);
+  }
 }
 
 // Initialize the include system when DOM is loaded
@@ -79,18 +119,6 @@ document.addEventListener('DOMContentLoaded', async function() {
   
   if (!success) {
     console.warn('Failed to load header/footer includes');
-  }
-
-  // Load version display system after includes are loaded
-  if (success) {
-    try {
-      const versionScript = document.createElement('script');
-      versionScript.src = '/js/version.js';
-      versionScript.defer = true;
-      document.head.appendChild(versionScript);
-    } catch (error) {
-      console.warn('Failed to load version display:', error);
-    }
   }
 });
 
