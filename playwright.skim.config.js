@@ -9,6 +9,12 @@ module.exports = defineConfig({
   retries: 0,
   workers: 2,
   reporter: [['line']],
+  webServer: {
+    command: 'npx http-server -p 8080 -c-1',
+    url: 'http://localhost:8080',
+    timeout: 120000,
+    reuseExistingServer: !process.env.CI,
+  },
   projects: [
     {
       name: 'chromium',

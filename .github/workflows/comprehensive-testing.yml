@@ -73,12 +73,6 @@ jobs:
       - name: 🎭 Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: 🚀 Start web server
-        run: npx http-server -p 8080 -c-1 &
-        
-      - name: ⏳ Wait for server
-        run: npx wait-on http://localhost:8080 --timeout 30000
-
       - name: 🏃‍♂️ Run smoke tests
         run: npm run test:smoke
 
@@ -573,3 +567,4 @@ jobs:
       - name: 🚀 Deploy to Pages
         id: deployment
         uses: actions/deploy-pages@v2
+
