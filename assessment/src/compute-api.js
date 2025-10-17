@@ -5,7 +5,7 @@
 
 class AssessmentComputeAPI {
   constructor() {
-    this.baseUrl = 'https://api.assessment.compute.moderneer.co.uk';
+    this.baseUrl = 'https://assessment-compute-service.vercel.app';
     this.enabled = true; // Can be toggled for fallback
     
     console.log(`🔧 Compute API: ${this.enabled ? 'Enabled' : 'Disabled'} (${this.baseUrl})`);
