@@ -1992,8 +1992,7 @@ function compute(silent=false){
     renderGateCaps(gates,caps); renderBreakdown(byPillar);
     
     // Update compute timestamp only when actually computing (not during render)
-    saveComputeStamp(Date.now());
-    refreshComputeStampLabel();
+    setLastCompute();
   }
   return { perParam: comp, byPillar, overallIndexPre, overallScalePre, afterGatesScale, finalScale, finalIndex, gates, caps };
 }
@@ -2035,6 +2034,9 @@ function renderBreakdown(byPillar){
     cont.appendChild(card);
   });
 }
+
+/* Make functions globally available */
+window.setLastCompute = setLastCompute;
 
 /* Init */
 render();
