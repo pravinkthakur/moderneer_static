@@ -1655,20 +1655,12 @@ function buildReport(results){
 
 // Wait for DOM to be fully loaded before adding event listeners
 document.addEventListener('DOMContentLoaded', function() {
-  const btnCompute = document.getElementById("btnCompute");
   const btnReport = document.getElementById("btnReport");
   const btnSave = document.getElementById("btnSave");
   const btnLoad = document.getElementById("btnLoad");
   const btnReset = document.getElementById("btnReset");
   const btnExport = document.getElementById("btnExport");
 
-  if (btnCompute) btnCompute.addEventListener("click", ()=>{
-    compute();
-    // Reset change tracking after compute
-    if (window.resetChangeTracking) {
-      setTimeout(() => window.resetChangeTracking(), 100);
-    }
-  });
   if (btnReport) btnReport.addEventListener("click", ()=>{ const results = compute(true); openTabbedModal("Detailed Report", buildReportTabs(results)); });
   if (btnSave) btnSave.addEventListener("click", saveAll);
   if (btnLoad) btnLoad.addEventListener("click", loadAll);

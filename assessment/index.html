@@ -54,49 +54,39 @@
         </div>
       </div>
 
-      <!-- Actions -->
+      <!-- Analysis & Export -->
       <div class="control-card">
-        <h3 class="card-title">Actions</h3>
-        <div class="action-group">
-          <button class="modern-btn primary" id="btnCompute" data-testid="compute">
-            <span class="btn-icon">⚡</span>Compute (Client)
+        <h3 class="card-title">Analysis & Export</h3>
+        <div class="button-grid primary-actions">
+          <button class="modern-btn success primary-action" id="btnReport" data-testid="report">
+            <span class="btn-icon">�</span>Generate Analysis Report
           </button>
-          <button class="modern-btn info" id="btnComputeAPI" data-testid="compute-api" style="margin-top: 8px;">
-            <span class="btn-icon">🌐</span>Compute (API)
-          </button>
-          <div class="compute-status" id="lastCompute" data-testid="last-compute">Last compute: never</div>
         </div>
-      </div>
-
-      <!-- Reports & Export -->
-      <div class="control-card">
-        <h3 class="card-title">Reports & Export</h3>
-        <div class="button-grid">
-          <button class="modern-btn success" id="btnReport" data-testid="report">
-            <span class="btn-icon">📄</span>Generate Report
-          </button>
+        <div class="button-grid secondary-actions">
           <button class="modern-btn secondary" id="btnSave" data-testid="save">
-            <span class="btn-icon">💾</span>Save
+            <span class="btn-icon">💾</span>Save Progress
           </button>
           <button class="modern-btn secondary" id="btnLoad" data-testid="load">
             <span class="btn-icon">📁</span>Load
           </button>
-          <button class="modern-btn warning" id="btnReset">
-            <span class="btn-icon">🔄</span>Reset
-          </button>
           <button class="modern-btn secondary" id="btnExport" data-testid="export">
-            <span class="btn-icon">📤</span>Export JSON
+            <span class="btn-icon">�</span>Export Data
+          </button>
+          <button class="modern-btn warning" id="btnReset">
+            <span class="btn-icon">�</span>Reset All
           </button>
           <button id="btnHelp" class="modern-btn info" aria-label="Open help and legend">
-            <span class="btn-icon">❓</span>Help / Legend
+            <span class="btn-icon">❓</span>Help & Guide
           </button>
         </div>
       </div>
     </div>
 
-    <div class="tiny" style="margin-top:6px">
-      <b>Scales carry purpose:</b> click ⓘ to see why a measure exists & anchor definitions (e.g., P95 lead time 0=≥20d … 5=≤1d).
-      <br/>Index→Scale: 0–25→1..2, 25–50→2..3, 50–80→3..4, 80–100→4..5. Gates & caps apply after weighting.
+    <div class="assessment-guide">
+      <p class="guide-text">
+        <strong>Assessment Guide:</strong> Click ⓘ next to any measure to understand its purpose and scale definitions. 
+        Generate your analysis report when ready to see comprehensive results and recommendations.
+      </p>
     </div>
 
     <div id="formArea"></div>
@@ -139,8 +129,6 @@
 
 
 <script src="src/app/boot.js"></script>
-<script src="src/compute-api.js"></script>
-<script src="src/boot-api-compute.js"></script>
 
 
 
@@ -148,8 +136,6 @@
   <script type="module" src="src/main.js"></script>
 
   <script type="module" src="src/l3_boot.js"></script>
-
-  <script type="module" src="src/change-tracking.js"></script>
 
   <script type="module" src="src/perf/boot_perf.js"></script>
 
