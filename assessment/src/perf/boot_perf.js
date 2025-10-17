@@ -2,17 +2,18 @@ import { precompute, getCachedResults } from './index.js';
 import { debounce } from './debounce.js';
 import { mountVirtualList } from './virtualize.js';
 
-// Debounced background precompute on input changes
-const handler = debounce(()=>{ try{ precompute(); }catch(e){ console.error(e); } }, 250);
+// DISABLED: Auto-computation on parameter changes (now requires manual compute button click)
+// const handler = debounce(()=>{ try{ precompute(); }catch(e){ console.error(e); } }, 250);
 
-document.addEventListener('input', (e)=>{
-  const el = e.target;
-  if(el && el.matches && el.matches('[data-param][data-index], [data-na="1"]')) handler();
-});
-document.addEventListener('change', (e)=>{
-  const el = e.target;
-  if(el && el.matches && el.matches('[data-param][data-index], [data-na="1"]')) handler();
-});
+// DISABLED: Auto-compute on input/change events
+// document.addEventListener('input', (e)=>{
+//   const el = e.target;
+//   if(el && el.matches && el.matches('[data-param][data-index], [data-na="1"]')) handler();
+// });
+// document.addEventListener('change', (e)=>{
+//   const el = e.target;
+//   if(el && el.matches && el.matches('[data-param][data-index], [data-na="1"]')) handler();
+// });
 
 // Hook into compute button to finish with cached results if available
 (function(){

@@ -98,6 +98,11 @@ document.addEventListener('DOMContentLoaded', function() {
       // Reset button state
       btnComputeAPI.innerHTML = originalText;
       btnComputeAPI.disabled = false;
+      
+      // Reset change tracking to disable buttons until next parameter change
+      if (window.resetChangeTracking) {
+        setTimeout(() => window.resetChangeTracking(), 100);
+      }
     }
   });
 });
