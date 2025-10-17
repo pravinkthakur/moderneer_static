@@ -1,13 +1,13 @@
 {
-  "version": "3.1.0",
-  "buildNumber": "202510151757",
-  "buildDate": "2025-10-15T16:57:15.878Z",
-  "gitCommit": "fe2a07f",
-  "environment": "production",
-  "features": {
-    "structuredReports": true,
-    "radarChart": true,
-    "jsonConfiguration": true,
-    "modernHeader": true
-  }
+    "buildDate":  "2025-10-17T11:58:09.247Z",
+    "version":  "3.1.0",
+    "gitCommit":  "e5f264b",
+    "environment":  "production",
+    "features":  {
+                     "jsonConfiguration":  true,
+                     "apiIntegration":  true,
+                     "structuredReports":  true,
+                     "radarChart":  true
+                 },
+    "buildNumber":  "202510171258"
 }
