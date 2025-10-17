@@ -562,8 +562,7 @@ function render(){
   if(singleMode){ renderTiles(); }
   else { if(currentView==="pillar") renderByPillar(); else renderByTier(); }
   attachHandlers();
-  compute();
-  refreshComputeStampLabel();
+  // Removed auto-compute and timestamp refresh - these should only happen when compute button is clicked
 }
 function visibleParamIds(){
   const all = MODEL.fullModel.pillars.flatMap(p=>p.parameters);
@@ -1973,10 +1972,6 @@ function compute(silent=false){
     if(vals.every(v=>v!=null)){
       if(c.logic==="OR"){ trigger = (vals[0] < c.lt) || (vals[1] < c.lt); }
       else if(c.logic==="LE"){ trigger = (vals[0] <= c.value); }
-    refreshVisibleRows();
-    saveComputeStamp(Date.now());
-    refreshComputeStampLabel();
-
     }
     return { label:c.label, trigger, cap:c.cap };
   });
@@ -1995,6 +1990,10 @@ function compute(silent=false){
     document.getElementById("overallBand").textContent = band(finalScale);
     document.getElementById("gatesPassed").textContent = allPass ? "All" : `${gates.filter(x=>x.pass).length}/${MODEL.gates.length}`;
     renderGateCaps(gates,caps); renderBreakdown(byPillar);
+    
+    // Update compute timestamp only when actually computing (not during render)
+    saveComputeStamp(Date.now());
+    refreshComputeStampLabel();
   }
   return { perParam: comp, byPillar, overallIndexPre, overallScalePre, afterGatesScale, finalScale, finalIndex, gates, caps };
 }
