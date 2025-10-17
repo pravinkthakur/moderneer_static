@@ -59,7 +59,10 @@
         <h3 class="card-title">Actions</h3>
         <div class="action-group">
           <button class="modern-btn primary" id="btnCompute" data-testid="compute">
-            <span class="btn-icon">⚡</span>Compute
+            <span class="btn-icon">⚡</span>Compute (Client)
+          </button>
+          <button class="modern-btn info" id="btnComputeAPI" data-testid="compute-api" style="margin-top: 8px;">
+            <span class="btn-icon">🌐</span>Compute (API)
           </button>
           <div class="compute-status" id="lastCompute" data-testid="last-compute">Last compute: never</div>
         </div>
@@ -136,6 +139,8 @@
 
 
 <script src="src/app/boot.js"></script>
+<script src="src/compute-api.js"></script>
+<script src="src/boot-api-compute.js"></script>
 
 
 
