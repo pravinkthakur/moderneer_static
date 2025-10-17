@@ -6,8 +6,14 @@
 class AssessmentDataLoader {
   constructor() {
     this.cache = new Map();
-    this.baseUrl = './data/';
+    // Use API in production, local files in development
+    this.baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? './data/'
+      : 'https://api.moderneer.co.uk/api/';
+    this.useAPI = !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1');
     this.loaded = false;
+    
+    console.log(`🔧 Data source: ${this.useAPI ? 'API (https://api.moderneer.co.uk)' : 'Local JSON files'}`);
   }
 
   /**
@@ -66,14 +72,21 @@ class AssessmentDataLoader {
    * Load individual JSON file with error handling
    */
   async loadJSON(filename) {
-    const url = this.baseUrl + filename;
+    // Remove .json extension for API calls
+    const endpoint = this.useAPI ? filename.replace('.json', '') : filename;
+    const url = this.baseUrl + endpoint;
+    
     try {
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      const data = await response.json();
-      console.log(`📄 Loaded ${filename} (v${data.version || 'unknown'})`);
+      const json = await response.json();
+      
+      // API returns { success: true, data: {...} }, local files return data directly
+      const data = this.useAPI ? json.data : json;
+      
+      console.log(`📄 Loaded ${filename} from ${this.useAPI ? 'API' : 'local'} (v${data.version || 'unknown'})`);
       return data;
     } catch (error) {
       throw new Error(`Failed to load ${filename}: ${error.message}`);
