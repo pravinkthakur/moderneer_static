@@ -1597,7 +1597,7 @@ function attachHandlers(){
       const ctrl = t.closest(".row").querySelector('[data-param][data-index]:not([data-na])');
       if(ctrl){ ctrl.disabled = t.checked; }
     }
-    compute();
+    // Removed auto-compute - computation now requires manual button click
   });
 }
 function saveAll(){ alert("Saved locally."); }
