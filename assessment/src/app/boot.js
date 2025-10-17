@@ -1,3 +1,17 @@
+/**
+ * Moderneer Assessment Platform - Main Boot Script
+ * 
+ * ARCHITECTURE: Hybrid Static Frontend + API Backend
+ * - Frontend: Static HTML/CSS/JS hosted on GitHub Pages (moderneer.co.uk)  
+ * - Data APIs: Dynamic JSON configuration from api.moderneer.co.uk
+ * - Compute APIs: Serverless assessment processing via Vercel compute service
+ * - Local Fallback: Static JSON files for development/offline scenarios
+ * 
+ * This is NOT a purely static site - it integrates with multiple APIs for
+ * dynamic data loading and server-side computation while maintaining the 
+ * performance benefits of static hosting for the frontend shell.
+ */
+
 /* Year */
 document.addEventListener('DOMContentLoaded', function() {
   const yearEl = document.getElementById('yr');

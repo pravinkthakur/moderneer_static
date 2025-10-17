@@ -1,4 +1,16 @@
 <!doctype html>
+<!-- 
+  Moderneer Assessment Platform - Hybrid Architecture
+  
+  ARCHITECTURE: This is NOT a purely static site!
+  - Frontend: Static HTML/CSS/JS (GitHub Pages hosting)
+  - Data Layer: Dynamic API loading from api.moderneer.co.uk  
+  - Compute Layer: Serverless functions for assessment processing
+  - CSP Policy: Configured for API endpoints and compute services
+  
+  The static frontend provides performance while APIs enable
+  dynamic configuration, real-time data updates, and server-side computation.
+-->
 <html lang="en">
 <head>
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.openai.com https://assessment-compute-service.vercel.app https://api.assessment.compute.moderneer.co.uk">

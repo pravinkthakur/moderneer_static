@@ -1,6 +1,17 @@
 /**
- * Assessment Data Loader - Dynamically loads assessment configuration from JSON files
- * This replaces hardcoded JavaScript data with configurable JSON-based data
+ * Assessment Data Loader - Hybrid Architecture Data Layer
+ * 
+ * IMPORTANT: This is NOT a static-only site!
+ * 
+ * This system implements a hybrid architecture that combines:
+ * 1. Static frontend hosting (GitHub Pages) for performance and reliability
+ * 2. Dynamic API-based data loading for flexibility and real-time updates
+ * 3. Local JSON fallback for development and offline scenarios
+ * 
+ * Production Mode: Loads all assessment configuration dynamically from api.moderneer.co.uk
+ * Development Mode: Falls back to local static JSON files for offline development
+ * 
+ * The frontend is static, but the data and computation are fully dynamic and API-driven.
  */
 
 class AssessmentDataLoader {
