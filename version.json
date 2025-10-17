@@ -1,7 +1,7 @@
 {
-    "buildDate":  "2025-10-17T13:44:32.783Z",
+    "buildDate":  "2025-10-17T13:46:49.355Z",
     "version":  "3.1.0",
-    "gitCommit":  "3288a13",
+    "gitCommit":  "e931191",
     "environment":  "production",
     "features":  {
                      "jsonConfiguration":  true,
@@ -9,5 +9,5 @@
                      "structuredReports":  true,
                      "radarChart":  true
                  },
-    "buildNumber":  "202510171444"
+    "buildNumber":  "202510171446"
 }

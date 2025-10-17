@@ -16,9 +16,11 @@ document.addEventListener('DOMContentLoaded', function() {
   btnComputeAPI.addEventListener('click', async function(e) {
     e.preventDefault();
     
+    // Store original button state
+    const originalText = btnComputeAPI.innerHTML;
+    
     try {
       // Show loading state
-      const originalText = btnComputeAPI.innerHTML;
       btnComputeAPI.innerHTML = '<span class="btn-icon">⏳</span>Computing...';
       btnComputeAPI.disabled = true;
       
@@ -32,8 +34,22 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       // Get current assessment configuration
-      const dataLoader = window.assessmentDataLoader || new window.AssessmentDataLoader();
-      const config = await dataLoader.loadAll();
+      let config;
+      try {
+        // Try to get existing loaded config
+        if (window.MODEL && window.MODEL.fullModel) {
+          config = {
+            pillars: window.MODEL.fullModel.pillars,
+            gates: window.MODEL.gates,
+            caps: window.MODEL.caps,
+            weights: window.MODEL.weights
+          };
+        } else {
+          throw new Error('Assessment configuration not loaded');
+        }
+      } catch (configError) {
+        throw new Error('Assessment configuration not available. Please refresh the page.');
+      }
       
       // Call API compute
       const result = await computeAPI.compute(config, false);
