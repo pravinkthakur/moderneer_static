@@ -1,13 +1,14 @@
 {
-    "buildDate":  "2025-10-18T15:30:00.000Z",
-    "version":  "5.0.0",
-    "gitCommit":  "c7ebcaf",
+    "buildDate":  "2025-10-18T16:45:00.000Z",
+    "version":  "5.1.0",
+    "gitCommit":  "a82e1e3",
     "environment":  "production",
     "features":  {
                      "jsonConfiguration":  false,
                      "apiIntegration":  true,
                      "structuredReports":  true,
-                     "radarChart":  true
+                     "radarChart":  true,
+                     "cleanArchitecture":  true
                  },
-    "buildNumber":  "202510181530"
+    "buildNumber":  "202510181645"
 }
