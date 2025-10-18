@@ -202,4 +202,3 @@ function addVersionStyles() {
   document.head.appendChild(style);
 }
 
-export default VersionDisplay;
