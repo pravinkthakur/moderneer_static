@@ -1,10 +1,10 @@
 {
-    "buildDate":  "2025-10-18T10:00:00.000Z",
-    "version":  "4.1.0",
-    "gitCommit":  "a579e66",
+    "buildDate":  "2025-10-18T11:00:00.000Z",
+    "version":  "5.0.0",
+    "gitCommit":  "c7ebcaf",
     "environment":  "production",
     "features":  {
-                     "jsonConfiguration":  true,
+                     "jsonConfiguration":  false,
                      "apiIntegration":  true,
                      "structuredReports":  true,
                      "radarChart":  true
