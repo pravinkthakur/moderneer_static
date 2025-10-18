@@ -17,14 +17,23 @@
 class AssessmentDataLoader {
   constructor() {
     this.cache = new Map();
-    // Use API in production, local files in development
-    this.baseUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? './data/'
-      : 'https://api.moderneer.co.uk/api/';
-    this.useAPI = !window.location.hostname.includes('localhost') && !window.location.hostname.includes('127.0.0.1');
+    
+    // Determine if we're running in development mode
+    this.isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    
+    // API Configuration - Use live assessment services
+    this.configApiUrl = this.isDev 
+      ? './data/'  // Local JSON files for development
+      : 'https://api.assessment.config.moderneer.co.uk/api/';  // Live config API
+    
+    this.computeApiUrl = 'https://api.assessment.compute.moderneer.co.uk/api/';  // Live compute API (always use live)
+    
+    this.useAPI = !this.isDev;
     this.loaded = false;
     
-    console.log(`🔧 Data source: ${this.useAPI ? 'API (https://api.moderneer.co.uk)' : 'Local JSON files'}`);
+    console.log(`� Assessment Platform Mode: ${this.useAPI ? 'LIVE APIs' : 'Development'}`);
+    console.log(`📊 Config Source: ${this.useAPI ? this.configApiUrl : 'Local JSON files'}`);
+    console.log(`🧮 Compute Service: ${this.computeApiUrl}`);
   }
 
   /**
@@ -80,26 +89,47 @@ class AssessmentDataLoader {
   }
 
   /**
-   * Load individual JSON file with error handling
+   * Load individual JSON file or API endpoint with error handling
    */
   async loadJSON(filename) {
-    // Remove .json extension for API calls
-    const endpoint = this.useAPI ? filename.replace('.json', '') : filename;
-    const url = this.baseUrl + endpoint;
+    let url;
+    
+    if (this.useAPI) {
+      // Map filename to API endpoint
+      const endpointMap = {
+        'config.json': `${this.configApiUrl}config/full`,
+        'pillars.json': `${this.configApiUrl}pillars`, 
+        'rules.json': `${this.configApiUrl}rules`,
+        'scales.json': `${this.configApiUrl}scales`
+      };
+      
+      url = endpointMap[filename];
+      if (!url) {
+        throw new Error(`Unknown API endpoint for ${filename}`);
+      }
+    } else {
+      // Local file path for development
+      url = this.configApiUrl + filename;
+    }
     
     try {
+      console.log(`🔄 Loading ${filename} from: ${url}`);
       const response = await fetch(url);
+      
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
+      
       const json = await response.json();
       
-      // API returns { success: true, data: {...} }, local files return data directly
-      const data = this.useAPI ? json.data : json;
+      // Config API returns data directly, no wrapper
+      const data = json;
       
-      console.log(`📄 Loaded ${filename} from ${this.useAPI ? 'API' : 'local'} (v${data.version || 'unknown'})`);
+      console.log(`✅ Loaded ${filename} from ${this.useAPI ? 'Config API' : 'local'} (v${data.version || 'unknown'})`);
       return data;
+      
     } catch (error) {
+      console.error(`❌ Failed to load ${filename}:`, error);
       throw new Error(`Failed to load ${filename}: ${error.message}`);
     }
   }
