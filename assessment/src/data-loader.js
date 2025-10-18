@@ -19,7 +19,10 @@ class AssessmentDataLoader {
     this.cache = new Map();
     
     // Determine if we're running in development mode
-    this.isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    this.isDev = window.location.hostname === 'localhost' || 
+                 window.location.hostname === '127.0.0.1' ||
+                 window.location.hostname.startsWith('192.168.') ||
+                 window.location.hostname.startsWith('10.0.');
     
     // API Configuration - Use live assessment services
     this.configApiUrl = this.isDev 
@@ -80,6 +83,12 @@ class AssessmentDataLoader {
       console.log('✅ Assessment configuration loaded successfully');
       console.log(`📊 Loaded: ${pillars.pillars.length} pillars, ${rules.gates.length} gates, ${rules.caps.length} caps`);
       
+      // Debug specific pillar data
+      const strategyPillar = pillars.pillars.find(p => p.id === 'strategy-exec');
+      if (strategyPillar) {
+        console.log(`🎯 Strategy pillar name: "${strategyPillar.name}"`);
+      }
+      
       return fullConfig;
 
     } catch (error) {
@@ -113,14 +122,27 @@ class AssessmentDataLoader {
     }
     
     try {
-      console.log(`🔄 Loading ${filename} from: ${url}`);
-      const response = await fetch(url);
+      // Add cache-busting timestamp for fresh data
+      const cacheBuster = Date.now();
+      const urlWithCacheBuster = url + (url.includes('?') ? '&' : '?') + `_cb=${cacheBuster}`;
+      
+      console.log(`🔄 Loading ${filename} from: ${urlWithCacheBuster}`);
+      console.log(`📍 Environment: ${this.isDev ? 'Development' : 'Production'} (${window.location.hostname})`);
+      
+      const response = await fetch(urlWithCacheBuster, {
+        cache: 'no-cache',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
       
       const json = await response.json();
+      console.log(`✅ Received data for ${filename}:`, json);
       
       // Config API returns data directly, no wrapper
       const data = json;
