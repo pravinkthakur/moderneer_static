@@ -107,7 +107,7 @@ function renderByPillar(){
 function renderByTier(){
   const vis = new Set(visibleParamIds());
   const tiers = {};
-  vis.forEach(pid=>{ const t=PARAM_META[pid]?.tier||6; (tiers[t]=tiers[t]||[]).push(pid); });
+  vis.forEach(pid=>{ const t=MODEL.fullModel.parameters[pid]?.tier||6; (tiers[t]=tiers[t]||[]).push(pid); });
   Object.keys(tiers).sort((a,b)=>a-b).forEach(t=>{
     const ids = tiers[t];
     const card = document.createElement("div");
@@ -131,7 +131,7 @@ function renderByTier(){
 }
 function renderParam(pillarName, pid, showPillarChip=false){
   const def = MODEL.fullModel.parameters[pid];
-  const meta = PARAM_META[pid] || {};
+  const meta = MODEL.fullModel.parameters[pid] || {};
   const key = b64(pid);
   const wrap = document.createElement("div");
   wrap.className="item";
