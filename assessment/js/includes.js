@@ -47,7 +47,46 @@ class AssessmentIncludeSystem {
       if (yearEl) {
         yearEl.textContent = new Date().getFullYear().toString();
       }
+      
+      // Load version information for footer
+      this.loadVersion();
     }, 0);
+  }
+
+  async loadVersion() {
+    setTimeout(async () => {
+      const versionElement = document.getElementById('app-version');
+      if (!versionElement) return;
+
+      try {
+        const response = await fetch('../version.json');
+        if (!response.ok) throw new Error('Failed to load version');
+        
+        const data = await response.json();
+        const buildDate = new Date(data.buildDate);
+        const dateStr = buildDate.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        versionElement.textContent = `v${data.version} • ${dateStr}`;
+        versionElement.title = `Build: ${data.buildNumber}\nCommit: ${data.gitCommit}\nEnvironment: ${data.environment}`;
+        
+      } catch (error) {
+        // Fallback to current date/time
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric'
+        });
+        versionElement.textContent = `v5.0.0 • ${dateStr}`;
+        console.warn('Could not load version.json from assessment page, using fallback');
+      }
+    }, 100);
   }
 }
 

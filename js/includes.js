@@ -105,7 +105,7 @@ class IncludeSystem {
           month: 'short', 
           day: 'numeric'
         });
-        versionElement.textContent = `v3.1.0 • ${dateStr}`;
+        versionElement.textContent = `v5.0.0 • ${dateStr}`;
         console.warn('Could not load version.json, using fallback');
       }
     }, 100);

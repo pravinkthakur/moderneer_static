@@ -69,7 +69,7 @@ class VersionDisplay {
       const buildNumber = now.toISOString().slice(0, 16).replace(/[-:T]/g, '').slice(0, 12); // YYYYMMDDHHMM
       
       this.versionData = {
-        version: '3.1.0',
+        version: '5.0.0',
         buildNumber: buildNumber,
         buildDate: now.toISOString(),
         gitCommit: 'local',
