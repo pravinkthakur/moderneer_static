@@ -1,6 +1,6 @@
 {
     "buildDate":  "2025-10-18T16:45:00.000Z",
-    "version":  "5.1.0",
+    "version":  "6.0.0",
     "gitCommit":  "a82e1e3",
     "environment":  "production",
     "features":  {
