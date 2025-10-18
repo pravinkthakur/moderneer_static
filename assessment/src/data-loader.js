@@ -48,17 +48,19 @@ class AssessmentDataLoader {
     try {
       console.log('🔄 Loading assessment configuration from JSON files...');
       
-      // Load all configuration files in parallel
+      // Load all configuration files in parallel, including parameter meta
       const [
         config,
         pillars, 
         rules,
-        scales
+        scales,
+        parameters
       ] = await Promise.all([
         this.loadJSON('config.json'),
         this.loadJSON('pillars.json'),
         this.loadJSON('rules.json'), 
-        this.loadJSON('scales.json')
+        this.loadJSON('scales.json'),
+        this.loadJSON('parameters.json')
       ]);
 
       // Validate loaded data
@@ -73,7 +75,8 @@ class AssessmentDataLoader {
         caps: rules.caps, 
         validationRules: rules.validationRules,
         scales: scales.scales,
-        scaleTypes: scales.scaleTypes
+        scaleTypes: scales.scaleTypes,
+        parameters: parameters.parameters
       };
 
       // Cache the result
@@ -109,7 +112,8 @@ class AssessmentDataLoader {
         'config.json': `${this.configApiUrl}config/full`,
         'pillars.json': `${this.configApiUrl}pillars`, 
         'rules.json': `${this.configApiUrl}rules`,
-        'scales.json': `${this.configApiUrl}scales`
+        'scales.json': `${this.configApiUrl}scales`,
+        'parameters.json': `${this.configApiUrl}parameters`
       };
       
       url = endpointMap[filename];
@@ -238,8 +242,7 @@ class AssessmentDataLoader {
         params: cap.parameters,
         logic: cap.logic,
         cap: cap.capValue,
-        // Convert conditions to legacy format
-        ...(cap.conditions[0] && {
+        ...(cap.conditions && cap.conditions[0] && {
           lt: cap.conditions[0].operator === '<' ? cap.conditions[0].value : undefined,
           value: cap.conditions[0].operator === '<=' ? cap.conditions[0].value : undefined
         })
@@ -249,7 +252,7 @@ class AssessmentDataLoader {
           name: pillar.name,
           parameters: pillar.parameters
         })),
-        parameters: {} // This would need to be populated from parameters.json
+        parameters: fullConfig.parameters // Now populated from API
       }
     };
 
@@ -319,4 +322,3 @@ if (document.readyState === 'loading') {
   initializeAssessment();
 }
 
-export { AssessmentDataLoader, initializeAssessment };
