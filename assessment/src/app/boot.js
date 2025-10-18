@@ -42,44 +42,8 @@ dataLoader.loadAll().then(fullConfig => {
 /* ---------- Backfill weights/slider meta ---------- */
 const TAPER8=[20,15,15,15,10,10,10,5], TAPER6=[20,20,15,15,15,15];
 function patchModel(){
-  const P = MODEL.fullModel.parameters;
-  Object.keys(P).forEach(pid=>{
-    PARAM_META[pid] = PARAM_META[pid] || {};
-    if(!PARAM_META[pid].purpose){
-      const pref = pid.split('.')[0];
-      PARAM_META[pid].purpose = DEFAULT_PURPOSE_BY_PREFIX[pref] || "Purpose: see checks below.";
-    }
-  });
-  for(const pid of Object.keys(P)){
-    const def = P[pid];
-    def.checks.forEach(ch=>{ if(!ch.type) ch.type="check"; });
-    const hasW = def.checks.some(ch=> typeof ch.w==="number");
-    if(!hasW){
-      const n=def.checks.length; let prof=(n===8?TAPER8:(n===6?TAPER6:null));
-      if(!prof){
-        prof = Array.from({length:n},(_,i)=> Math.max(8, Math.round(100*Math.pow(0.88,i))));
-        const s=prof.reduce((a,b)=>a+b,0); prof=prof.map(x=>Math.round(100*x/s));
-        const d=100-prof.reduce((a,b)=>a+b,0); if(d) prof[0]+=d;
-      }
-      def.checks.forEach((ch,i)=> ch.w = prof[i]);
-    } else {
-      const s = def.checks.reduce((a,ch)=>a+(ch.w||0),0);
-      if(s>0) def.checks.forEach(ch=> ch.w = +(ch.w*100/s).toFixed(2));
-    }
-    def.checks.forEach(ch=>{
-      if(ch.type==="check"){
-        const L=(ch.label||"").toLowerCase();
-        if(/coverage %|slo coverage|lineage|tagging/.test(L)){ ch.type="scale100"; }
-        else if(/coverage|%|adoption|frequency|rate|p95|median|mttr|lead time|time to|setup time/.test(L)){ ch.type="scale5"; }
-      }
-      if((ch.type==="scale5" || ch.type==="scale100") && !ch.scaleRef){
-        ch.scaleRef = (ch.type==="scale100") ? "generic_0_100" : "generic_0_5";
-      }
-      if((ch.type==="scale5" || ch.type==="scale100") && !ch.purpose){
-        const sc = SCALE_CATALOG[ch.scaleRef]; if(sc) ch.purpose = sc.purpose;
-      }
-    });
-  }
+  // All parameter meta is now loaded from MODEL.fullModel.parameters (API-driven)
+  // No static meta patching required
 patchModel();
 
 /* ---------- State & view ---------- */
