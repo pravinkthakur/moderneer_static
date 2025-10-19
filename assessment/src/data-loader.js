@@ -24,12 +24,14 @@ class AssessmentDataLoader {
                  window.location.hostname.startsWith('192.168.') ||
                  window.location.hostname.startsWith('10.0.');
     
-    // API Configuration - Use live assessment services
+    // API Configuration - Use live Vercel services
     this.configApiUrl = this.isDev 
       ? './data/'  // Local JSON files for development
-      : 'https://assessment-service.vercel.app/api/';  // Live config API on Vercel
+      : 'https://assessment-config-service-guwi0iomy.vercel.app/api/';  // Production config API
     
-    this.computeApiUrl = 'https://assessment-compute-service.vercel.app/api/';  // Live compute API (always use live)
+    this.computeApiUrl = this.isDev
+      ? 'http://localhost:3003/api/'
+      : 'https://assessment-compute-service-6fj2z82oo.vercel.app/api/';  // Production compute API
     
     this.useAPI = !this.isDev;
     this.loaded = false;
