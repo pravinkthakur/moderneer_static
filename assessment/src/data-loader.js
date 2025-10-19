@@ -27,9 +27,9 @@ class AssessmentDataLoader {
     // API Configuration - Use live assessment services
     this.configApiUrl = this.isDev 
       ? './data/'  // Local JSON files for development
-      : 'https://api.assessment.config.moderneer.co.uk/api/';  // Live config API
+      : 'https://assessment-service.vercel.app/api/';  // Live config API on Vercel
     
-    this.computeApiUrl = 'https://api.assessment.compute.moderneer.co.uk/api/';  // Live compute API (always use live)
+    this.computeApiUrl = 'https://assessment-compute-service.vercel.app/api/';  // Live compute API (always use live)
     
     this.useAPI = !this.isDev;
     this.loaded = false;
@@ -107,9 +107,9 @@ class AssessmentDataLoader {
     let url;
     
     if (this.useAPI) {
-      // Map filename to API endpoint
+      // Map filename to API endpoint - these endpoints return {success: true, data: {...}}
       const endpointMap = {
-        'config.json': `${this.configApiUrl}config/full`,
+        'config.json': `${this.configApiUrl}config`,
         'pillars.json': `${this.configApiUrl}pillars`, 
         'rules.json': `${this.configApiUrl}rules`,
         'scales.json': `${this.configApiUrl}scales`,
@@ -148,8 +148,9 @@ class AssessmentDataLoader {
       const json = await response.json();
       console.log(`✅ Received data for ${filename}:`, json);
       
-      // Config API returns data directly, no wrapper
-      const data = json;
+      // API returns {success: true, data: {...}}, extract data
+      // Local files return data directly
+      const data = this.useAPI && json.success ? json.data : json;
       
       console.log(`✅ Loaded ${filename} from ${this.useAPI ? 'Config API' : 'local'} (v${data.version || 'unknown'})`);
       return data;

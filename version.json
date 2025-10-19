@@ -1,6 +1,6 @@
 {
-    "buildDate":  "2025-10-18T16:45:00.000Z",
-    "version":  "6.1.0",
+    "buildDate":  "2025-10-18T17:00:00.000Z",
+    "version":  "7.0.0",
     "gitCommit":  "a82e1e3",
     "environment":  "production",
     "features":  {
@@ -10,5 +10,5 @@
                      "radarChart":  true,
                      "cleanArchitecture":  true
                  },
-    "buildNumber":  "202510181645"
+    "buildNumber":  "202510181700"
 }
