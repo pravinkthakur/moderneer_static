@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Integration Test - Moderneer Assessment</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 { color: #2563eb; }
+        .endpoint {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .endpoint h3 {
+            margin-top: 0;
+            color: #1e293b;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .status.pending { background: #fef3c7; color: #92400e; }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        .url {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            color: #64748b;
+            margin: 10px 0;
+        }
+        .response {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 300px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        button.test-all {
+            background: #10b981;
+        }
+        button.test-all:hover {
+            background: #059669;
+        }
+        .error-msg {
+            color: #dc2626;
+            margin-top: 10px;
+        }
+        .instructions {
+            background: #dbeafe;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2563eb;
+        }
+        .instructions h2 {
+            margin-top: 0;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Moderneer API Integration Test</h1>
+    
+    <div class="instructions">
+        <h2>📋 Instructions</h2>
+        <ol>
+            <li>Update the API URLs below with your actual Vercel deployment URLs</li>
+            <li>Click "Test All Endpoints" or test individual endpoints</li>
+            <li>Check that all endpoints return success status</li>
+            <li>Copy the working URLs to your frontend code</li>
+        </ol>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <button class="test-all" onclick="testAll()">🚀 Test All Endpoints</button>
+        <button onclick="clearAll()">🗑️ Clear Results</button>
+    </div>
+
+    <div id="endpoints"></div>
+
+    <script>
+        // ⚠️ UPDATE THESE URLs WITH YOUR ACTUAL VERCEL DEPLOYMENT URLS
+        const CONFIG_SERVICE_URL = 'https://assessment-service.vercel.app/api';
+        const COMPUTE_SERVICE_URL = 'https://assessment-compute-service.vercel.app/api';
+
+        const endpoints = [
+            {
+                name: 'Health Check',
+                url: `${CONFIG_SERVICE_URL.replace('/api', '')}/health`,
+                description: 'Check if the config service is running'
+            },
+            {
+                name: 'Config',
+                url: `${CONFIG_SERVICE_URL}/config`,
+                description: 'Get assessment configuration'
+            },
+            {
+                name: 'Pillars',
+                url: `${CONFIG_SERVICE_URL}/pillars`,
+                description: 'Get all pillars with their parameters'
+            },
+            {
+                name: 'Rules',
+                url: `${CONFIG_SERVICE_URL}/rules`,
+                description: 'Get all rules (gates, caps, validation)'
+            },
+            {
+                name: 'Scales',
+                url: `${CONFIG_SERVICE_URL}/scales`,
+                description: 'Get scale definitions'
+            },
+            {
+                name: 'Parameters',
+                url: `${CONFIG_SERVICE_URL}/parameters`,
+                description: 'Get parameter metadata (NEW ENDPOINT)'
+            },
+            {
+                name: 'Metadata',
+                url: `${CONFIG_SERVICE_URL}/metadata`,
+                description: 'Get full metadata with versions and counts'
+            },
+            {
+                name: 'Compute Health',
+                url: `${COMPUTE_SERVICE_URL.replace('/api', '')}/health`,
+                description: 'Check if the compute service is running'
+            }
+        ];
+
+        function createEndpointHTML(endpoint, index) {
+            return `
+                <div class="endpoint" id="endpoint-${index}">
+                    <h3>
+                        ${endpoint.name}
+                        <span class="status pending" id="status-${index}">⏱️ Not Tested</span>
+                    </h3>
+                    <p>${endpoint.description}</p>
+                    <div class="url">${endpoint.url}</div>
+                    <button onclick="testEndpoint(${index})">Test Endpoint</button>
+                    <div id="response-${index}"></div>
+                </div>
+            `;
+        }
+
+        function renderEndpoints() {
+            const container = document.getElementById('endpoints');
+            container.innerHTML = endpoints.map((ep, idx) => createEndpointHTML(ep, idx)).join('');
+        }
+
+        async function testEndpoint(index) {
+            const endpoint = endpoints[index];
+            const statusEl = document.getElementById(`status-${index}`);
+            const responseEl = document.getElementById(`response-${index}`);
+            
+            statusEl.className = 'status pending';
+            statusEl.textContent = '⏳ Testing...';
+            responseEl.innerHTML = '';
+
+            try {
+                const startTime = performance.now();
+                const response = await fetch(endpoint.url, {
+                    method: 'GET',
+                    cache: 'no-cache',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                const endTime = performance.now();
+                const duration = Math.round(endTime - startTime);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    statusEl.className = 'status success';
+                    statusEl.textContent = `✅ Success (${duration}ms)`;
+                    responseEl.innerHTML = `<div class="response">${JSON.stringify(data, null, 2)}</div>`;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '❌ Failed';
+                responseEl.innerHTML = `<div class="error-msg">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function testAll() {
+            for (let i = 0; i < endpoints.length; i++) {
+                await testEndpoint(i);
+                // Small delay between requests to avoid overwhelming the server
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
+
+        function clearAll() {
+            endpoints.forEach((_, index) => {
+                const statusEl = document.getElementById(`status-${index}`);
+                const responseEl = document.getElementById(`response-${index}`);
+                statusEl.className = 'status pending';
+                statusEl.textContent = '⏱️ Not Tested';
+                responseEl.innerHTML = '';
+            });
+        }
+
+        // Initialize
+        renderEndpoints();
+    </script>
+</body>
+</html>
