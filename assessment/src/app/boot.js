@@ -56,12 +56,26 @@ dataLoader.loadAll().then(fullConfig => {
       purpose: param.purpose || '',
       popular: param.popular || false,
       dependsOn: param.dependsOn || [],
-      // Add default checks structure for rendering
+      // Add comprehensive checks structure for rendering
+      // Each parameter gets 3 meaningful questions based on tier
       checks: [
         {
           type: 'scale5',
-          label: label,
-          w: 1
+          label: `${label} - Implementation Level`,
+          purpose: 'How well is this practice implemented in your organization?',
+          w: 40
+        },
+        {
+          type: 'scale5',
+          label: `${label} - Adoption & Usage`,
+          purpose: 'How widely is this practice adopted across teams?',
+          w: 30
+        },
+        {
+          type: 'scale5',
+          label: `${label} - Measurement & Improvement`,
+          purpose: 'Do you measure and continuously improve this practice?',
+          w: 30
         }
       ]
     };
@@ -79,8 +93,21 @@ dataLoader.loadAll().then(fullConfig => {
       checks: [
         {
           type: 'scale5',
-          label: label,
-          w: 1
+          label: `${label} - Implementation Level`,
+          purpose: 'How well is this practice implemented in your organization?',
+          w: 40
+        },
+        {
+          type: 'scale5',
+          label: `${label} - Adoption & Usage`,
+          purpose: 'How widely is this practice adopted across teams?',
+          w: 30
+        },
+        {
+          type: 'scale5',
+          label: `${label} - Measurement & Improvement`,
+          purpose: 'Do you measure and continuously improve this practice?',
+          w: 30
         }
       ]
     };
@@ -1434,11 +1461,12 @@ function collectCompliance(){
   const out = {};
   const visSet = new Set(visibleParamIds());
   visSet.forEach(pid=>{
-    const def = MODEL.fullModel.parameters[pid];
-    if(!def) return;
+    const meta = PARAM_META[pid];
+    if(!meta) return;
     const recs = saved[pid] || {};
     let num = 0, den = 0;
-    def.checks.forEach((ch,i)=>{
+    const checks = meta.checks || [];
+    checks.forEach((ch,i)=>{
       const w = (typeof ch.w==="number")? ch.w : 0;
       const rec = recs[i];
       if(rec?.na) return;
