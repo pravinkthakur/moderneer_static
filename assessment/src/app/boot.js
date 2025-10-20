@@ -23,20 +23,53 @@ document.addEventListener('DOMContentLoaded', function() {
 /* ---------- Model (weights, gates, caps) ---------- */
 // MODEL is now loaded dynamically from AssessmentDataLoader
 let MODEL = null;
+let PARAM_META = {};
 
 // Load assessment config and update MODEL
 const dataLoader = new AssessmentDataLoader();
 dataLoader.loadAll().then(fullConfig => {
+  console.log('🔧 Building MODEL from fullConfig:', fullConfig);
+  
+  // Build weights object from pillars
+  const weights = {};
+  fullConfig.pillars.forEach(pillar => {
+    weights[pillar.name] = pillar.weight || 10;
+  });
+  
+  // Build PARAM_META from parameters
+  PARAM_META = {};
+  const allParamIds = Object.keys(fullConfig.parameters || {});
+  allParamIds.forEach(paramId => {
+    const param = fullConfig.parameters[paramId];
+    PARAM_META[paramId] = {
+      label: paramId.split('.')[1]?.replace(/_/g, ' ').toUpperCase() || paramId,
+      tier: param.tier || 1,
+      pillar: paramId.split('.')[0] || 'unknown',
+      purpose: param.purpose || '',
+      popular: param.popular || false
+    };
+  });
+  
+  // Build core24 list from popular parameters
+  const core24 = allParamIds.filter(paramId => fullConfig.parameters[paramId]?.popular === true);
+  
   MODEL = {
-    weights: fullConfig.config.weights,
-    gates: fullConfig.gates,
-    caps: fullConfig.caps,
-    core24: fullConfig.config.core24,
+    weights: weights,
+    gates: fullConfig.gates || [],
+    caps: fullConfig.caps || [],
+    core24: core24.length > 0 ? core24 : allParamIds.slice(0, 24),
     fullModel: {
       pillars: fullConfig.pillars,
-      parameters: fullConfig.config.parameters
+      parameters: fullConfig.parameters || {}
     }
   };
+  
+  console.log('✅ MODEL built successfully');
+  console.log('   Weights:', Object.keys(MODEL.weights).length, 'pillars');
+  console.log('   PARAM_META:', Object.keys(PARAM_META).length, 'parameters');
+  console.log('   Core24:', MODEL.core24.length, 'parameters');
+  console.log('   Gates:', MODEL.gates.length);
+  console.log('   Caps:', MODEL.caps.length);
   
   // Initialize UI after MODEL is loaded
   patchModel();
