@@ -40,23 +40,37 @@ class AssessmentDataLoader {
       console.log('🔄 Loading assessment configuration from API...');
       console.log(`📡 Config API: ${this.configApiUrl}`);
       
-      // Load all configuration files in parallel, including parameter meta
+      // Load all configuration files in parallel, including parameter meta and detailed checks
       const [
         config,
         pillars, 
         rules,
         scales,
-        parameters
+        parameters,
+        detailedChecks
       ] = await Promise.all([
         this.loadJSON('config.json'),
         this.loadJSON('pillars.json'),
         this.loadJSON('rules.json'), 
         this.loadJSON('scales.json'),
-        this.loadJSON('parameters.json')
+        this.loadJSON('parameters.json'),
+        this.loadJSON('checks.json')
       ]);
 
       // Validate loaded data
       this.validateConfig(config, pillars, rules, scales);
+
+      // Merge detailed checks into parameters
+      const parametersWithChecks = { ...parameters.parameters };
+      if (detailedChecks && detailedChecks.checks) {
+        Object.keys(detailedChecks.checks).forEach(paramId => {
+          if (parametersWithChecks[paramId]) {
+            // Replace generic checks with detailed checks
+            parametersWithChecks[paramId].checks = detailedChecks.checks[paramId];
+          }
+        });
+        console.log(`✅ Merged detailed checks for ${Object.keys(detailedChecks.checks).length} parameters`);
+      }
 
       // Combine into full configuration
       const fullConfig = {
@@ -68,7 +82,7 @@ class AssessmentDataLoader {
         validationRules: rules.validationRules,
         scales: scales.scales,
         scaleTypes: scales.scaleTypes,
-        parameters: parameters.parameters
+        parameters: parametersWithChecks
       };
 
       // Cache the result
@@ -106,7 +120,8 @@ class AssessmentDataLoader {
         'pillars.json': `${this.configApiUrl}pillars`, 
         'rules.json': `${this.configApiUrl}rules`,
         'scales.json': `${this.configApiUrl}scales`,
-        'parameters.json': `${this.configApiUrl}parameters`
+        'parameters.json': `${this.configApiUrl}parameters`,
+        'checks.json': `${this.configApiUrl}checks`
       };
       
       url = endpointMap[filename];
