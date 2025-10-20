@@ -23,8 +23,9 @@ Slide N+3: 180-Day Plan
 - 3 bullets
 Slide N+4: 365-Day Plan
 - 3 bullets`;
+}
 
-function promptNarrative(ctx){
+export function promptNarrative(ctx){
   const { byPillar = {}, finalIndex } = ctx || {};
   const top = Object.entries(byPillar).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${k}: ${v.toFixed(1)}`).join(", ");
   return [
@@ -49,7 +50,7 @@ Slide N+4: 365-Day Plan
 - 3 bullets`;
 }
 
-function promptFullReport(ctx){
+export function promptFullReport(ctx){
   const { finalIndex, finalScale, byPillar = {} } = ctx || {};
   return [
     "Generate a full report style text for the maturity assessment.",
@@ -72,5 +73,3 @@ Slide N+3: 180-Day Plan
 Slide N+4: 365-Day Plan
 - 3 bullets`;
 }
-
-export { promptExecutiveSummary, promptNarrative, promptFullReport };

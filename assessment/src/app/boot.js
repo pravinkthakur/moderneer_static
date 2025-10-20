@@ -37,6 +37,15 @@ dataLoader.loadAll().then(fullConfig => {
       parameters: fullConfig.config.parameters
     }
   };
+  
+  // Initialize UI after MODEL is loaded
+  patchModel();
+  if (typeof render === 'function') {
+    render();
+  }
+}).catch(error => {
+  console.error('Failed to initialize assessment:', error);
+  alert('Failed to load assessment configuration. Please refresh the page.');
 });
 
 /* ---------- Backfill weights/slider meta ---------- */
@@ -44,7 +53,7 @@ const TAPER8=[20,15,15,15,10,10,10,5], TAPER6=[20,20,15,15,15,15];
 function patchModel(){
   // All parameter meta is now loaded from MODEL.fullModel.parameters (API-driven)
   // No static meta patching required
-patchModel();
+}
 
 /* ---------- State & view ---------- */
 const STORAGE_KEYS = { core:"oemm_core24_seq", full:"oemm_full12_seq" };
@@ -1467,5 +1476,4 @@ function renderBreakdown(byPillar){
 /* Make functions globally available */
 window.setLastCompute = setLastCompute;
 
-/* Init */
-render();
+/* Init - render() is now called after MODEL loads in the dataLoader.loadAll().then() callback */

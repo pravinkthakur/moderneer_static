@@ -1,6 +1,6 @@
 {
-    "buildDate":  "2025-10-20T20:00:00.000Z",
-    "version":  "7.1.2",
+    "buildDate":  "2025-10-20T20:15:00.000Z",
+    "version":  "7.1.3",
     "gitCommit":  "latest",
     "environment":  "production",
     "features":  {
@@ -11,7 +11,7 @@
                      "cleanArchitecture":  true,
                      "customDomainAPIs":  true,
                      "corsFix":  true,
-                     "missingFilesFix":  true
+                     "renderFix":  true
                  },
-    "buildNumber":  "202510202000"
+    "buildNumber":  "202510202015"
 }
