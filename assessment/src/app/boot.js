@@ -1406,11 +1406,29 @@ document.addEventListener('DOMContentLoaded', function() {
   const btnReset = document.getElementById("btnReset");
   const btnExport = document.getElementById("btnExport");
 
-  if (btnReport) btnReport.addEventListener("click", ()=>{ const results = compute(true); openTabbedModal("Detailed Report", buildReportTabs(results)); });
+  if (btnReport) btnReport.addEventListener("click", ()=>{ 
+    // Guard: Check if MODEL is loaded
+    if (!MODEL) {
+      alert('⏳ Assessment configuration is still loading. Please wait a moment and try again.');
+      console.error('❌ MODEL not loaded yet - cannot generate report');
+      return;
+    }
+    try {
+      const results = compute(true); 
+      openTabbedModal("Detailed Report", buildReportTabs(results));
+    } catch (error) {
+      console.error('❌ Error generating report:', error);
+      alert('Error generating report: ' + error.message);
+    }
+  });
   if (btnSave) btnSave.addEventListener("click", saveAll);
   if (btnLoad) btnLoad.addEventListener("click", loadAll);
   if (btnReset) btnReset.addEventListener("click", resetAll);
   if (btnExport) btnExport.addEventListener("click", ()=>{
+    if (!MODEL) {
+      alert('⏳ Assessment configuration is still loading. Please wait and try again.');
+      return;
+    }
     const payload = { module:currentModule, view:currentView, ts:new Date().toISOString(), selections:getSaved(), results:compute(true) };
     const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
     const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`moderneer_oemm_${currentModule}_${Date.now()}.json`;
@@ -1665,6 +1683,25 @@ function collectCompliance(){
 }
 
 function compute(silent=false){
+  // Guard: Ensure MODEL is loaded before computing
+  if (!MODEL || !MODEL.fullModel || !MODEL.fullModel.pillars) {
+    console.error('❌ Cannot compute: MODEL not fully loaded');
+    if (!silent) {
+      alert('⏳ Assessment configuration is still loading. Please wait a moment and try again.');
+    }
+    return {
+      perParam: {},
+      byPillar: {},
+      overallIndexPre: null,
+      overallScalePre: null,
+      afterGatesScale: null,
+      finalScale: null,
+      finalIndex: null,
+      gates: [],
+      caps: []
+    };
+  }
+  
   const comp = collectCompliance();
   if(!silent){
     Object.keys(comp).forEach(pid=>{
