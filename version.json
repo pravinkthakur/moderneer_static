@@ -1,6 +1,6 @@
 {
-    "buildDate":  "2025-10-20T21:00:00.000Z",
-    "version":  "7.2.2",
+    "buildDate":  "2025-10-20T21:10:00.000Z",
+    "version":  "7.2.3",
     "gitCommit":  "latest",
     "environment":  "production",
     "features":  {
@@ -13,5 +13,5 @@
                      "corsFix":  true,
                      "parameterChecksFix":  true
                  },
-    "buildNumber":  "202510202100"
+    "buildNumber":  "202510202110"
 }

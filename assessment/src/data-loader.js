@@ -19,21 +19,10 @@ class AssessmentDataLoader {
     this.cache = new Map();
     
     // Determine if we're running in development mode
-    this.isDev = window.location.hostname === 'localhost' || 
-                 window.location.hostname === '127.0.0.1' ||
-                 window.location.hostname.startsWith('192.168.') ||
-                 window.location.hostname.startsWith('10.0.');
-    
-    // API Configuration - Use live Vercel services (direct URLs with CORS fixed)
-    this.configApiUrl = this.isDev 
-  ? './data/'
-  : 'https://api.assessment.config.moderneer.co.uk/';  // Production custom domain
-    
-    this.computeApiUrl = this.isDev
-  ? 'http://localhost:3003/api/'
-  : 'https://api.assessment.compute.moderneer.co.uk/';  // Production custom domain
-    
-    this.useAPI = !this.isDev;
+    // Always use hosted API endpoints
+    this.configApiUrl = 'https://api.assessment.config.moderneer.co.uk/';
+    this.computeApiUrl = 'https://api.assessment.compute.moderneer.co.uk/';
+    this.useAPI = true;
     this.loaded = false;
     
     console.log(`� Assessment Platform Mode: ${this.useAPI ? 'LIVE APIs' : 'Development'}`);
