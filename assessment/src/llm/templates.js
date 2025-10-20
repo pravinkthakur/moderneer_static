@@ -72,4 +72,5 @@ Slide N+3: 180-Day Plan
 Slide N+4: 365-Day Plan
 - 3 bullets`;
 }
-}
+
+export { promptExecutiveSummary, promptNarrative, promptFullReport };
