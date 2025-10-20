@@ -230,8 +230,8 @@ function renderByTier(){
   });
 }
 function renderParam(pillarName, pid, showPillarChip=false){
-  const def = MODEL.fullModel.parameters[pid];
-  const meta = MODEL.fullModel.parameters[pid] || {};
+  const meta = PARAM_META[pid] || {};
+  const def = MODEL.fullModel.parameters[pid] || {};
   const key = b64(pid);
   const wrap = document.createElement("div");
   wrap.className="item";
@@ -239,7 +239,7 @@ function renderParam(pillarName, pid, showPillarChip=false){
     <header>
       <div class="titleWrap">
         ${meta.popular?'<span class="ico star" title="Popular ★" data-pop="'+pid+'">★</span>':''}
-        <div style="font-weight:700">${def.label}</div>
+        <div style="font-weight:700">${meta.label || pid}</div>
         ${showPillarChip?`<span class="pill">${pillarName}</span>`:""}
         <span class="tierTag">Tier ${meta.tier||"—"}</span>
         <div class="icons">
@@ -256,7 +256,8 @@ function renderParam(pillarName, pid, showPillarChip=false){
   `;
   const area = wrap.querySelector(`#checks-${key}`);
   const saved = getSaved()[pid] || {};
-  def.checks.forEach((ch,i)=>{
+  const checks = meta.checks || [];
+  checks.forEach((ch,i)=>{
     const row = document.createElement("div"); row.className="row";
     const type = ch.type || "check";
     const w = (typeof ch.w==="number")? ch.w : 0;
@@ -1488,21 +1489,34 @@ function compute(silent=false){
   const overallIndexPre = sumW? (sumWx/sumW) : null;
   const overallScalePre = indexToScale(overallIndexPre);
   const gates = MODEL.gates.map(g=>{
-    const vals = g.params.map(pid => comp[pid]?.scale ?? null);
-    const pass = vals.every(v=>v!=null) && ((g.logical==="AND") ? vals.every(v=>v>=g.threshold) : vals.some(v=>v>=g.threshold));
+    const vals = g.parameters.map(pid => comp[pid]?.scale ?? null);
+    const pass = vals.every(v=>v!=null) && ((g.logic==="AND") ? vals.every(v=>v>=g.threshold) : vals.some(v=>v>=g.threshold));
     return { id:g.id, label:g.label, pass };
   });
   const allPass = gates.every(x=>x.pass);
   let afterGatesScale = overallScalePre;
   if(afterGatesScale!=null && !allPass) afterGatesScale = Math.min(afterGatesScale,3.0);
   const caps = MODEL.caps.map(c=>{
-    const vals = c.params.map(pid => comp[pid]?.scale ?? null);
     let trigger=false;
-    if(vals.every(v=>v!=null)){
-      if(c.logic==="OR"){ trigger = (vals[0] < c.lt) || (vals[1] < c.lt); }
-      else if(c.logic==="LE"){ trigger = (vals[0] <= c.value); }
+    if(c.conditions && c.conditions.length > 0){
+      const conditionResults = c.conditions.map(cond => {
+        const paramScale = comp[cond.parameter]?.scale ?? null;
+        if(paramScale === null) return false;
+        
+        if(cond.operator === '<') return paramScale < cond.value;
+        if(cond.operator === '<=') return paramScale <= cond.value;
+        if(cond.operator === '>') return paramScale > cond.value;
+        if(cond.operator === '>=') return paramScale >= cond.value;
+        return false;
+      });
+      
+      if(c.logic === 'OR'){
+        trigger = conditionResults.some(r => r);
+      } else {
+        trigger = conditionResults.every(r => r);
+      }
     }
-    return { label:c.label, trigger, cap:c.cap };
+    return { label:c.label, trigger, cap:c.capValue };
   });
   let finalScale = afterGatesScale;
   caps.forEach(c=>{ if(c.trigger) finalScale = Math.min(finalScale, c.cap); });

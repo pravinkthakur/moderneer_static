@@ -1,6 +1,6 @@
 {
-    "buildDate":  "2025-10-20T21:30:00.000Z",
-    "version":  "7.2.4",
+    "buildDate":  "2025-10-20T21:45:00.000Z",
+    "version":  "7.2.5",
     "gitCommit":  "latest",
     "environment":  "production",
     "features":  {
@@ -12,7 +12,8 @@
                      "customDomainAPIs":  true,
                      "corsFix":  true,
                      "parameterChecksFix":  true,
-                     "apiOnlyMode":  true
+                     "apiOnlyMode":  true,
+                     "apiDataStructureFix":  true
                  },
-    "buildNumber":  "202510202130"
+    "buildNumber":  "202510202145"
 }
