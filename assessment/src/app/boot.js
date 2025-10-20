@@ -282,7 +282,7 @@ function scopeLabel(){
   try { return (currentModule==="core") ? "Core 24" : "Full 12 Pillars"; }
   catch(e){ return "Core 24"; }
 }
-}
+
 function generateExecutiveSummary(results){
   const bandTxt = band(results.finalScale);
   const idx = results.finalIndex||0;
