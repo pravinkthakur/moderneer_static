@@ -41,12 +41,42 @@ dataLoader.loadAll().then(fullConfig => {
   const allParamIds = Object.keys(fullConfig.parameters || {});
   allParamIds.forEach(paramId => {
     const param = fullConfig.parameters[paramId];
+    const label = paramId.split('.')[1]?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || paramId;
+    
     PARAM_META[paramId] = {
-      label: paramId.split('.')[1]?.replace(/_/g, ' ').toUpperCase() || paramId,
+      label: label,
       tier: param.tier || 1,
       pillar: paramId.split('.')[0] || 'unknown',
       purpose: param.purpose || '',
-      popular: param.popular || false
+      popular: param.popular || false,
+      dependsOn: param.dependsOn || [],
+      // Add default checks structure for rendering
+      checks: [
+        {
+          type: 'scale5',
+          label: label,
+          w: 1
+        }
+      ]
+    };
+  });
+  
+  // Also add checks to fullModel.parameters for backward compatibility
+  fullConfig.parameters = fullConfig.parameters || {};
+  Object.keys(fullConfig.parameters).forEach(paramId => {
+    const param = fullConfig.parameters[paramId];
+    const label = paramId.split('.')[1]?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || paramId;
+    
+    fullConfig.parameters[paramId] = {
+      ...param,
+      label: label,
+      checks: [
+        {
+          type: 'scale5',
+          label: label,
+          w: 1
+        }
+      ]
     };
   });
   

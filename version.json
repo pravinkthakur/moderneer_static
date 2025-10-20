@@ -1,6 +1,6 @@
 {
-    "buildDate":  "2025-10-20T20:30:00.000Z",
-    "version":  "7.2.0",
+    "buildDate":  "2025-10-20T20:40:00.000Z",
+    "version":  "7.2.1",
     "gitCommit":  "latest",
     "environment":  "production",
     "features":  {
@@ -11,7 +11,7 @@
                      "cleanArchitecture":  true,
                      "customDomainAPIs":  true,
                      "corsFix":  true,
-                     "modelFix":  true
+                     "parameterChecksFix":  true
                  },
-    "buildNumber":  "202510202030"
+    "buildNumber":  "202510202040"
 }
