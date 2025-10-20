@@ -1529,8 +1529,59 @@ function generateRadarChart(results) {
   return radarSvg;
 }
 
+// REASONING: buildReportTabs creates tab structure for detailed report modal
+// Each tab has an ID, title, and HTML content generated from compute results
+// fullTab was undefined because it needs to be generated here, not referenced from DOM
 function buildReportTabs(results){
+  // Overall metrics card
+  const overallHTML = `
+    <div class="kpis">
+      <div class="kpi"><div class="tiny">Overall (index 0–100)</div><strong>${fmt(results.finalIndex,1)}</strong></div>
+      <div class="kpi"><div class="tiny">Overall (scale 1–5)</div><strong>${fmt(results.finalScale,1)}</strong></div>
+      <div class="kpi"><div class="tiny">Band</div><strong>${band(results.finalScale)}</strong></div>
+      <div class="kpi"><div class="tiny">Gates passed</div><strong>${results.gates.filter(g=>g.pass).length}/${results.gates.length}</strong></div>
+    </div>
+  `;
+  
+  // Gates and caps status
+  let gatesHTML = `<div style="display:grid;gap:10px">`;
+  results.gates.forEach(g=>{
+    const cls = g.pass? "score-good" : "score-bad";
+    gatesHTML += `<div class="pillar-card"><div style="display:flex;justify-content:space-between;align-items:center"><div>${g.label}</div><span class="score-badge ${cls}">${g.pass?"PASS":"FAIL"}</span></div></div>`;
+  });
+  gatesHTML += `<div class="tiny">Caps</div>`;
+  results.caps.forEach(c=>{
+    const cls = c.trigger? "score-bad" : "score-good";
+    gatesHTML += `<div class="pillar-card"><div style="display:flex;justify-content:space-between;align-items:center"><div>${c.label}</div><span class="score-badge ${cls}">${c.trigger?"ACTIVE":"—"}</span></div></div>`;
+  });
+  gatesHTML += `</div>`;
+  
+  // Pillar overview
+  const pillarHTML = pillarCardsHTML(results.byPillar);
+  
+  // Next steps
+  const detailsHTML = nextStepsHTML(results);
+  
+  // Full report tab with generation buttons
+  const fullTab = `
+    <div class="fullreport">
+      <div class="toolbar">
+        <button class="btn" id="btnGenFull">Generate full report</button>
+        <button class="btn" id="btnCopyFull" data-target="fullText">Copy full report</button>
+        <button class="btn" id="btnDownloadFull">Download .md</button>
+      </div>
+      <div class="report" id="fullText">(click "Generate full report")</div>
+    </div>`;
+  
+  // Return all tabs with their HTML content
   return [
+    {id:"overall", title:"Overall", html: overallHTML},
+    {id:"gates", title:"Critical Gates & Caps", html: gatesHTML},
+    {id:"pillars", title:"Pillar Overview", html: pillarHTML},
+    {id:"radar", title:"Radar Chart", html: generateRadarChart(results)},
+    {id:"next", title:"Further Details", html: detailsHTML},
+    {id:"exec", title:"Executive Summary", html: generateExecutiveSummary(results)},
+    {id:"narrative", title:"Narrative", html: generateNarrative(results)},
     {id:"full", title:"Full Report", html: fullTab},
     {id:"analyst", title:"Analyst Lens", html: analystHTML(results)}
   ];
