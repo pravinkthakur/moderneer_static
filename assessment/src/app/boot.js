@@ -146,13 +146,29 @@ dataLoader.loadAll().then(fullConfig => {
   // Build core24 list from popular parameters
   const core24 = allParamIds.filter(paramId => fullConfig.parameters[paramId]?.popular === true);
   
+  // Filter pillar parameters to only include those that exist in fullConfig.parameters
+  const validatedPillars = fullConfig.pillars.map(pillar => {
+    const validParams = pillar.parameters.filter(paramId => {
+      const exists = fullConfig.parameters.hasOwnProperty(paramId);
+      if (!exists) {
+        console.warn(`⚠️ Pillar "${pillar.name}" references missing parameter: ${paramId}`);
+      }
+      return exists;
+    });
+    
+    return {
+      ...pillar,
+      parameters: validParams
+    };
+  });
+  
   MODEL = {
     weights: weights,
     gates: fullConfig.gates || [],
     caps: fullConfig.caps || [],
     core24: core24.length > 0 ? core24 : allParamIds.slice(0, 24),
     fullModel: {
-      pillars: fullConfig.pillars,
+      pillars: validatedPillars,
       parameters: fullConfig.parameters || {}
     }
   };
@@ -494,6 +510,19 @@ function nextStepsHTML(results){
   const saved = getSaved();
   visibleParamIds().forEach(pid=>{
     const def = MODEL.fullModel.parameters[pid];
+    
+    // Safety check: skip if parameter definition not found
+    if (!def) {
+      console.warn(`⚠️ Parameter ${pid} not found in MODEL.fullModel.parameters`);
+      return;
+    }
+    
+    // Safety check: skip if no checks defined
+    if (!def.checks || !Array.isArray(def.checks)) {
+      console.warn(`⚠️ Parameter ${pid} has no checks array`);
+      return;
+    }
+    
     const recs = [];
     def.checks.forEach((ch,i)=>{
       const s = saved[pid]?.[i];
