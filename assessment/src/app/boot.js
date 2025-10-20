@@ -26,10 +26,374 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+/* ---------- Scales (with purpose/anchors) - from October 17th ---------- */
+const SCALE_CATALOG = {
+  p95_lead_time:{label:"P95 Lead Time",purpose:"Shorten idea→production to tighten feedback loops.",anchors:["0 = ≥20 days","1 = ~15 days","2 = ~10 days","3 = ~5 days","4 = ~2 days","5 = ≤1 day"]},
+  deploy_frequency:{label:"Deployment Frequency",purpose:"Increase safe delivery cadence to reduce batch size.",anchors:["0 = Monthly","1 = Bi-weekly","2 = Weekly","3 = 2–3×/week","4 = Daily","5 = Hourly"]},
+  change_failure_rate:{label:"Change Failure Rate",purpose:"Ship safely by reducing incidents per deployment.",anchors:["0 = ≥40%","2 = ~25%","3 = ~15%","4 = ~8%","5 = ≤5% (↓ is better)"]},
+  ci_feedback_time:{label:"CI Feedback Time",purpose:"Tighten developer loop to enable small, frequent changes.",anchors:["0 = ≥60m","1 = 45m","2 = 30m","3 = 20m","4 = 15m","5 = ≤10m"]},
+  mttr_scale:{label:"MTTR",purpose:"Recover fast to protect user outcomes & error budgets.",anchors:["0 = ≥2 days","2 = ~8h","3 = ~2h","4 = ~45m","5 = ≤15m"]},
+  slo_coverage_pct:{label:"SLO Coverage %",purpose:"Ensure reliability is defined where it matters.",anchors:["0–100% of services with SLOs"]},
+  lineage_coverage_pct:{label:"Outcome Lineage %",purpose:"Trace PR→Feature→Event→KPI to attribute impact.",anchors:["0–100% merged PRs with lineage"]},
+  eng_cust_hours:{label:"Engineer–Customer Hours",purpose:"Bring engineers closer to users to reduce rework.",anchors:["0 = 0h/qtr","1 = 1h","2 = 2h","3 = 4h","4 = 6h","5 = ≥8h per engineer/quarter"]},
+  tagging_coverage_pct:{label:"Tagging Coverage %",purpose:"Expose cost-to-serve for financial decisions.",anchors:["0–100% resources correctly tagged"]},
+  generic_0_5:{label:"Maturity (0–5)",purpose:"Rate the maturity of this capability.",anchors:["0 = Not at all","1 = Ad-hoc","2 = Emerging","3 = Defined","4 = Managed","5 = Optimised"]},
+  generic_0_100:{label:"Coverage % (0–100)",purpose:"Estimate current coverage/completeness.",anchors:["0% = none → 100% = fully covered"]}
+};
+
+const DEFAULT_PURPOSE_BY_PREFIX = {
+  strat:"Align strategy to measurable outcomes and governance.",
+  cust:"Wire customer evidence and KPIs into daily work.",
+  prod:"De-risk bets via discovery, prioritisation and GTM readiness.",
+  arch:"Shape systems for safe change and extensibility.",
+  eng:"Automate build/test/deploy and enable paved paths.",
+  deliv:"Improve flow metrics and release safety.",
+  reliab:"Protect user outcomes with SLOs, incidents and budgets.",
+  sec:"Bake security, privacy and compliance into the lifecycle.",
+  docs:"Make decisions and knowledge discoverable and auditable.",
+  org:"Enable empowered, accountable, outcome-owning teams.",
+  econ:"Expose costs and link spend to value outcomes.",
+  data:"Ensure trustworthy data/ML with SLAs and oversight.",
+  xp:"Deliver fast, inclusive experiences with feedback loops."
+};
+
+const TAPER8=[20,15,15,15,10,10,10,5], TAPER6=[20,20,15,15,15,15];
+
 /* ---------- Model (weights, gates, caps) ---------- */
 // MODEL is now loaded dynamically from AssessmentDataLoader
 let MODEL = null;
 let PARAM_META = {};
+
+// OCTOBER 17TH HARDCODED MODEL - Complete parameter definitions with detailed checks
+// This serves as the authoritative source for parameter labels, checks, and scales
+// extracted from the working October 17th version (commit 5938486)
+const LEGACY_MODEL_PARAMETERS = {
+  "deliv.lead_time": { label:"Lead time for change", checks:[
+    {type:"check",  w:18, label:"DORA/VCS export available (90d)"},
+    {type:"scale5", w:22, label:"P95 lead time (lower is better)", scaleRef:"p95_lead_time", purpose:"Lower time → faster learning cycles."},
+    {type:"check",  w:14, label:"WIP limits enforced"},
+    {type:"check",  w:12, label:"Blocker ageing alerts"},
+    {type:"check",  w:10, label:"Small PR policy"},
+    {type:"check",  w:8,  label:"Pair/mob or PR-buddy rotation"},
+    {type:"check",  w:8,  label:"Trunk-based or short-lived branches"},
+    {type:"check",  w:8,  label:"Weekly review of slowest 10% PRs"}
+  ]},
+  "eng.test_strategy": { label:"Test strategy", checks:[
+    {type:"check",  w:18, label:"Test pyramid ratios documented"},
+    {type:"check",  w:16, label:"CI enforces min test gates"},
+    {type:"check",  w:12, label:"Contract tests between services"},
+    {type:"check",  w:10, label:"Test data mgmt (synthetic/anonymised)"},
+    {type:"check",  w:10, label:"Flake tracking & quarantine"},
+    {type:"check",  w:10, label:"Performance tests for critical paths"},
+    {type:"check",  w:8,  label:"AI-assisted/mutation testing used"},
+    {type:"scale5", w:16, label:"Median CI feedback time (lower is better)", scaleRef:"ci_feedback_time", purpose:"Tight loop enables small batches."}
+  ]},
+  "reliab.mttr_budget": { label:"MTTR & error budgets", checks:[
+    {type:"check",  w:16, label:"Error budgets defined per service"},
+    {type:"check",  w:14, label:"Budget burn dashboard live"},
+    {type:"check",  w:12, label:"Budget policy (throttle/gate) documented"},
+    {type:"check",  w:14, label:"≥2 policy activations last quarter"},
+    {type:"scale5", w:22, label:"Incident MTTR (lower is better)", scaleRef:"mttr_scale", purpose:"Faster recovery protects outcomes."},
+    {type:"check",  w:8,  label:"Auto-page/auto-ticket wired"},
+    {type:"check",  w:8,  label:"Budget breaches reviewed in planning"},
+    {type:"check",  w:6,  label:"Incident playbooks link to budget view"}
+  ]},
+  "reliab.slos_product": { label:"SLOs & product impact", checks:[
+    {type:"check",   w:16, label:"SLOs defined (latency/errors/availability)"},
+    {type:"check",   w:14, label:"SLOs declared in code/config"},
+    {type:"check",   w:14, label:"Error budget tied to release gating"},
+    {type:"check",   w:12, label:"Customer impact quantified (rev at risk)"},
+    {type:"check",   w:10, label:"Runbooks link from SLO alerts"},
+    {type:"check",   w:10, label:"SLO reviews in PM & on-call rituals"},
+    {type:"scale100",w:24, label:"SLO coverage % (higher is better)", scaleRef:"slo_coverage_pct", purpose:"Wider coverage → reliability by design."}
+  ]},
+  "cust.proximity": { label:"Customer proximity", checks:[
+    {type:"scale5",  w:28, label:"Engineer–customer hours (higher is better)", scaleRef:"eng_cust_hours", purpose:"Direct exposure prevents rework."},
+    {type:"check",   w:16, label:"Engineers join discovery/shadow sessions"},
+    {type:"check",   w:12, label:"Notes linked to backlog items"},
+    {type:"check",   w:12, label:"Quarterly pipeline of sessions planned"},
+    {type:"check",   w:10, label:"Post-release sessions / support ride-alongs"},
+    {type:"check",   w:8,  label:"Recordings accessible to squad"},
+    {type:"check",   w:7,  label:"Finding→change linkage logged"},
+    {type:"check",   w:7,  label:"Quarterly roll-up of insights & actions"}
+  ]},
+  "cust.outcome_trace": { label:"Outcome traceability (PR→Feature→Event→KPI)", checks:[
+    {type:"check",   w:16, label:"Event schema in PRs (owner, fields, KPI)"},
+    {type:"check",   w:14, label:"Deploy SHA joined to event stream"},
+    {type:"check",   w:12, label:"Flag/experiment ID linked to PR"},
+    {type:"check",   w:12, label:"KPI chart linked in PR/ticket"},
+    {type:"check",   w:12, label:"Automated lineage view exists"},
+    {type:"scale100",w:22, label:"Lineage coverage % (higher is better)", scaleRef:"lineage_coverage_pct", purpose:"Attribution coverage."},
+    {type:"check",   w:7,  label:"Attribution notes: expected vs actual delta"},
+    {type:"check",   w:5,  label:"Event data quality checks & alerts"}
+  ]},
+  "eng.cicd": { label:"CI/CD maturity", checks:[
+    {type:"check",  w:16, label:"Pipeline as code with reviews"},
+    {type:"check",  w:16, label:"Automated deploy to prod/staging"},
+    {type:"check",  w:14, label:"Post-deploy verification (smoke/health/KPIs)"},
+    {type:"check",  w:12, label:"Feature flags supported"},
+    {type:"check",  w:10, label:"Canary/blue-green available"},
+    {type:"check",  w:10, label:"Automated rollback hook"},
+    {type:"scale5", w:12, label:"Deployment frequency (higher is better)", scaleRef:"deploy_frequency", purpose:"Smaller batches, lower risk."},
+    {type:"scale5", w:10, label:"Change failure rate (lower is better)", scaleRef:"change_failure_rate", purpose:"Safety of delivery."}
+  ]},
+  "econ.cost_to_serve": { label:"Cost-to-serve visibility", checks:[
+    {type:"check",   w:18, label:"Tagging standards implemented"},
+    {type:"check",   w:14, label:"Dashboard: cost per request/segment"},
+    {type:"check",   w:12, label:"Allocation method documented"},
+    {type:"check",   w:12, label:"Trends vs SLO compliance visible"},
+    {type:"check",   w:10, label:"Alerts on anomaly spikes"},
+    {type:"check",   w:10, label:"Monthly review in squad & product forums"},
+    {type:"scale100",w:14, label:"Tagging coverage % (higher is better)", scaleRef:"tagging_coverage_pct", purpose:"Transparency of spend."},
+    {type:"check",   w:10, label:"Accuracy spot-checks performed"}
+  ]},
+  "strat.okr_link": { label:"Strategy → OKR linkage", checks:[
+    {label:"Strategy tree documented & versioned"},{label:"≥80% squads have OKRs with owners & dates"},
+    {label:"OKR quality rubric ≥ 3/5 per squad"},{label:"Quarterly OKR reviews with minutes"},
+    {label:"Each KR links to instrumented metric"},{label:"Dependencies mapped; cross-team alignment"},
+    {label:"Outcome deltas recorded post-quarter"},{label:"OKR registry searchable (tags)"}
+  ]},
+  "strat.portfolio_review": { label:"Portfolio bet review", checks:[
+    {label:"Quarterly portfolio review held"},{label:"Bets framed with expected KPI uplift ranges"},
+    {label:"Evidence pack template used"},{label:"% budget reallocated based on evidence"},
+    {label:"Kill/continue decisions logged"},{label:"Risks/assumptions register updated"},
+    {label:"Scenario analysis for top bets"},{label:"Portfolio dashboard org-visible"}
+  ]},
+  "strat.exec_narrative": { label:"Executive single narrative", checks:[
+    {label:"Narrative links customer/tech/finance"},{label:"Versioned & refreshed quarterly"},
+    {label:"Referenced in exec reviews/QBRs"},{label:"KPIs aligned to narrative themes"},
+    {label:"Org-wide accessible/searchable"},{label:"Feedback loop to update"}
+  ]},
+  "strat.decision_reversible": { label:"Decision cadence & reversibility", checks:[
+    {label:"ADRs mandatory for key decisions"},{label:"Decision latency tracked"},
+    {label:"Reversal protocol defined"},{label:"Reversal yield measured"},
+    {label:"Sunset/stop criteria documented"},{label:"Periodic retro on major decisions"}
+  ]},
+  "cust.kpi_literacy": { label:"KPI literacy", checks:[
+    {label:"KPI registry with owners & formulas"},{label:"KPI quiz ≥ threshold"},
+    {label:"Work items link to target KPI"},{label:"KPI dashboards in rituals"},
+    {label:"Pre-release KPI forecast captured"},{label:"Post-release delta reviewed"}
+  ]},
+  "cust.problem_framing": { label:"Problem framing", checks:[
+    {label:"Opportunity solution tree maintained"},{label:"Assumptions log with tests"},
+    {label:"Impact sizing documented"},{label:"Customer evidence attached"},
+    {label:"Alternatives compared"},{label:"Triad-approved problem statement"}
+  ]},
+  "prod.discovery": { label:"Discovery & experiments", checks:[
+    {label:"Experiment template with hypothesis & MDE"},{label:"Decision log links outcomes to experiments"},
+    {label:"Interview schedule & participant sourcing"},{label:"Guardrail metrics defined"},
+    {label:"A/B or cohort platform with audit"},{label:"Median time-to-insight ≤ 14 days"},
+    {label:"Quarterly kill-rate reported"},{label:"Opportunity solution trees up to date"}
+  ]},
+  "prod.prioritisation": { label:"Prioritisation method", checks:[
+    {label:"Impact/risk/confidence/TTV scored"},{label:"Option value or sequencing captured"},
+    {label:"Assumptions & ranges explicit"},{label:"Result ties to strategy/OKRs"},
+    {label:"Periodic re-prioritisation"},{label:"Decision log linked"}
+  ]},
+  "prod.roadmapping": { label:"Roadmapping", checks:[
+    {label:"Outcome-based roadmap"},{label:"Dependencies & risks mapped"},
+    {label:"Replan cycle ≤ quarterly"},{label:"Scenario/guardrails defined"},
+    {label:"Capacity assumptions listed"},{label:"Public, versioned roadmap"}
+  ]},
+  "prod.gtm_readiness": { label:"Go-to-market readiness", checks:[
+    {label:"Launch playbook approved"},{label:"Cohorting plan & ramp schedule"},
+    {label:"Enablement docs/demo/training"},{label:"Support runbook & taxonomy ready"},
+    {label:"Pricing/packaging w/ telemetry"},{label:"Readiness gates passed"},
+    {label:"Rollback/comms plan rehearsed"},{label:"Post-launch metrics owner set"}
+  ]},
+  "arch.modularity": { label:"Modularity", checks:[
+    {label:"Domain/capability map defined"},{label:"Service/module boundaries documented"},
+    {label:"Ownership per module clear"},{label:"Change blast radius measured"},
+    {label:"Dependency graph maintained"},{label:"Refactoring backlog exists"}
+  ]},
+  "arch.evolutionary": { label:"Evolutionary architecture", checks:[
+    {label:"Fitness functions defined"},{label:"Fitness tests in CI"},
+    {label:"Architecture runway documented"},{label:"Policy failures tracked"},
+    {label:"Refactor budget set"},{label:"Architecture reviews regular"}
+  ]},
+  "arch.api_product": { label:"API productisation", checks:[
+    {label:"OpenAPI/IDL versioned"},{label:"Contract tests in CI"},
+    {label:"SLAs/SLOs defined"},{label:"API portal with docs/examples"},
+    {label:"SDKs/client libraries maintained"},{label:"Usage analytics dashboard"},
+    {label:"Quota/auth policies enforced"},{label:"Onboarding time ≤ target"}
+  ]},
+  "arch.obs_by_design": { label:"Observability by design", checks:[
+    {label:"Golden signals selected per service"},{label:"SLOs defined in code/config"},
+    {label:"Tracing enabled on critical paths"},{label:"Logs/metrics/traces correlation (traceID)"},
+    {label:"Dashboards reviewed in on-call & planning"},{label:"Alert runbooks linked"},
+    {label:"Telemetry coverage reported"},{label:"Synthetic checks or RUM enabled"}
+  ]},
+  "eng.code_review_gates": { label:"Code review & gates", checks:[
+    {label:"Peer review required"},{label:"Static checks/lint/format enforced"},
+    {label:"Quality/security gates on PR"},{label:"AI assist guardrails"},
+    {label:"Review SLA tracked"},{label:"Rollback/test evidence in PR"}
+  ]},
+  "eng.dev_workflow": { label:"Dev workflow", checks:[
+    {label:"Dev containers or cloud IDE"},{label:"PR previews with seeded data"},
+    {label:"One-command bootstrap"},{label:"Local/prod parity documented"},
+    {label:"Toolchain version pinning"},{label:"Setup time ≤ target"}
+  ]},
+  "eng.iac_gitops": { label:"IaC & GitOps", checks:[
+    {label:"Infra provisioned via code"},{label:"Infra changes via PR only"},
+    {label:"GitOps controller & drift detection"},{label:"Policy as code with audit"},
+    {label:"Secrets management integrated & scanned"},{label:"Ephemeral envs via PR"},
+    {label:"Infra cost tags enforced"},{label:"Drift incidents tracked with MTTR"}
+  ]},
+  "eng.cloud_enable": { label:"Cloud & stack enablement", checks:[
+    {label:"Paved path templates (service/worker/job/UI)"},{label:"Managed services catalogue"},
+    {label:"Golden path docs with SLA"},{label:"Per-squad infra control with guardrails"},
+    {label:"Standard telemetry baked into templates"},{label:"PR preview envs with URLs"},
+    {label:"Adoption metrics published"},{label:"Legacy stack decommission rules"}
+  ]},
+  "deliv.release_safety": { label:"Release cadence & safety", checks:[
+    {label:"Feature flags in production"},{label:"Canary with automated health gates"},
+    {label:"Rollback rehearsal ≤ 15 min"},{label:"Blast radius control (cohorting/%)"},
+    {label:"Deployment frequency targets"},{label:"Release freeze rules tied to SLO burn"},
+    {label:"CAB equivalence pack (if regulated)"},{label:"Post-release KPI check ≤ 24h"}
+  ]},
+  "deliv.flow_efficiency": { label:"Flow efficiency & WIP", checks:[
+    {label:"Value stream map maintained"},{label:"Flow efficiency metric tracked"},
+    {label:"Constraint register with owners"},{label:"Auto-flags for blocked >24h"},
+    {label:"Swimlanes & policies for expedite"},{label:"Arrival/departure rate dashboard"},
+    {label:"Queue age visualised"},{label:"Monthly Kaizen on top constraint"}
+  ]},
+  "deliv.planning_adapt": { label:"Planning cadence & adaptability", checks:[
+    {label:"Quarterly OKRs set & tracked"},{label:"Decision records maintained"},
+    {label:"Weekly evidence review (metrics)"},{label:"Replan rules documented"},
+    {label:"Stakeholder comms cadence"},{label:"Risk/assumption updates"}
+  ]},
+  "reliab.incident_mgmt": { label:"Incident management", checks:[
+    {label:"On-call rota & escalation"},{label:"Blameless RCA template used"},
+    {label:"Runbooks per top alerts"},{label:"Drills/table-tops held"},
+    {label:"Action items tracked to closure"},{label:"Incident metrics dashboard"}
+  ]},
+  "reliab.anomaly": { label:"Anomaly detection", checks:[
+    {label:"Alert thresholds tuned"},{label:"Change-aware alerting (deploy link)"},
+    {label:"False positive rate monitored"},{label:"Context enrichment (runbook/owner)"},
+    {label:"ML/heuristics evaluated"},{label:"Alert fatigue reviews"}
+  ]},
+  "sec.secure_coding": { label:"Secure coding & supply chain", checks:[
+    {label:"SAST/DAST in CI with gates"},{label:"Dependency scanning & license policy"},
+    {label:"SBOM per build stored"},{label:"Signed builds/provenance"},
+    {label:"Secrets scanners in CI/repos"},{label:"Threat models maintained"},
+    {label:"Security training ≥ threshold"},{label:"Vuln SLA tracking & exceptions"}
+  ]},
+  "sec.privacy_data": { label:"Privacy & data handling", checks:[
+    {label:"Data maps & lawful basis recorded"},{label:"PII tracing by flow"},
+    {label:"Retention/deletion jobs automated"},{label:"Consent checks enforced"},
+    {label:"DPIAs completed & stored"},{label:"Privacy incident runbook"}
+  ]},
+  "sec.compliance_evidence": { label:"Compliance evidence", checks:[
+    {label:"Controls mapped to ISO/SOC"},{label:"Evidence as code (artifacts)"},
+    {label:"Evidence freshness dashboard"},{label:"Sampling window defined"},
+    {label:"Immutable audit trail"},{label:"Alerts on stale/missing evidence"}
+  ]},
+  "sec.runtime_ir": { label:"Runtime security & IR", checks:[
+    {label:"SIEM integrated with product"},{label:"Playbooks & containment steps"},
+    {label:"MTTD/MTTR security tracked"},{label:"Drills with KPIs"},
+    {label:"Forensics capability defined"},{label:"Post-incident learning captured"}
+  ]},
+  "docs.code_api_docs": { label:"Code & API docs", checks:[
+    {label:"Docs as code (in repo)"},{label:"Freshness checks in CI"},
+    {label:"Usage analytics"},{label:"API examples validated"},
+    {label:"Docs ownership listed"},{label:"SLA for doc updates"}
+  ]},
+  "docs.knowledge_onboarding": { label:"Knowledge sharing & onboarding", checks:[
+    {label:"Onboarding path with checkpoints"},{label:"Time to first PR tracked"},
+    {label:"Recorded walkthroughs"},{label:"Glossary of systems"},
+    {label:"Self-serve labs/sandboxes"},{label:"Feedback loop on path"}
+  ]},
+  "docs.adrs_quality": { label:"ADRs & decision quality", checks:[
+    {label:"ADR template with IDs & owners"},{label:"Decision latency tracked"},
+    {label:"Reversal decisions recorded"},{label:"ADRs link to expected impact"},
+    {label:"Decision quality review"},{label:"Discoverable/indexed"},
+    {label:"Cross-team visibility"},{label:"Deprecated ADRs mark successors"}
+  ]},
+  "docs.audit_trace": { label:"Audit & traceability", checks:[
+    {label:"User & system action logging"},{label:"Searchable within minutes"},
+    {label:"Tamper-evident storage"},{label:"Least privilege enforced"},
+    {label:"Retention policy documented"},{label:"Access audit reports"}
+  ]},
+  "org.role_triad": { label:"Role clarity & triad", checks:[
+    {label:"EM/Product/Design triad named"},{label:"Decision rights documented"},
+    {label:"Triad rituals (weekly)"},{label:"Escalation routes"},
+    {label:"Role backfills planned"},{label:"Outcome ownership in goals"}
+  ]},
+  "org.team_autonomy": { label:"Team autonomy & ownership", checks:[
+    {label:"Decision rights matrix (RACI)"},{label:"Squad owns on-call & incidents"},
+    {label:"Squad owns service catalogue entries"},{label:"Infra controls with guardrails"},
+    {label:"Low-risk changes approved in squad"},{label:"Autonomy score surveyed"},
+    {label:"Escalation paths documented"},{label:"Ops cost prompts in planning"}
+  ]},
+  "org.growth_calibration": { label:"Growth & calibration", checks:[
+    {label:"Lattice with competencies"},{label:"Evidence-based calibration"},
+    {label:"Peer/skip calibration"},{label:"Calibration transparency"},
+    {label:"Promotion packet template"},{label:"Calibration cadence defined"}
+  ]},
+  "org.leadership_behaviour": { label:"Leadership behaviour", checks:[
+    {label:"Blocker removal SLA"},{label:"AMAs/surveys (listening)"},
+    {label:"Systems thinking training"},{label:"Outcome-based goals"},
+    {label:"Recognise learning, not just output"},{label:"Visible retros/actions"}
+  ]},
+  "econ.squad_budget": { label:"Squad budget accountability", checks:[
+    {label:"Budget envelope defined"},{label:"Guardrails (limits/approvals)"},
+    {label:"Monthly variance tracking"},{label:"Spend vs outcome review"},
+    {label:"Reallocate within envelope"},{label:"Quarterly reconciliation"},
+    {label:"Cost forecasts in planning"},{label:"Experiment spend tracked"}
+  ]},
+  "econ.pricing_levers": { label:"Pricing & value levers", checks:[
+    {label:"Telemetry inputs to pricing"},{label:"Pricing experiment framework"},
+    {label:"Change cycle time measured"},{label:"Cohort guardrails defined"},
+    {label:"Packaging linked to outcomes"},{label:"Revenue impact tracked"}
+  ]},
+  "econ.finops": { label:"FinOps practice", checks:[
+    {label:"Tagging coverage ≥ threshold"},{label:"Policy engine (alerts/suggestions)"},
+    {label:"Savings tracked & attributed"},{label:"Budget vs forecast dashboards"},
+    {label:"Rightsizing/RI playbooks"},{label:"Monthly FinOps review"}
+  ]},
+  "data.data_sla_lineage": { label:"Data quality SLAs & lineage", checks:[
+    {label:"Data contracts defined (schema+SLAs)"},{label:"Lineage graph (source→sink→dashboard)"},
+    {label:"Freshness/completeness monitors"},{label:"Breach routing to owners"},
+    {label:"Backfills automated/scripted"},{label:"Ownership metadata complete"},
+    {label:"Test datasets/sandbox defined"},{label:"Quarterly data review with product"}
+  ]},
+  "data.model_lifecycle": { label:"Model lifecycle & monitoring", checks:[
+    {label:"Model registry with versions & lineage"},{label:"Drift/perf monitors with alerts"},
+    {label:"Rollback/disable automation"},{label:"Feature store documented"},
+    {label:"Shadow/canary deploys"},{label:"Retraining cadence & data SLAs"}
+  ]},
+  "data.responsible_ai": { label:"Responsible AI", checks:[
+    {label:"Model cards completed"},{label:"Bias/fairness tests stored"},
+    {label:"Human-in-the-loop defined"},{label:"Appeal/override route"},
+    {label:"PII/consent checks"},{label:"Audit trail preserved"}
+  ]},
+  "data.analytics_selfserve": { label:"Analytics self-serve", checks:[
+    {label:"Access control & catalog"},{label:"Dashboards per squad"},
+    {label:"Analytics DAU/MAU telemetry"},{label:"Query templates"},
+    {label:"Training/how-tos"},{label:"Query latency SLAs"}
+  ]},
+  "xp.perf_budgets_rum": { label:"Performance budgets & RUM", checks:[
+    {label:"Perf budgets per page/flow"},{label:"Budgets enforced in CI"},
+    {label:"RUM instrumented on key flows"},{label:"Perf dashboards with cohorts"},
+    {label:"PR perf regression auto-flags"},{label:"Perf SLOs tied to KPIs"},
+    {label:"Synthetic checks for critical flows"},{label:"Perf remediation backlog"}
+  ]},
+  "xp.accessibility": { label:"Accessibility & inclusion", checks:[
+    {label:"WCAG targets & audits scheduled"},{label:"Automated a11y linters in CI"},
+    {label:"Manual audits on critical flows"},{label:"Inclusive research participants"},
+    {label:"A11y debt backlog & SLA"},{label:"Assistive tech test plan"}
+  ]},
+  "xp.i18n_l10n": { label:"Internationalisation & localisation", checks:[
+    {label:"i18n frameworks in code"},{label:"Locale files & workflows"},
+    {label:"Currency/timezone handling"},{label:"Localisation QA process"},
+    {label:"Market toggles/feature flags"},{label:"Locale bug rate tracked"}
+  ]},
+  "xp.support_integration": { label:"Support integration", checks:[
+    {label:"Ticket taxonomy aligns to backlog"},{label:"Deflection & CSAT shared"},
+    {label:"Auto-label/route to squads"},{label:"Support runbooks per issue"},
+    {label:"Feedback loop into roadmap"},{label:"Quarterly CS→Eng review"}
+  ]}
+};
 
 // Load assessment config and update MODEL
 const dataLoader = new AssessmentDataLoader();
@@ -42,75 +406,99 @@ dataLoader.loadAll().then(fullConfig => {
     weights[pillar.name] = pillar.weight || 10;
   });
   
-  // Build PARAM_META from parameters
+  // Build PARAM_META from parameters - USE LEGACY MODEL FOR DETAILED CHECKS
   PARAM_META = {};
   const allParamIds = Object.keys(fullConfig.parameters || {});
   allParamIds.forEach(paramId => {
     const param = fullConfig.parameters[paramId];
-    const label = paramId.split('.')[1]?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || paramId;
+    const legacyDef = LEGACY_MODEL_PARAMETERS[paramId];
     
-    PARAM_META[paramId] = {
-      label: label,
-      tier: param.tier || 1,
-      pillar: paramId.split('.')[0] || 'unknown',
-      purpose: param.purpose || '',
-      popular: param.popular || false,
-      dependsOn: param.dependsOn || [],
-      // Add comprehensive checks structure for rendering
-      // Each parameter gets 3 meaningful questions based on tier
-      checks: [
-        {
-          type: 'scale5',
-          label: `${label} - Implementation Level`,
-          purpose: 'How well is this practice implemented in your organization?',
-          w: 40
-        },
-        {
-          type: 'scale5',
-          label: `${label} - Adoption & Usage`,
-          purpose: 'How widely is this practice adopted across teams?',
-          w: 30
-        },
-        {
-          type: 'scale5',
-          label: `${label} - Measurement & Improvement`,
-          purpose: 'Do you measure and continuously improve this practice?',
-          w: 30
-        }
-      ]
-    };
+    // If we have a legacy definition with detailed checks, use it
+    if (legacyDef && legacyDef.checks && legacyDef.checks.length > 0) {
+      console.log(`✅ Using October 17th detailed checks for ${paramId} (${legacyDef.checks.length} checks)`);
+      PARAM_META[paramId] = {
+        label: legacyDef.label || paramId,
+        tier: param.tier || 1,
+        pillar: paramId.split('.')[0] || 'unknown',
+        purpose: param.purpose || '',
+        popular: param.popular || false,
+        dependsOn: param.dependsOn || [],
+        checks: legacyDef.checks // Use original October 17th detailed checks!
+      };
+    } else {
+      // Fallback to API data or generate basic structure
+      const label = paramId.split('.')[1]?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || paramId;
+      console.log(`⚠️  No legacy checks for ${paramId}, using basic structure`);
+      PARAM_META[paramId] = {
+        label: label,
+        tier: param.tier || 1,
+        pillar: paramId.split('.')[0] || 'unknown',
+        purpose: param.purpose || '',
+        popular: param.popular || false,
+        dependsOn: param.dependsOn || [],
+        checks: [
+          {
+            type: 'scale5',
+            label: `${label} - Implementation Level`,
+            purpose: 'How well is this practice implemented in your organization?',
+            w: 40
+          },
+          {
+            type: 'scale5',
+            label: `${label} - Adoption & Usage`,
+            purpose: 'How widely is this practice adopted across teams?',
+            w: 30
+          },
+          {
+            type: 'scale5',
+            label: `${label} - Measurement & Improvement`,
+            purpose: 'Do you measure and continuously improve this practice?',
+            w: 30
+          }
+        ]
+      };
+    }
   });
   
-  // Also add checks to fullModel.parameters for backward compatibility
+  // Also add checks to fullModel.parameters for backward compatibility - USE LEGACY MODEL
   fullConfig.parameters = fullConfig.parameters || {};
   Object.keys(fullConfig.parameters).forEach(paramId => {
     const param = fullConfig.parameters[paramId];
-    const label = paramId.split('.')[1]?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || paramId;
+    const legacyDef = LEGACY_MODEL_PARAMETERS[paramId];
     
-    fullConfig.parameters[paramId] = {
-      ...param,
-      label: label,
-      checks: [
-        {
-          type: 'scale5',
-          label: `${label} - Implementation Level`,
-          purpose: 'How well is this practice implemented in your organization?',
-          w: 40
-        },
-        {
-          type: 'scale5',
-          label: `${label} - Adoption & Usage`,
-          purpose: 'How widely is this practice adopted across teams?',
-          w: 30
-        },
-        {
-          type: 'scale5',
-          label: `${label} - Measurement & Improvement`,
-          purpose: 'Do you measure and continuously improve this practice?',
-          w: 30
-        }
-      ]
-    };
+    if (legacyDef && legacyDef.checks && legacyDef.checks.length > 0) {
+      fullConfig.parameters[paramId] = {
+        ...param,
+        label: legacyDef.label || paramId,
+        checks: legacyDef.checks // Use original October 17th detailed checks!
+      };
+    } else {
+      const label = paramId.split('.')[1]?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || paramId;
+      fullConfig.parameters[paramId] = {
+        ...param,
+        label: label,
+        checks: [
+          {
+            type: 'scale5',
+            label: `${label} - Implementation Level`,
+            purpose: 'How well is this practice implemented in your organization?',
+            w: 40
+          },
+          {
+            type: 'scale5',
+            label: `${label} - Adoption & Usage`,
+            purpose: 'How widely is this practice adopted across teams?',
+            w: 30
+          },
+          {
+            type: 'scale5',
+            label: `${label} - Measurement & Improvement`,
+            purpose: 'Do you measure and continuously improve this practice?',
+            w: 30
+          }
+        ]
+      };
+    }
   });
   
   // Build core24 list from popular parameters
@@ -166,11 +554,69 @@ dataLoader.loadAll().then(fullConfig => {
   alert('Failed to load assessment configuration from API. Please check the console for details and refresh the page.');
 });
 
-/* ---------- Backfill weights/slider meta ---------- */
-const TAPER8=[20,15,15,15,10,10,10,5], TAPER6=[20,20,15,15,15,15];
+/* ---------- Backfill weights/slider meta - October 17th patchModel ---------- */
 function patchModel(){
-  // All parameter meta is now loaded from MODEL.fullModel.parameters (API-driven)
-  // No static meta patching required
+  const P = MODEL.fullModel.parameters;
+  
+  // Ensure PARAM_META has purpose for all parameters
+  Object.keys(P).forEach(pid=>{
+    PARAM_META[pid] = PARAM_META[pid] || {};
+    if(!PARAM_META[pid].purpose){
+      const pref = pid.split('.')[0];
+      PARAM_META[pid].purpose = DEFAULT_PURPOSE_BY_PREFIX[pref] || "Purpose: see checks below.";
+    }
+  });
+  
+  // Patch each parameter's checks with weights and types
+  for(const pid of Object.keys(P)){
+    const def = P[pid];
+    if (!def.checks || def.checks.length === 0) continue;
+    
+    // Ensure all checks have type
+    def.checks.forEach(ch=>{ if(!ch.type) ch.type="check"; });
+    
+    // Calculate weights if missing
+    const hasW = def.checks.some(ch=> typeof ch.w==="number");
+    if(!hasW){
+      const n=def.checks.length; 
+      let prof=(n===8?TAPER8:(n===6?TAPER6:null));
+      if(!prof){
+        // Generate tapered weights for other lengths
+        prof = Array.from({length:n},(_,i)=> Math.max(8, Math.round(100*Math.pow(0.88,i))));
+        const s=prof.reduce((a,b)=>a+b,0); 
+        prof=prof.map(x=>Math.round(100*x/s));
+        const d=100-prof.reduce((a,b)=>a+b,0); 
+        if(d) prof[0]+=d;
+      }
+      def.checks.forEach((ch,i)=> ch.w = prof[i]);
+    } else {
+      // Normalize existing weights to 100
+      const s = def.checks.reduce((a,ch)=>a+(ch.w||0),0);
+      if(s>0) def.checks.forEach(ch=> ch.w = +(ch.w*100/s).toFixed(2));
+    }
+    
+    // Auto-detect scale types from labels and add scale references
+    def.checks.forEach(ch=>{
+      if(ch.type==="check"){
+        const L=(ch.label||"").toLowerCase();
+        if(/coverage %|slo coverage|lineage|tagging/.test(L)){ 
+          ch.type="scale100"; 
+        }
+        else if(/coverage|%|adoption|frequency|rate|p95|median|mttr|lead time|time to|setup time/.test(L)){ 
+          ch.type="scale5"; 
+        }
+      }
+      if((ch.type==="scale5" || ch.type==="scale100") && !ch.scaleRef){
+        ch.scaleRef = (ch.type==="scale100") ? "generic_0_100" : "generic_0_5";
+      }
+      if((ch.type==="scale5" || ch.type==="scale100") && !ch.purpose){
+        const sc = SCALE_CATALOG[ch.scaleRef]; 
+        if(sc) ch.purpose = sc.purpose;
+      }
+    });
+  }
+  
+  console.log('✅ patchModel completed - weights and types normalized');
 }
 
 /* ---------- State & view ---------- */
