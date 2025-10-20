@@ -49,6 +49,7 @@ function getTaperWeights(n) {
 // MODEL is now loaded dynamically from AssessmentDataLoader
 let MODEL = null;
 let PARAM_META = {};
+let PILLAR_OUTCOMES = {}; // Pillar purpose/outcome descriptions loaded from API
 
 // V8.0: ALL parameter data now loaded from API - no hardcoded legacy model
 const dataLoader = new AssessmentDataLoader();
@@ -75,9 +76,12 @@ dataLoader.loadAll().then(fullConfig => {
         if (!DEFAULT_PURPOSE_BY_PREFIX[namePrefix]) {
           DEFAULT_PURPOSE_BY_PREFIX[namePrefix] = pillar.purpose;
         }
+        // Also populate PILLAR_OUTCOMES for report generation
+        PILLAR_OUTCOMES[pillar.name] = pillar.purpose;
       }
     });
     console.log('✅ Built purpose map for', Object.keys(DEFAULT_PURPOSE_BY_PREFIX).length, 'prefixes');
+    console.log('✅ Built pillar outcomes map for', Object.keys(PILLAR_OUTCOMES).length, 'pillars');
   }
   
   // 3. Build weights object from pillars
@@ -415,7 +419,44 @@ function renderParam(pillarName, pid, showPillarChip=false){
       if(saved[i].na){ na.checked = true; if(ctrl) ctrl.disabled = true; }
     }
   });
+  
+  // Update progress bar based on saved answers
+  setTimeout(() => {
+    updateParamProgressInternal(pid, saved, checks);
+  }, 0);
+  
   return wrap;
+}
+
+// Internal helper to update progress (used during render)
+function updateParamProgressInternal(pid, saved, checks){
+  if(checks.length === 0) return;
+  
+  let answered = 0;
+  checks.forEach((ch, i) => {
+    if(saved[i] && !saved[i].na){
+      // Check if answered (not default/zero)
+      if(ch.type === "check"){
+        if(saved[i].v === true) answered++;
+      } else {
+        // For scales, any non-zero value counts as answered
+        if(saved[i].v > 0) answered++;
+      }
+    }
+  });
+  
+  const pct = Math.round((answered / checks.length) * 100);
+  const key = b64(pid);
+  const bar = document.getElementById(`bar-${key}`);
+  if(bar) {
+    bar.style.width = `${pct}%`;
+  }
+  
+  // Update badge if exists
+  const badge = document.getElementById(`badge-${key}`);
+  if(badge && answered > 0) {
+    badge.textContent = `${pct}%`;
+  }
 }
 
 /* ---------- Popovers ---------- */
@@ -1289,6 +1330,18 @@ function attachHandlers(){
       const ctrl = t.closest(".row").querySelector('[data-param][data-index]:not([data-na])');
       if(ctrl){ ctrl.disabled = t.checked; }
     }
+    
+    // Update progress bar for this parameter
+    if(t.dataset.param){
+      const pid = t.dataset.param;
+      const meta = PARAM_META[pid];
+      if(meta){
+        const saved = getSaved()[pid] || {};
+        const checks = meta.checks || [];
+        updateParamProgressInternal(pid, saved, checks);
+      }
+    }
+    
     // Removed auto-compute - computation now requires manual button click
   });
 }
