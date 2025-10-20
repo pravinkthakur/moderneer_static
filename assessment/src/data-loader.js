@@ -27,11 +27,11 @@ class AssessmentDataLoader {
     // API Configuration - Use live Vercel services
     this.configApiUrl = this.isDev 
       ? './data/'  // Local JSON files for development
-      : 'https://assessment-config-service-guwi0iomy.vercel.app/api/';  // Production config API
+      : 'https://assessment-config-service-p19mr9vc8.vercel.app/api/';  // Production config API (latest deployment)
     
     this.computeApiUrl = this.isDev
       ? 'http://localhost:3003/api/'
-      : 'https://assessment-compute-service-6fj2z82oo.vercel.app/api/';  // Production compute API
+      : 'https://assessment-compute-service-m0m5n4iec.vercel.app/api/';  // Production compute API (latest deployment)
     
     this.useAPI = !this.isDev;
     this.loaded = false;
