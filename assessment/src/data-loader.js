@@ -37,7 +37,8 @@ class AssessmentDataLoader {
     if (this.loaded) return this.cache.get('fullConfig');
 
     try {
-      console.log('🔄 Loading assessment configuration from JSON files...');
+      console.log('🔄 Loading assessment configuration from API...');
+      console.log(`📡 Config API: ${this.configApiUrl}`);
       
       // Load all configuration files in parallel, including parameter meta
       const [
@@ -74,8 +75,9 @@ class AssessmentDataLoader {
       this.cache.set('fullConfig', fullConfig);
       this.loaded = true;
 
-      console.log('✅ Assessment configuration loaded successfully');
+      console.log('✅ Assessment configuration loaded successfully from API');
       console.log(`📊 Loaded: ${pillars.pillars.length} pillars, ${rules.gates.length} gates, ${rules.caps.length} caps`);
+      console.log(`📋 Parameters: ${Object.keys(parameters.parameters).length} total`);
       
       // Debug specific pillar data
       const strategyPillar = pillars.pillars.find(p => p.id === 'strategy-exec');
@@ -122,7 +124,7 @@ class AssessmentDataLoader {
       const urlWithCacheBuster = url + (url.includes('?') ? '&' : '?') + `_cb=${cacheBuster}`;
       
       console.log(`🔄 Loading ${filename} from: ${urlWithCacheBuster}`);
-      console.log(`📍 Environment: ${this.isDev ? 'Development' : 'Production'} (${window.location.hostname})`);
+      console.log(`📍 Environment: Production API (${window.location.hostname})`);
       
       const response = await fetch(urlWithCacheBuster, {
         cache: 'no-cache',

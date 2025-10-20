@@ -18,6 +18,12 @@ document.addEventListener('DOMContentLoaded', function() {
   if (yearEl) {
     yearEl.textContent = new Date().getFullYear().toString();
   }
+  
+  // Show loader status
+  const loaderStatus = document.getElementById('loader-status');
+  if (loaderStatus) {
+    loaderStatus.textContent = 'Connecting to API server...';
+  }
 });
 
 /* ---------- Model (weights, gates, caps) ---------- */
@@ -101,6 +107,17 @@ dataLoader.loadAll().then(fullConfig => {
   console.log('   Gates:', MODEL.gates.length);
   console.log('   Caps:', MODEL.caps.length);
   
+  // Hide loader, show main UI
+  const loader = document.getElementById('loader');
+  const loaderStatus = document.getElementById('loader-status');
+  const mainGrid = document.querySelector('.assessment-grid');
+  
+  if(loaderStatus) loaderStatus.textContent = '✅ Loaded from API server successfully!';
+  setTimeout(() => {
+    if(loader) loader.style.display = 'none';
+    if(mainGrid) mainGrid.style.display = '';
+  }, 800);
+  
   // Initialize UI after MODEL is loaded
   patchModel();
   if (typeof render === 'function') {
@@ -108,7 +125,18 @@ dataLoader.loadAll().then(fullConfig => {
   }
 }).catch(error => {
   console.error('Failed to initialize assessment:', error);
-  alert('Failed to load assessment configuration. Please refresh the page.');
+  
+  // Show error in loader
+  const loader = document.getElementById('loader');
+  const loaderStatus = document.getElementById('loader-status');
+  if(loader) {
+    loader.innerHTML = '<div style="color:#DC2626;">❌ Failed to load assessment data from API</div>';
+  }
+  if(loaderStatus) {
+    loaderStatus.innerHTML = `<div style="color:#666;margin-top:1em;">Error: ${error.message}</div><div style="margin-top:0.5em;">Please check your internet connection and refresh the page.</div>`;
+  }
+  
+  alert('Failed to load assessment configuration from API. Please check the console for details and refresh the page.');
 });
 
 /* ---------- Backfill weights/slider meta ---------- */

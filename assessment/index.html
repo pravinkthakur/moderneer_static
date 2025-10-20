@@ -29,7 +29,11 @@
 <div id="header-include"></div>
 
 <main class="container" role="main">
-  <div class="assessment-grid" data-testid="main">
+  <div id="loader" style="text-align:center;padding:2em;font-size:1.2em;color:#3B82F6;">
+    <div style="margin-bottom:1em;">🔄 Loading assessment data from API...</div>
+    <div id="loader-status" style="font-size:0.9em;color:#666;"></div>
+  </div>
+  <div class="assessment-grid" data-testid="main" style="display:none;">
     <section class="assessment-card">
     <div class="assessment-toolbar">
       <div class="toolbar-left">
