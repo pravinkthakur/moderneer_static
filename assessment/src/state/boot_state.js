@@ -1,6 +1,5 @@
 import { loadState, saveState, getSavedCompat, setSavedCompat } from './storage.js';
 import { readStateFromUrl, encodeState } from './share.js';
-import { telemetry, isOptedIn, setOptIn } from './telemetry.js';
 
 (function(){
   // 1) URL -> local state (one-shot)
@@ -22,17 +21,9 @@ import { telemetry, isOptedIn, setOptIn } from './telemetry.js';
       <button id="btnExportJSON" class="btn">Export JSON</button>
       <button id="btnImportJSON" class="btn">Import JSON</button>
       <button id="btnShareURL" class="btn">Copy Shareable URL</button>
-      <label class="switch tiny" style="margin-left:8px">
-        <input type="checkbox" id="toggleTelemetry" />
-        <span>Telemetry</span>
-      </label>
       <input id="importFile" type="file" accept="application/json" style="display:none" />
     `;
     ctr.appendChild(wrap);
-
-    // Telemetry toggle initial state
-    const tel = document.getElementById('toggleTelemetry');
-    if(tel){ tel.checked = isOptedIn(); tel.addEventListener('change', ()=> setOptIn(tel.checked)); }
 
     // Export
     document.getElementById('btnExportJSON').addEventListener('click', ()=>{
@@ -76,23 +67,7 @@ import { telemetry, isOptedIn, setOptIn } from './telemetry.js';
     });
   }
 
-  // 3) Telemetry hooks
-  const tel = telemetry();
-  window.App = Object.assign(window.App||{}, { telemetry: tel });
-
-  // Hook into compute completion
-  document.addEventListener('click', (e)=>{
-    if(e.target && e.target.id === 'btnCompute'){
-      setTimeout(()=>{
-        try{
-          const res = window.LAST_RESULTS || (window.compute && window.compute(false));
-          tel.log('compute', { finalIndex: res && res.finalIndex, finalScale: res && res.finalScale, ts: Date.now() });
-        }catch(_){}
-      }, 0);
-    }
-  });
-
-  // 4) Run now and after render
+  // 3) Run now and after render
   if(document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', ensureControls);
   } else {
