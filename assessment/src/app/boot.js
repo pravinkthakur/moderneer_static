@@ -621,6 +621,77 @@ function generateExecutiveSummary(results){
   </div>`;
   return html;
 }
+
+/* ---------- Narrative Tab (Story Format) ---------- */
+function generateNarrative(results){
+  const bandTxt = band(results.finalScale);
+  const idx = results.finalIndex||0;
+  const scale = results.finalScale||0;
+  const gatesPassCount = results.gates.filter(g=>g.pass).length;
+  
+  const pairs = Object.keys(results.byPillar).map(k=>({name:k, idx:results.byPillar[k], weight:MODEL.weights[k]||0})).filter(x=>x.idx!=null);
+  const strengths = [...pairs].sort((a,b)=>b.idx-a.idx).slice(0,3);
+  const gaps = [...pairs].sort((a,b)=>a.idx-b.idx).slice(0,3);
+  
+  return `
+    <div class="narrative-report">
+      <h3>The Maturity Story</h3>
+      
+      <section>
+        <h4>📖 Current Chapter</h4>
+        <p>Your organization is operating at <strong>${bandTxt}</strong> (Scale ${scale.toFixed(1)}/5, Index ${idx.toFixed(1)}/100). 
+        This means your engineering and delivery practices have reached a ${bandTxt.toLowerCase()} stage of maturity.</p>
+        
+        <p>Of the critical gates that represent foundational capabilities, you've passed <strong>${gatesPassCount} out of ${results.gates.length}</strong>. 
+        ${gatesPassCount === results.gates.length ? 
+          'Congratulations - all critical gates are passed! This demonstrates strong foundational practices.' : 
+          'There are still some foundational gaps that need attention before progressing further.'}</p>
+      </section>
+      
+      <section>
+        <h4>💪 What's Working Well</h4>
+        <p>Your strongest capabilities are:</p>
+        <ul>
+          ${strengths.map(s => `
+            <li><strong>${s.name}</strong> (Index: ${s.idx.toFixed(1)}) - 
+            ${PILLAR_OUTCOMES[s.name] || 'Strong performance in this area.'}</li>
+          `).join('')}
+        </ul>
+        <p>These strengths provide a solid foundation to build upon and can serve as examples for other areas.</p>
+      </section>
+      
+      <section>
+        <h4>🎯 Where to Focus Next</h4>
+        <p>The areas needing the most attention are:</p>
+        <ul>
+          ${gaps.map(g => `
+            <li><strong>${g.name}</strong> (Index: ${g.idx.toFixed(1)}) - 
+            ${PILLAR_OUTCOMES[g.name] || 'Requires improvement to advance overall maturity.'}</li>
+          `).join('')}
+        </ul>
+        <p>Improving these areas will have the most significant impact on your overall maturity score and delivery capabilities.</p>
+      </section>
+      
+      <section>
+        <h4>🚀 The Path Forward</h4>
+        <p>To reach the next maturity level, you'll need to:</p>
+        <ul>
+          <li>Address the gaps identified above systematically</li>
+          <li>Ensure all critical gates are passed</li>
+          <li>Build on your existing strengths to lift overall performance</li>
+          <li>Focus on consistency across all pillars, not just top performers</li>
+        </ul>
+        <p>This is a journey, not a destination. Each improvement builds capability that compounds over time, 
+        leading to faster delivery, higher quality, and better business outcomes.</p>
+      </section>
+      
+      <div class="copyRow">
+        <button class="btn" id="btnCopyNarrative" data-target="narrative-report">Copy narrative</button>
+      </div>
+    </div>
+  `;
+}
+
 /* ---------- Nano LLM: heuristic text realiser (no external APIs) ---------- */
 const NanoLLM = { sent(s){ if(!s) return ""; s = s.trim(); if(!s) return ""; const last = s[s.length-1]; return /[.!?]$/.test(last) ? s : s + "."; } };
 
