@@ -24,14 +24,14 @@ class AssessmentDataLoader {
                  window.location.hostname.startsWith('192.168.') ||
                  window.location.hostname.startsWith('10.0.');
     
-    // API Configuration - Use live Vercel services
+    // API Configuration - Use live Vercel services (direct URLs with CORS fixed)
     this.configApiUrl = this.isDev 
-    ? './data/'
-    : 'https://api.assessment.config.moderneer.co.uk/api/';  // Production config API (latest deployment)
+      ? './data/'
+      : 'https://assessment-config-service-nvkh2bftp.vercel.app/api/';  // Latest deployment with CORS fix
     
     this.computeApiUrl = this.isDev
-  ? 'http://localhost:3003/api/'
-  : 'https://api.assessment.compute.moderneer.co.uk/api/';  // Production compute API (latest deployment)
+      ? 'http://localhost:3003/api/'
+      : 'https://assessment-compute-service-fl21smzwj.vercel.app/api/';  // Latest deployment with CORS fix
     
     this.useAPI = !this.isDev;
     this.loaded = false;
