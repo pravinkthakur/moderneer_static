@@ -1,23 +1,84 @@
-<header class="site" role="banner">
-  <div class="container nav" aria-label="Primary">
-    <a class="brand" href="/index.html">
-      <img src="/assets/logo.jpg" alt="Moderneer logo" />
-      <span>Moderneer</span>
-    </a>
-    <nav role="navigation" aria-label="Main navigation">
-      <ul class="nav-list">
-        <li><a href="/index.html">Home</a></li>
-        <li><a href="/about.html">About</a></li>
-        <li><a href="/maturity.html">Maturity Model</a></li>
-        <li><a href="/assessment/">Assessments</a></li>
-        <li><a href="/ai-reverse-engineering.html">AI Engineering</a></li>
-        <li><a href="/shift-left.html">Shift‑Left QE</a></li>
-        <li><a href="/bootcamps.html">Bootcamps</a></li>
-        <li><a href="/advisory.html">Advisory</a></li>
-        <li><a href="/operating-models.html">Operating Models</a></li>
-        <li><a href="/future-trends.html">Future Trends</a></li>
-        <li><a href="/contact.html">Contact</a></li>
-      </ul>
-    </nav>
+<mn-navbar logo-src="/assets/logo.jpg" logo-alt="Moderneer" sticky>
+  <span slot="title">Moderneer</span>
+  <div slot="actions">
+    <mn-button variant="ghost" size="sm" class="theme-toggle">🌙</mn-button>
   </div>
-</header>
+</mn-navbar>
+
+<mn-burger-panel position="right" width="400px">
+  <h3 slot="title">Navigation</h3>
+  <nav style="display: flex; flex-direction: column; gap: var(--mn-space-2);">
+    <a href="/index.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
+      🏠 Home
+    </a>
+    <a href="/about.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
+      ℹ️ About
+    </a>
+    <a href="/maturity.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
+      📊 Maturity Model
+    </a>
+    <a href="/assessment/" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
+      📝 Assessments
+    </a>
+    <a href="/ai-reverse-engineering.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
+      🤖 AI Engineering
+    </a>
+    <a href="/shift-left.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
+      ⬅️ Shift-Left QE
+    </a>
+    <a href="/bootcamps.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
+      🎓 Bootcamps
+    </a>
+    <a href="/advisory.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
+      💼 Advisory
+    </a>
+    <a href="/operating-models.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
+      ⚙️ Operating Models
+    </a>
+    <a href="/future-trends.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
+      🔮 Future Trends
+    </a>
+    <a href="/contact.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
+      ✉️ Contact
+    </a>
+  </nav>
+</mn-burger-panel>
+
+<script type="module">
+  // Theme toggle
+  document.querySelectorAll('.theme-toggle').forEach(btn => {
+    let theme = localStorage.getItem('mn-theme') || 'light';
+    btn.textContent = theme === 'light' ? '🌙' : '☀️';
+    
+    btn.addEventListener('click', () => {
+      theme = theme === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('mn-theme', theme);
+      document.querySelectorAll('.theme-toggle').forEach(b => {
+        b.textContent = theme === 'light' ? '🌙' : '☀️';
+      });
+    });
+  });
+  
+  // Highlight active page
+  const currentPath = window.location.pathname;
+  document.querySelectorAll('.nav-link').forEach(link => {
+    const href = link.getAttribute('href');
+    if (currentPath === href || currentPath.includes(href.replace('.html', ''))) {
+      link.style.background = 'var(--mn-primary)';
+      link.style.color = 'var(--mn-primary-contrast)';
+    }
+    
+    // Hover effects
+    link.addEventListener('mouseenter', (e) => {
+      if (!e.target.style.background.includes('primary')) {
+        e.target.style.background = 'var(--mn-bg-muted)';
+      }
+    });
+    link.addEventListener('mouseleave', (e) => {
+      if (!e.target.style.background.includes('primary')) {
+        e.target.style.background = '';
+      }
+    });
+  });
+</script>

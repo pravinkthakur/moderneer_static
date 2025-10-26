@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design System Demo - Moderneer</title>
+  
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="../moderneer-design-system/src/reset.css">
+  <link rel="stylesheet" href="../moderneer-design-system/src/tokens.css">
+  <link rel="stylesheet" href="../moderneer-design-system/src/theme.css">
+  <script type="module" src="../moderneer-design-system/dist/index.js"></script>
+  
+  <style>
+    /* Demo-specific styles */
+    .demo-section {
+      padding: var(--mn-space-6) 0;
+      border-bottom: 1px solid var(--mn-border);
+    }
+    
+    .demo-section:last-child {
+      border-bottom: none;
+    }
+    
+    .demo-section h2 {
+      font-size: var(--mn-text-2xl);
+      font-weight: var(--mn-font-bold);
+      margin-bottom: var(--mn-space-4);
+      color: var(--mn-fg);
+    }
+    
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--mn-space-4);
+      margin-top: var(--mn-space-4);
+    }
+    
+    .demo-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--mn-space-3);
+      margin-top: var(--mn-space-4);
+    }
+    
+    .demo-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--mn-space-2);
+      margin-top: var(--mn-space-4);
+    }
+    
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: var(--mn-space-2);
+    }
+    
+    .nav-links a {
+      padding: var(--mn-space-3);
+      border-radius: var(--mn-radius-md);
+      transition: background var(--mn-transition-fast);
+      color: var(--mn-fg);
+      text-decoration: none;
+    }
+    
+    .nav-links a:hover {
+      background: var(--mn-bg-muted);
+    }
+    
+    .theme-toggle {
+      margin-top: var(--mn-space-3);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar with burger menu -->
+  <mn-navbar 
+    logo-src="/images/moderneer-logo.svg" 
+    logo-alt="Moderneer"
+    sticky
+  >
+    <span slot="title">Moderneer</span>
+    <div slot="actions">
+      <mn-button variant="ghost" id="theme-toggle-btn">
+        <span id="theme-icon">🌙</span>
+      </mn-button>
+    </div>
+  </mn-navbar>
+
+  <!-- Burger Panel -->
+  <mn-burger-panel position="right" width="400px">
+    <h3 slot="title">Navigation</h3>
+    
+    <div class="nav-links">
+      <a href="/">🏠 Home</a>
+      <a href="/services.html">⚡ Services</a>
+      <a href="/assessment.html">📊 Assessment</a>
+      <a href="/about.html">ℹ️ About</a>
+      <a href="/contact.html">✉️ Contact</a>
+    </div>
+    
+    <div class="theme-toggle">
+      <h4 style="margin-bottom: var(--mn-space-2); color: var(--mn-fg-muted); font-size: var(--mn-text-sm);">Theme</h4>
+      <div style="display: flex; gap: var(--mn-space-2);">
+        <mn-button variant="secondary" size="sm" data-theme="light">Light</mn-button>
+        <mn-button variant="secondary" size="sm" data-theme="dark">Dark</mn-button>
+        <mn-button variant="secondary" size="sm" data-theme="auto">Auto</mn-button>
+      </div>
+    </div>
+  </mn-burger-panel>
+
+  <!-- Main Content -->
+  <main class="mn-container">
+    <!-- Hero Section -->
+    <section style="padding: var(--mn-space-8) 0; text-align: center;">
+      <h1 style="font-size: var(--mn-text-5xl); font-weight: var(--mn-font-extrabold); margin-bottom: var(--mn-space-4); background: linear-gradient(135deg, var(--mn-brand) 0%, var(--mn-brand-2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+        Moderneer Design System
+      </h1>
+      <p style="font-size: var(--mn-text-lg); color: var(--mn-fg-muted); margin-bottom: var(--mn-space-6); max-width: 600px; margin-left: auto; margin-right: auto;">
+        Modern, accessible, and performant UI components for building exceptional user experiences.
+      </p>
+      <div style="display: flex; gap: var(--mn-space-3); justify-content: center;">
+        <mn-button variant="primary" size="lg" id="demo-modal-btn">
+          See Demo
+        </mn-button>
+        <mn-button variant="secondary" size="lg">
+          Documentation
+        </mn-button>
+      </div>
+    </section>
+
+    <!-- Buttons Demo -->
+    <section class="demo-section">
+      <h2>Buttons</h2>
+      <div class="demo-buttons">
+        <mn-button variant="primary">Primary</mn-button>
+        <mn-button variant="secondary">Secondary</mn-button>
+        <mn-button variant="ghost">Ghost</mn-button>
+        <mn-button variant="danger">Danger</mn-button>
+        <mn-button variant="primary" disabled>Disabled</mn-button>
+      </div>
+      <div class="demo-buttons">
+        <mn-button variant="primary" size="sm">Small</mn-button>
+        <mn-button variant="primary">Medium</mn-button>
+        <mn-button variant="primary" size="lg">Large</mn-button>
+      </div>
+    </section>
+
+    <!-- Cards Demo -->
+    <section class="demo-section">
+      <h2>Cards</h2>
+      <div class="demo-grid">
+        <mn-card elevated>
+          <h3 slot="title">Basic Card</h3>
+          <p>This is a basic card with a title and content. Cards are perfect for grouping related information.</p>
+          <div slot="footer">
+            <mn-button variant="ghost" size="sm">Learn More</mn-button>
+          </div>
+        </mn-card>
+        
+        <mn-card interactive>
+          <h3 slot="title">Interactive Card</h3>
+          <p>This card has hover effects and can be clicked. Great for clickable items like products or articles.</p>
+        </mn-card>
+        
+        <mn-card>
+          <h3 slot="title">Status Card</h3>
+          <p style="margin-bottom: var(--mn-space-3);">Cards can contain any content, including badges and other components.</p>
+          <div style="display: flex; gap: var(--mn-space-2);">
+            <mn-badge variant="success">Active</mn-badge>
+            <mn-badge variant="primary">Premium</mn-badge>
+          </div>
+        </mn-card>
+      </div>
+    </section>
+
+    <!-- Badges Demo -->
+    <section class="demo-section">
+      <h2>Badges</h2>
+      <div class="demo-badges">
+        <mn-badge variant="primary">Primary</mn-badge>
+        <mn-badge variant="success">Success</mn-badge>
+        <mn-badge variant="warning">Warning</mn-badge>
+        <mn-badge variant="danger">Danger</mn-badge>
+        <mn-badge variant="neutral">Neutral</mn-badge>
+      </div>
+    </section>
+
+    <!-- Inputs Demo -->
+    <section class="demo-section">
+      <h2>Form Inputs</h2>
+      <div style="max-width: 500px;">
+        <mn-input type="text" placeholder="Enter your name">
+          <span slot="label">Full Name</span>
+          <span slot="helper">Please enter your full name</span>
+        </mn-input>
+        
+        <div style="margin-top: var(--mn-space-4);"></div>
+        
+        <mn-input type="email" placeholder="you@example.com">
+          <span slot="label">Email Address</span>
+        </mn-input>
+        
+        <div style="margin-top: var(--mn-space-4);"></div>
+        
+        <mn-input type="password" placeholder="Enter password" error>
+          <span slot="label">Password</span>
+          <span slot="error">Password must be at least 8 characters</span>
+        </mn-input>
+      </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section class="demo-section">
+      <h2>Key Features</h2>
+      <div class="demo-grid">
+        <mn-card>
+          <div style="font-size: var(--mn-text-3xl); margin-bottom: var(--mn-space-3);">🎨</div>
+          <h3 style="font-weight: var(--mn-font-semibold); margin-bottom: var(--mn-space-2);">Design Tokens</h3>
+          <p style="color: var(--mn-fg-muted); font-size: var(--mn-text-sm);">Consistent colors, spacing, typography, and more across all components.</p>
+        </mn-card>
+        
+        <mn-card>
+          <div style="font-size: var(--mn-text-3xl); margin-bottom: var(--mn-space-3);">♿</div>
+          <h3 style="font-weight: var(--mn-font-semibold); margin-bottom: var(--mn-space-2);">Accessible</h3>
+          <p style="color: var(--mn-fg-muted); font-size: var(--mn-text-sm);">WCAG 2.1 AA compliant with keyboard navigation and screen reader support.</p>
+        </mn-card>
+        
+        <mn-card>
+          <div style="font-size: var(--mn-text-3xl); margin-bottom: var(--mn-space-3);">🌓</div>
+          <h3 style="font-weight: var(--mn-font-semibold); margin-bottom: var(--mn-space-2);">Dark Mode</h3>
+          <p style="color: var(--mn-fg-muted); font-size: var(--mn-text-sm);">Automatic dark mode support with smooth transitions.</p>
+        </mn-card>
+        
+        <mn-card>
+          <div style="font-size: var(--mn-text-3xl); margin-bottom: var(--mn-space-3);">⚡</div>
+          <h3 style="font-weight: var(--mn-font-semibold); margin-bottom: var(--mn-space-2);">Zero Dependencies</h3>
+          <p style="color: var(--mn-fg-muted); font-size: var(--mn-text-sm);">Pure TypeScript and CSS, no heavy frameworks required.</p>
+        </mn-card>
+      </div>
+    </section>
+  </main>
+
+  <!-- Demo Modal -->
+  <mn-modal id="demo-modal">
+    <h2 slot="title">Welcome to Moderneer Design System</h2>
+    <p>This modal demonstrates the focus trap and accessibility features. Try pressing Tab to cycle through focusable elements, or Escape to close.</p>
+    <p style="margin-top: var(--mn-space-3);">All components are built with accessibility in mind, following WCAG 2.1 AA guidelines.</p>
+    <div slot="footer">
+      <mn-button variant="secondary" id="close-modal">Close</mn-button>
+      <mn-button variant="primary">Get Started</mn-button>
+    </div>
+  </mn-modal>
+
+  <!-- Scripts -->
+  <script type="module">
+    import { applyTheme, getTheme } from '../moderneer-design-system/dist/index.js';
+    
+    // Initialize theme
+    const currentTheme = getTheme();
+    updateThemeIcon(currentTheme);
+    
+    // Theme toggle in navbar
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    themeToggleBtn.addEventListener('click', () => {
+      const current = getTheme();
+      const next = current === 'light' ? 'dark' : current === 'dark' ? 'auto' : 'light';
+      applyTheme(next);
+      updateThemeIcon(next);
+    });
+    
+    // Theme buttons in panel
+    document.querySelectorAll('[data-theme]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const theme = e.target.getAttribute('data-theme');
+        applyTheme(theme);
+        updateThemeIcon(theme);
+      });
+    });
+    
+    function updateThemeIcon(theme) {
+      const icon = document.getElementById('theme-icon');
+      icon.textContent = theme === 'light' ? '🌙' : theme === 'dark' ? '☀️' : '🌗';
+    }
+    
+    // Modal demo
+    const modal = document.getElementById('demo-modal');
+    const demoModalBtn = document.getElementById('demo-modal-btn');
+    const closeModalBtn = document.getElementById('close-modal');
+    
+    demoModalBtn.addEventListener('click', () => modal.open());
+    closeModalBtn.addEventListener('click', () => modal.close());
+    
+    // Close panel on navigation
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        // In a real app, let navigation happen
+        // For demo, just close the panel
+        document.querySelector('mn-burger-panel').close();
+      });
+    });
+  </script>
+</body>
+</html>

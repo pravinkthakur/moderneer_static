@@ -8,6 +8,12 @@
 <meta name="theme-color" content="#3B82F6" />
 <link rel="stylesheet" href="css/modern-2025.css" />
 
+<!-- Moderneer Design System -->
+<link rel="stylesheet" href="../moderneer-design-system/src/reset.css">
+<link rel="stylesheet" href="../moderneer-design-system/src/tokens.css">
+<link rel="stylesheet" href="../moderneer-design-system/src/theme.css">
+<script type="module" src="../moderneer-design-system/dist/index.js"></script>
+
 <!-- Minimal site-specific styles using your Moderneer tokens -->
 <style>
   :root{
@@ -99,6 +105,27 @@
 </style>
 </head>
 <body class="moderneer">
+
+<!-- Design System Navigation -->
+<mn-navbar logo-src="/assets/logo.jpg" logo-alt="Moderneer" sticky>
+  <span slot="title">Moderneer</span>
+  <div slot="actions">
+    <mn-button variant="ghost" size="sm" class="theme-toggle" title="Toggle theme">🌙</mn-button>
+  </div>
+</mn-navbar>
+
+<mn-burger-panel position="right" width="400px">
+  <h3 slot="title">Navigation</h3>
+  <nav style="display: flex; flex-direction: column; gap: var(--mn-space-2);">
+    <a href="/index.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); color: var(--mn-fg); text-decoration: none; transition: background var(--mn-transition-fast);">🏠 Home</a>
+    <a href="/about.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); color: var(--mn-fg); text-decoration: none; transition: background var(--mn-transition-fast);">ℹ️ About</a>
+    <a href="/maturity.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); color: var(--mn-fg); text-decoration: none; transition: background var(--mn-transition-fast);">📊 Maturity Model</a>
+    <a href="/assessment/" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); color: var(--mn-fg); text-decoration: none; transition: background var(--mn-transition-fast);">📝 Assessments</a>
+    <a href="/self-assessment.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); background: var(--mn-primary); color: var(--mn-primary-contrast); text-decoration: none;">✨ Self Assessment</a>
+    <a href="/contact.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); color: var(--mn-fg); text-decoration: none; transition: background var(--mn-transition-fast);">✉️ Contact</a>
+  </nav>
+</mn-burger-panel>
+
 <header>
   <div class="wrap brandbar">
     <div class="brand-left">
@@ -1137,5 +1164,50 @@ function renderBreakdown(byPillar){
 /* Init */
 render();
 </script>
+
+<!-- Theme Toggle Script -->
+<script type="module">
+  // Initialize theme from localStorage
+  const savedTheme = localStorage.getItem('mn-theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  
+  // Setup theme toggle
+  document.querySelectorAll('.theme-toggle').forEach(btn => {
+    let theme = savedTheme;
+    btn.textContent = theme === 'light' ? '🌙' : '☀️';
+    
+    btn.addEventListener('click', () => {
+      theme = theme === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('mn-theme', theme);
+      document.querySelectorAll('.theme-toggle').forEach(b => {
+        b.textContent = theme === 'light' ? '🌙' : '☀️';
+      });
+    });
+  });
+  
+  // Highlight active page
+  const currentPath = window.location.pathname;
+  document.querySelectorAll('.nav-link').forEach(link => {
+    const href = link.getAttribute('href');
+    if (currentPath.includes(href.replace('.html', ''))) {
+      link.style.background = 'var(--mn-primary)';
+      link.style.color = 'var(--mn-primary-contrast)';
+    }
+    
+    // Hover effects
+    link.addEventListener('mouseenter', (e) => {
+      if (!e.target.style.background.includes('primary')) {
+        e.target.style.background = 'var(--mn-bg-muted)';
+      }
+    });
+    link.addEventListener('mouseleave', (e) => {
+      if (!e.target.style.background.includes('primary')) {
+        e.target.style.background = '';
+      }
+    });
+  });
+</script>
+
 </body>
 </html>

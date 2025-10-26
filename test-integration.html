@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design System Integration Test</title>
+  <link rel="stylesheet" href="css/modern-2025.css">
+  <style>
+    .test-results {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .test-item {
+      padding: 1rem;
+      margin: 0.5rem 0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .test-pass {
+      background: #d1fae5;
+      border: 1px solid #10b981;
+    }
+    
+    .test-fail {
+      background: #fee2e2;
+      border: 1px solid #ef4444;
+    }
+    
+    .test-pending {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+    }
+    
+    .status {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    
+    h1 {
+      color: #3B82F6;
+      margin-bottom: 2rem;
+    }
+    
+    .instructions {
+      background: #f3f4f6;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  
+<!-- Header Include -->
+<div id="header-include"></div>
+
+<div class="test-results">
+  <h1>🧪 Design System Integration Tests</h1>
+  
+  <div class="instructions">
+    <h3>Manual Tests:</h3>
+    <ol>
+      <li>Click the hamburger menu (☰) button in the top right</li>
+      <li>Verify the burger panel slides in from the right</li>
+      <li>Click the theme toggle button (🌙/☀️)</li>
+      <li>Verify the theme changes between light and dark</li>
+      <li>Click a navigation link</li>
+      <li>Press ESC to close the burger panel</li>
+    </ol>
+  </div>
+  
+  <h2>Automated Checks:</h2>
+  <div id="test-container"></div>
+  
+  <div style="margin-top: 2rem;">
+    <button onclick="window.location.reload()" style="padding: 0.75rem 1.5rem; background: #3B82F6; color: white; border: none; border-radius: 8px; cursor: pointer;">
+      Re-run Tests
+    </button>
+  </div>
+</div>
+
+<!-- Footer Include -->
+<div id="footer-include"></div>
+<script src="js/includes.js"></script>
+
+<script>
+  const tests = [
+    {
+      name: 'Design System CSS Loaded',
+      test: () => {
+        const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+        return links.some(link => link.href.includes('moderneer-design-system'));
+      }
+    },
+    {
+      name: 'Design System JS Module Loaded',
+      test: () => {
+        const scripts = Array.from(document.querySelectorAll('script[type="module"]'));
+        return scripts.some(script => script.src.includes('moderneer-design-system'));
+      }
+    },
+    {
+      name: 'Theme Attribute Present',
+      test: () => {
+        return document.documentElement.hasAttribute('data-theme');
+      }
+    },
+    {
+      name: 'mn-navbar Component Present',
+      test: () => {
+        return document.querySelector('mn-navbar') !== null;
+      }
+    },
+    {
+      name: 'mn-burger-panel Component Present',
+      test: () => {
+        return document.querySelector('mn-burger-panel') !== null;
+      }
+    },
+    {
+      name: 'Theme Toggle Button Present',
+      test: () => {
+        return document.querySelector('.theme-toggle') !== null;
+      }
+    },
+    {
+      name: 'Header Include Loaded',
+      test: () => {
+        const header = document.getElementById('header-include');
+        return header && header.innerHTML.trim().length > 0;
+      }
+    },
+    {
+      name: 'Navigation Links Present',
+      test: () => {
+        const navLinks = document.querySelectorAll('mn-burger-panel a');
+        return navLinks.length > 0;
+      }
+    },
+    {
+      name: 'includes.js Loaded',
+      test: () => {
+        return typeof window.IncludeSystem !== 'undefined';
+      }
+    },
+    {
+      name: 'CSS Custom Properties Working',
+      test: () => {
+        const style = getComputedStyle(document.documentElement);
+        return style.getPropertyValue('--mn-primary').trim().length > 0;
+      }
+    }
+  ];
+  
+  function runTests() {
+    const container = document.getElementById('test-container');
+    let passed = 0;
+    let failed = 0;
+    
+    tests.forEach(({ name, test }) => {
+      const div = document.createElement('div');
+      
+      try {
+        const result = test();
+        if (result) {
+          div.className = 'test-item test-pass';
+          div.innerHTML = `<span class="status">✅</span><span>${name}</span>`;
+          passed++;
+        } else {
+          div.className = 'test-item test-fail';
+          div.innerHTML = `<span class="status">❌</span><span>${name}</span>`;
+          failed++;
+        }
+      } catch (error) {
+        div.className = 'test-item test-fail';
+        div.innerHTML = `<span class="status">❌</span><span>${name} - Error: ${error.message}</span>`;
+        failed++;
+      }
+      
+      container.appendChild(div);
+    });
+    
+    // Add summary
+    const summary = document.createElement('div');
+    summary.style.marginTop = '2rem';
+    summary.style.padding = '1rem';
+    summary.style.background = passed === tests.length ? '#d1fae5' : '#fef3c7';
+    summary.style.borderRadius = '8px';
+    summary.style.fontWeight = 'bold';
+    summary.innerHTML = `
+      <h3>Results: ${passed}/${tests.length} tests passed</h3>
+      ${failed > 0 ? `<p style="color: #ef4444;">${failed} tests failed</p>` : '<p style="color: #10b981;">All tests passed! 🎉</p>'}
+    `;
+    container.appendChild(summary);
+    
+    // Console output
+    console.log(`%c Design System Integration Tests`, 'font-size: 16px; font-weight: bold; color: #3B82F6;');
+    console.log(`Passed: ${passed}/${tests.length}`);
+    if (failed > 0) {
+      console.error(`Failed: ${failed}`);
+    }
+  }
+  
+  // Wait for everything to load
+  setTimeout(() => {
+    runTests();
+  }, 2000);
+</script>
+
+</body>
+</html>
