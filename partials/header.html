@@ -1,6 +1,7 @@
 <mn-navbar logo-src="/images/logo.jpg" logo-alt="Moderneer" sticky>
-  <div slot="actions">
+  <div slot="actions" style="display: flex; align-items: center; gap: var(--mn-space-2);">
     <mn-button variant="ghost" size="sm" class="theme-toggle">🌙</mn-button>
+    <mn-button variant="ghost" size="sm" class="burger-trigger">☰</mn-button>
   </div>
 </mn-navbar>
 
@@ -44,6 +45,16 @@
 </mn-burger-panel>
 
 <script type="module">
+  // Burger menu trigger
+  document.querySelectorAll('.burger-trigger').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const panel = document.querySelector('mn-burger-panel');
+      if (panel) {
+        panel.open = !panel.open;
+      }
+    });
+  });
+
   // Theme toggle
   document.querySelectorAll('.theme-toggle').forEach(btn => {
     let theme = localStorage.getItem('mn-theme') || 'light';
