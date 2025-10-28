@@ -1,94 +1,66 @@
-<mn-navbar logo-src="/assets/logo.jpg" logo-alt="Moderneer" sticky>
-  <div slot="actions" style="display: flex; align-items: center; gap: var(--mn-space-2);">
-    <mn-button variant="ghost" size="sm" class="theme-toggle">🌙</mn-button>
-    <mn-button variant="ghost" size="sm" class="burger-trigger">☰</mn-button>
+﻿<header class="site-header">
+  <div class="header-container">
+    <a href="/index.html" class="logo-link">
+      <img src="/images/logo.jpg" alt="Moderneer" class="header-logo" />
+    </a>
+    <button class="burger-menu" aria-label="Open menu">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
   </div>
-</mn-navbar>
+</header>
 
-<mn-burger-panel position="right" width="400px">
-  <h3 slot="title">Navigation</h3>
-  <nav style="display: flex; flex-direction: column; gap: var(--mn-space-2);">
-    <a href="/index.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
-      🏠 Home
-    </a>
-    <a href="/about.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
-      ℹ️ About
-    </a>
-    <a href="/maturity.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
-      📊 Maturity Model
-    </a>
-    <a href="/assessment/" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
-      📝 Assessments
-    </a>
-    <a href="/ai-reverse-engineering.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
-      🤖 AI Engineering
-    </a>
-    <a href="/shift-left.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
-      ⬅️ Shift-Left QE
-    </a>
-    <a href="/bootcamps.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
-      🎓 Bootcamps
-    </a>
-    <a href="/advisory.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
-      💼 Advisory
-    </a>
-    <a href="/operating-models.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
-      ⚙️ Operating Models
-    </a>
-    <a href="/future-trends.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
-      🔮 Future Trends
-    </a>
-    <a href="/contact.html" class="nav-link" style="padding: var(--mn-space-3); border-radius: var(--mn-radius-md); text-decoration: none; color: var(--mn-fg); transition: background var(--mn-transition-fast);">
-      ✉️ Contact
-    </a>
-  </nav>
-</mn-burger-panel>
+<nav class="burger-nav">
+  <div class="burger-overlay"></div>
+  <div class="burger-panel">
+    <button class="burger-close" aria-label="Close menu">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+    <ul class="nav-menu">
+      <li><a href="/index.html" class="nav-link"> Home</a></li>
+      <li><a href="/about.html" class="nav-link">ℹ About</a></li>
+      <li><a href="/maturity.html" class="nav-link"> Maturity Model</a></li>
+      <li><a href="/assessment/" class="nav-link"> Assessments</a></li>
+      <li><a href="/ai-reverse-engineering.html" class="nav-link"> AI Engineering</a></li>
+      <li><a href="/shift-left.html" class="nav-link"> Shift-Left</a></li>
+      <li><a href="/bootcamps.html" class="nav-link"> Bootcamps</a></li>
+      <li><a href="/advisory.html" class="nav-link"> Advisory</a></li>
+      <li><a href="/operating-models.html" class="nav-link"> Operating Models</a></li>
+      <li><a href="/future-trends.html" class="nav-link"> Future Trends</a></li>
+      <li><a href="/contact.html" class="nav-link"> Contact</a></li>
+    </ul>
+  </div>
+</nav>
 
-<script type="module">
-  // Burger menu trigger
-  document.querySelectorAll('.burger-trigger').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const panel = document.querySelector('mn-burger-panel');
-      if (panel) {
-        panel.open = !panel.open;
-      }
-    });
-  });
+<style>
+.site-header{position:sticky;top:0;z-index:1000;background:#fff;border-bottom:1px solid #e5e7eb;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.header-container{max-width:1400px;margin:0 auto;padding:.75rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+.logo-link{display:flex;text-decoration:none}
+.header-logo{height:40px;width:auto}
+.burger-menu{background:none;border:none;padding:.5rem;cursor:pointer;color:#1f2937;border-radius:.375rem;transition:background .2s}
+.burger-menu:hover{background:#f3f4f6}
+.burger-nav{position:fixed;inset:0;z-index:2000;pointer-events:none;opacity:0;transition:opacity .3s}
+.burger-nav.open{pointer-events:auto;opacity:1}
+.burger-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);opacity:0;transition:opacity .3s}
+.burger-nav.open .burger-overlay{opacity:1}
+.burger-panel{position:absolute;top:0;right:0;bottom:0;width:320px;max-width:90vw;background:#fff;box-shadow:-2px 0 8px rgba(0,0,0,.1);transform:translateX(100%);transition:transform .3s;overflow-y:auto;padding:1.5rem}
+.burger-nav.open .burger-panel{transform:translateX(0)}
+.burger-close{position:absolute;top:1rem;right:1rem;background:none;border:none;padding:.5rem;cursor:pointer;color:#1f2937;border-radius:.375rem;transition:background .2s}
+.burger-close:hover{background:#f3f4f6}
+.nav-menu{list-style:none;padding:0;margin:3rem 0 0}
+.nav-menu li{margin-bottom:.5rem}
+.nav-link{display:block;padding:.75rem 1rem;border-radius:.375rem;text-decoration:none;color:#1f2937;transition:background .2s}
+.nav-link:hover{background:#f3f4f6}
+.nav-link.active{background:#3b82f6;color:#fff}
+@media(max-width:768px){.header-logo{height:32px}.burger-panel{width:280px}}
+</style>
 
-  // Theme toggle
-  document.querySelectorAll('.theme-toggle').forEach(btn => {
-    let theme = localStorage.getItem('mn-theme') || 'light';
-    btn.textContent = theme === 'light' ? '🌙' : '☀️';
-    
-    btn.addEventListener('click', () => {
-      theme = theme === 'light' ? 'dark' : 'light';
-      document.documentElement.setAttribute('data-theme', theme);
-      localStorage.setItem('mn-theme', theme);
-      document.querySelectorAll('.theme-toggle').forEach(b => {
-        b.textContent = theme === 'light' ? '🌙' : '☀️';
-      });
-    });
-  });
-  
-  // Highlight active page
-  const currentPath = window.location.pathname;
-  document.querySelectorAll('.nav-link').forEach(link => {
-    const href = link.getAttribute('href');
-    if (currentPath === href || currentPath.includes(href.replace('.html', ''))) {
-      link.style.background = 'var(--mn-primary)';
-      link.style.color = 'var(--mn-primary-contrast)';
-    }
-    
-    // Hover effects
-    link.addEventListener('mouseenter', (e) => {
-      if (!e.target.style.background.includes('primary')) {
-        e.target.style.background = 'var(--mn-bg-muted)';
-      }
-    });
-    link.addEventListener('mouseleave', (e) => {
-      if (!e.target.style.background.includes('primary')) {
-        e.target.style.background = '';
-      }
-    });
-  });
+<script>
+(function(){const b=document.querySelector('.burger-menu'),n=document.querySelector('.burger-nav'),c=document.querySelector('.burger-close'),o=document.querySelector('.burger-overlay');function open(){n?.classList.add('open');b?.setAttribute('aria-expanded','true');document.body.style.overflow='hidden'}function close(){n?.classList.remove('open');b?.setAttribute('aria-expanded','false');document.body.style.overflow=''}b?.addEventListener('click',open);c?.addEventListener('click',close);o?.addEventListener('click',close);document.addEventListener('keydown',e=>{if(e.key==='Escape'&&n?.classList.contains('open'))close()});document.querySelectorAll('.nav-link').forEach(l=>{l.addEventListener('click',close);const p=window.location.pathname,h=l.getAttribute('href');if(p===h||(h!=='/index.html'&&p.includes(h.replace('.html',''))))l.classList.add('active')})})();
 </script>
