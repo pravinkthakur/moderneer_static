@@ -62,5 +62,81 @@
 </style>
 
 <script>
-(function(){const b=document.querySelector('.burger-menu'),n=document.querySelector('.burger-nav'),c=document.querySelector('.burger-close'),o=document.querySelector('.burger-overlay');function open(){n?.classList.add('open');b?.setAttribute('aria-expanded','true');document.body.style.overflow='hidden'}function close(){n?.classList.remove('open');b?.setAttribute('aria-expanded','false');document.body.style.overflow=''}b?.addEventListener('click',open);c?.addEventListener('click',close);o?.addEventListener('click',close);document.addEventListener('keydown',e=>{if(e.key==='Escape'&&n?.classList.contains('open'))close()});document.querySelectorAll('.nav-link').forEach(l=>{l.addEventListener('click',close);const p=window.location.pathname,h=l.getAttribute('href');if(p===h||(h!=='/index.html'&&p.includes(h.replace('.html',''))))l.classList.add('active')})})();
+(function() {
+  console.log('🍔 Burger menu script loading...');
+  
+  // Wait a tick to ensure DOM is ready
+  setTimeout(() => {
+    const burgerButton = document.querySelector('.burger-menu');
+    const burgerNav = document.querySelector('.burger-nav');
+    const closeButton = document.querySelector('.burger-close');
+    const overlay = document.querySelector('.burger-overlay');
+    
+    console.log('🍔 Elements found:', {
+      burgerButton: !!burgerButton,
+      burgerNav: !!burgerNav,
+      closeButton: !!closeButton,
+      overlay: !!overlay
+    });
+    
+    if (!burgerButton || !burgerNav) {
+      console.error('❌ Burger menu elements not found!');
+      return;
+    }
+    
+    function openMenu() {
+      console.log('🍔 Opening menu');
+      burgerNav.classList.add('open');
+      burgerButton.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeMenu() {
+      console.log('🍔 Closing menu');
+      burgerNav.classList.remove('open');
+      burgerButton.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+    
+    // Burger button click
+    burgerButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('🍔 Burger button clicked');
+      openMenu();
+    });
+    
+    // Close button click
+    if (closeButton) {
+      closeButton.addEventListener('click', closeMenu);
+    }
+    
+    // Overlay click
+    if (overlay) {
+      overlay.addEventListener('click', closeMenu);
+    }
+    
+    // ESC key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && burgerNav.classList.contains('open')) {
+        closeMenu();
+      }
+    });
+    
+    // Close on nav link click
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', closeMenu);
+      
+      // Set active link
+      const currentPath = window.location.pathname;
+      const linkHref = link.getAttribute('href');
+      if (currentPath === linkHref || 
+          (linkHref !== '/index.html' && currentPath.includes(linkHref.replace('.html', '')))) {
+        link.classList.add('active');
+      }
+    });
+    
+    console.log('✅ Burger menu initialized');
+  }, 100);
+})();
 </script>
