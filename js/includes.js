@@ -7,33 +7,10 @@ class IncludeSystem {
   }
 
   loadDesignSystem() {
-    // Load CSS files from local design system
-    const cssFiles = [
-      '../moderneer-design-system/src/reset.css',
-      '../moderneer-design-system/src/tokens.css',
-      '../moderneer-design-system/src/theme.css'
-    ];
+    // Design system CSS is now embedded in partials/header.html
+    // No external CSS files needed
     
-    cssFiles.forEach(href => {
-      // Check if already loaded
-      if (!document.querySelector(`link[href="${href}"]`)) {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = href;
-        document.head.appendChild(link);
-      }
-    });
-    
-    // Load JavaScript module from local design system
-    const scriptSrc = '../moderneer-design-system/dist/index.js';
-    if (!document.querySelector(`script[src="${scriptSrc}"]`)) {
-      const script = document.createElement('script');
-      script.type = 'module';
-      script.src = scriptSrc;
-      document.head.appendChild(script);
-    }
-    
-    // Initialize theme
+    // Initialize theme (keep for compatibility)
     const savedTheme = localStorage.getItem('mn-theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
   }
