@@ -1,6 +1,6 @@
 {
     "buildDate":  "2025-11-07T23:30:00.000Z",
-    "version":  "8.7.4",
+    "version":  "8.7.5",
     "gitCommit":  "latest",
     "environment":  "production",
     "features":  {
@@ -23,7 +23,10 @@
                      "correctIconLogic":  true,
                      "neverAutoDisable":  true,
                      "edgeBranding":  true,
-                     "noIconForMissingEvidence":  true
+                     "noIconForMissingEvidence":  true,
+                     "scoreInTooltip":  true,
+                     "setupDesignRestored":  true,
+                     "clearPastDataOnSetup":  true
                  },
     "buildNumber":  "202511072330"
 }
