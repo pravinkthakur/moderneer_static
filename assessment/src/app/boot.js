@@ -446,7 +446,19 @@ function renderParam(pillarName, pid, showPillarChip=false){
           const isEdgeAssessed = hasValue && !saved[i].na;
           const icon = isEdgeAssessed ? '✅' : '⚠️';
           const iconColor = isEdgeAssessed ? '#22C55E' : '#EF4444';
-          const iconLabel = isEdgeAssessed ? 'Edge assessed' : 'Manual review needed';
+          
+          // Format score display based on check type
+          let scoreDisplay = '';
+          if(isEdgeAssessed && type !== 'check') {
+            // For scale5 and scale100, show the score
+            const scoreValue = saved[i].v || 0;
+            if(type === 'scale5') {
+              scoreDisplay = ` (${scoreValue}/5)`;
+            } else {
+              scoreDisplay = ` (${scoreValue}/100)`;
+            }
+          }
+          const iconLabel = isEdgeAssessed ? `Edge assessed${scoreDisplay}` : 'Manual review needed';
           
           // Add icon with tooltip
           const tooltipIcon = document.createElement('span');
