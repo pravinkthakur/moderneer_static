@@ -77,12 +77,15 @@
         
         <!-- Secondary Actions -->
         <div class="action-menu" role="group" aria-label="Assessment actions">
+          <button class="icon-btn" id="btnUpload" data-testid="upload" title="Upload Edge assessment.json" aria-label="Upload Edge assessment">📥</button>
           <button class="icon-btn" id="btnSave" data-testid="save" title="Save current progress" aria-label="Save progress">💾</button>
           <button class="icon-btn" id="btnLoad" data-testid="load" title="Load saved assessment" aria-label="Load saved data">📁</button>
           <button class="icon-btn" id="btnExport" data-testid="export" title="Export assessment data" aria-label="Export data">📤</button>
           <button class="icon-btn warning" id="btnReset" title="Reset all responses" aria-label="Reset assessment">🔄</button>
           <button class="icon-btn" id="btnHelp" title="View help and guidance" aria-label="Open help">❓</button>
         </div>
+        <!-- Hidden file input for upload -->
+        <input type="file" id="fileInput" accept=".json" style="display: none" />
       </div>
     </div>
 

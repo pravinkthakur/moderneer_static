@@ -433,6 +433,82 @@ function renderParam(pillarName, pid, showPillarChip=false){
       else if(ctrl) ctrl.value = saved[i].v;
       const na = row.querySelector(`[data-na="1"]`);
       if(saved[i].na){ na.checked = true; if(ctrl) ctrl.disabled = true; }
+      
+      // Add evidence tooltip if evidence exists
+      if(saved[i].evidence || saved[i].answer) {
+        const evidence = saved[i].evidence || saved[i].answer;
+        const labelElement = row.querySelector(`label[for="${inputId}"]`);
+        if(labelElement && evidence) {
+          // Add warning icon with tooltip
+          const tooltipIcon = document.createElement('span');
+          tooltipIcon.className = 'evidence-icon';
+          tooltipIcon.innerHTML = ' ⚠️';
+          tooltipIcon.title = evidence;
+          tooltipIcon.style.cssText = `
+            margin-left: 6px;
+            cursor: help;
+            font-size: 1em;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+          `;
+          
+          // Enhanced tooltip on hover
+          const showTooltip = (e) => {
+            const tooltip = document.createElement('div');
+            tooltip.className = 'evidence-tooltip-popup';
+            tooltip.textContent = evidence;
+            tooltip.style.cssText = `
+              position: fixed;
+              background: #1F2937;
+              color: white;
+              padding: 10px 14px;
+              border-radius: 6px;
+              font-size: 0.875rem;
+              max-width: 400px;
+              z-index: 10000;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+              line-height: 1.5;
+              word-wrap: break-word;
+              pointer-events: none;
+            `;
+            
+            const rect = tooltipIcon.getBoundingClientRect();
+            tooltip.style.left = rect.left + 'px';
+            tooltip.style.top = (rect.bottom + 8) + 'px';
+            
+            // Adjust if tooltip goes off screen
+            document.body.appendChild(tooltip);
+            const tooltipRect = tooltip.getBoundingClientRect();
+            if(tooltipRect.right > window.innerWidth) {
+              tooltip.style.left = (window.innerWidth - tooltipRect.width - 10) + 'px';
+            }
+            if(tooltipRect.bottom > window.innerHeight) {
+              tooltip.style.top = (rect.top - tooltipRect.height - 8) + 'px';
+            }
+            
+            tooltipIcon._tooltip = tooltip;
+          };
+          
+          const hideTooltip = () => {
+            if(tooltipIcon._tooltip && tooltipIcon._tooltip.parentNode) {
+              tooltipIcon._tooltip.parentNode.removeChild(tooltipIcon._tooltip);
+              tooltipIcon._tooltip = null;
+            }
+          };
+          
+          tooltipIcon.addEventListener('mouseenter', (e) => {
+            tooltipIcon.style.opacity = '1';
+            showTooltip(e);
+          });
+          
+          tooltipIcon.addEventListener('mouseleave', () => {
+            tooltipIcon.style.opacity = '0.7';
+            hideTooltip();
+          });
+          
+          labelElement.appendChild(tooltipIcon);
+        }
+      }
     }
   });
   
@@ -1499,12 +1575,53 @@ function buildReport(results){
 }
 
 // Wait for DOM to be fully loaded before adding event listeners
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+  // Import Edge integration module
+  const { loadEdgeAssessment, populateFromEdgeAssessment, exportToEdgeFormat } = await import('../edge-integration.js');
+  
   const btnReport = document.getElementById("btnReport");
   const btnSave = document.getElementById("btnSave");
   const btnLoad = document.getElementById("btnLoad");
   const btnReset = document.getElementById("btnReset");
   const btnExport = document.getElementById("btnExport");
+  const btnUpload = document.getElementById("btnUpload");
+  const fileInput = document.getElementById("fileInput");
+
+  // Upload Edge assessment.json
+  if (btnUpload && fileInput) {
+    btnUpload.addEventListener("click", () => {
+      fileInput.click();
+    });
+    
+    fileInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      try {
+        console.log('📥 Loading Edge assessment file...');
+        const edgeAssessment = await loadEdgeAssessment(file);
+        
+        // Populate UI with Edge data
+        const count = populateFromEdgeAssessment(edgeAssessment, getSaved, setSaved);
+        
+        // Re-render to show the populated data
+        render();
+        
+        alert(`✅ Successfully loaded Edge assessment!\n\n` +
+              `Repository: ${edgeAssessment.repo_name || 'Unknown'}\n` +
+              `Generated: ${new Date(edgeAssessment.generated_at_utc).toLocaleString()}\n` +
+              `Populated ${count} checks\n\n` +
+              `The assessment has been loaded into the UI. You can now review, modify, and export it.`);
+        
+        // Clear file input for next upload
+        fileInput.value = '';
+      } catch (error) {
+        console.error('❌ Error loading Edge assessment:', error);
+        alert('Error loading Edge assessment:\n\n' + error.message);
+        fileInput.value = '';
+      }
+    });
+  }
 
   if (btnReport) btnReport.addEventListener("click", ()=>{ 
     // Guard: Check if MODEL is loaded
@@ -1524,15 +1641,33 @@ document.addEventListener('DOMContentLoaded', function() {
   if (btnSave) btnSave.addEventListener("click", saveAll);
   if (btnLoad) btnLoad.addEventListener("click", loadAll);
   if (btnReset) btnReset.addEventListener("click", resetAll);
+  
+  // Export to Edge format
   if (btnExport) btnExport.addEventListener("click", ()=>{
     if (!MODEL) {
       alert('⏳ Assessment configuration is still loading. Please wait and try again.');
       return;
     }
-    const payload = { module:currentModule, view:currentView, ts:new Date().toISOString(), selections:getSaved(), results:compute(true) };
-    const blob = new Blob([JSON.stringify(payload,null,2)], {type:"application/json"});
-    const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`moderneer_oemm_${currentModule}_${Date.now()}.json`;
-    a.click(); URL.revokeObjectURL(a.href);
+    
+    try {
+      const selections = getSaved();
+      const results = compute(true);
+      
+      // Export in Edge format
+      const edgeFormat = exportToEdgeFormat(selections, results, MODEL, PARAM_META);
+      
+      const blob = new Blob([JSON.stringify(edgeFormat, null, 2)], {type:"application/json"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `assessment_${edgeFormat.repo_name || 'export'}_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      
+      console.log('✅ Exported assessment in Edge format');
+    } catch (error) {
+      console.error('❌ Error exporting assessment:', error);
+      alert('Error exporting assessment:\n\n' + error.message);
+    }
   });
 });
 document.getElementById("btnCore").addEventListener("click", ()=>{
