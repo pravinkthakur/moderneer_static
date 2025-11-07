@@ -1,6 +1,6 @@
 {
-    "buildDate":  "2025-10-28T19:15:00.000Z",
-    "version":  "8.6.1",
+    "buildDate":  "2025-11-07T12:00:00.000Z",
+    "version":  "8.7.0",
     "gitCommit":  "latest",
     "environment":  "production",
     "features":  {
@@ -14,7 +14,10 @@
                      "parameterChecksFix":  true,
                      "apiOnlyMode":  true,
                      "apiDataStructureFix":  true,
-                     "comprehensiveQuestions":  true
+                     "comprehensiveQuestions":  true,
+                     "edgeIntegration":  true,
+                     "companyContextTracking":  true,
+                     "setupOnboardingFlow":  true
                  },
-    "buildNumber":  "202510202200"
+    "buildNumber":  "202511071200"
 }

@@ -15,7 +15,7 @@ export async function loadEdgeAssessment(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const assessment = JSON.parse(e.target.result);
         
@@ -25,6 +25,7 @@ export async function loadEdgeAssessment(file) {
         }
         
         console.log('✅ Edge assessment loaded:', {
+          company: assessment.company_name,
           repo: assessment.repo_name,
           generated: assessment.generated_at_utc,
           pillars: assessment.pillars.length,
@@ -33,6 +34,15 @@ export async function loadEdgeAssessment(file) {
         
         // Store globally for export
         window.EDGE_ASSESSMENT = assessment;
+        
+        // Update assessment context banner
+        try {
+          const { updateAssessmentContext, extractContextFromAssessment } = await import('./context-manager.js');
+          const context = extractContextFromAssessment(assessment);
+          updateAssessmentContext(context);
+        } catch (err) {
+          console.warn('Could not update context banner:', err);
+        }
         
         resolve(assessment);
       } catch (error) {
@@ -93,18 +103,18 @@ export function populateFromEdgeAssessment(edgeAssessment, getSaved, setSaved) {
           answer: check.answer || ''
         };
         
-        // Convert score to appropriate format
+        // Convert score to appropriate format based on check_type
         if (check.score !== null && check.score !== undefined) {
           // Check type determines how to interpret the score
           if (check.check_type === 'check') {
-            // Boolean check: score > 50 means checked
-            checkData.v = check.score >= 50;
+            // Boolean check: Edge should only have 0 or 100, but handle any value > 50 as true
+            checkData.v = check.score > 0;  // More forgiving: any positive score = checked
           } else if (check.check_type === 'scale5') {
             // Scale 0-5: score is 0-100, convert to 0-5
-            checkData.v = (check.score / 100) * 5;
+            checkData.v = Math.min(5, Math.max(0, (check.score / 100) * 5));
           } else if (check.check_type === 'scale100') {
             // Scale 0-100: use score directly
-            checkData.v = check.score;
+            checkData.v = Math.min(100, Math.max(0, check.score));
           }
         }
         
@@ -130,21 +140,25 @@ export function populateFromEdgeAssessment(edgeAssessment, getSaved, setSaved) {
  * @returns {Object} Edge-formatted assessment
  */
 export function exportToEdgeFormat(currentSelections, computedResults, MODEL, PARAM_META) {
+  const ctx = window.ASSESSMENT_CONTEXT || {};
   const edgeAssessment = window.EDGE_ASSESSMENT || {
     version: "3.0.0",
     schema_version: "3.0.0",
     generated_at_utc: new Date().toISOString(),
-    repo_name: "Static Assessment Export",
-    repo_url: "",
+    company_name: ctx.companyName || null,
+    repo_name: ctx.repoName || "Static Assessment Export",
+    repo_url: ctx.repoUrl || "",
     assessment_type: "manual",
     overall_score: Math.round(computedResults.finalIndex || 0),
     overall_confidence: 0.9,
     pillars: []
   };
   
-  // Update overall score
+  // Update overall score and metadata
   edgeAssessment.overall_score = Math.round(computedResults.finalIndex || 0);
   edgeAssessment.generated_at_utc = new Date().toISOString();
+  edgeAssessment.company_name = ctx.companyName || edgeAssessment.company_name;
+  edgeAssessment.repo_name = ctx.repoName || edgeAssessment.repo_name;
   
   // Build pillars array
   const pillars = [];
