@@ -3,9 +3,9 @@ import { describe, it, expect } from 'vitest';
 import { CSP } from '../../src/security/csp.js';
 
 describe('security/CSP', () => {
-  it('index.html contains exact CSP content from module', async () => {
+  it('assessment.html contains exact CSP content from module', async () => {
     const fs = await import('fs/promises');
-    const html = await fs.readFile('index.html', 'utf-8');
+    const html = await fs.readFile('assessment.html', 'utf-8');
     const m = html.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)"/);
     expect(m).toBeTruthy();
     expect(m[1]).toBe(CSP);

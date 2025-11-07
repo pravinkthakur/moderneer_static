@@ -439,11 +439,18 @@ function renderParam(pillarName, pid, showPillarChip=false){
         const evidence = saved[i].evidence || saved[i].answer;
         const labelElement = row.querySelector(`label[for="${inputId}"]`);
         if(labelElement && evidence) {
-          // Add warning icon with tooltip
+          // Determine if this was LLM assessed or needs manual review
+          // LLM assessed = has evidence AND has a non-null answer AND not marked for manual review
+          const isLLMAssessed = saved[i].evidence && saved[i].v !== null && saved[i].v !== undefined && !saved[i].na;
+          const icon = isLLMAssessed ? '✅' : '⚠️';
+          const iconColor = isLLMAssessed ? '#22C55E' : '#EF4444';
+          const iconLabel = isLLMAssessed ? 'LLM assessed' : 'Manual review needed';
+          
+          // Add icon with tooltip
           const tooltipIcon = document.createElement('span');
-          tooltipIcon.className = 'evidence-icon';
-          tooltipIcon.innerHTML = ' ⚠️';
-          tooltipIcon.title = evidence;
+          tooltipIcon.className = `evidence-icon ${isLLMAssessed ? 'evidence-success' : 'evidence-warning'}`;
+          tooltipIcon.innerHTML = ` ${icon}`;
+          tooltipIcon.title = `${iconLabel}: ${evidence}`;
           tooltipIcon.style.cssText = `
             margin-left: 6px;
             cursor: help;
@@ -456,7 +463,7 @@ function renderParam(pillarName, pid, showPillarChip=false){
           const showTooltip = (e) => {
             const tooltip = document.createElement('div');
             tooltip.className = 'evidence-tooltip-popup';
-            tooltip.textContent = evidence;
+            tooltip.innerHTML = `<strong style="color: ${iconColor};">${iconLabel}</strong><br><br>${evidence}`;
             tooltip.style.cssText = `
               position: fixed;
               background: #1F2937;
@@ -645,15 +652,10 @@ function generateExecutiveSummary(results){
   const li = (arr) => arr.map(x=>`<li>${x}</li>`).join("");
   const liKPI = (items) => items.map(x=>`<li><b>${x.k}</b>: ${x.v}</li>`).join("");
 
-  // Get company and repository context
-  const companyName = window.ASSESSMENT_CONTEXT?.companyName || 'Organization';
-  const repoName = window.ASSESSMENT_CONTEXT?.repoName || 'Repository';
-
   const html = `
   <div class="execsum" id="execText">
     <div class="callout">
       <h4>TL;DR</h4>
-      <div class="tiny"><i>Assessment for <b>${companyName}</b> | Repository: <b>${repoName}</b></i></div>
       <div class="tiny"><i>Preliminary report based on <b>${scopeLabel()}</b>. A thorough report will include deeper analysis, evidence, and the full 12‑pillar view if selected.</i></div>
       <ul>
         ${liKPI([
@@ -743,16 +745,9 @@ function generateNarrative(results){
   const strengths = [...pairs].sort((a,b)=>b.idx-a.idx).slice(0,3);
   const gaps = [...pairs].sort((a,b)=>a.idx-b.idx).slice(0,3);
   
-  // Get company and repository context
-  const companyName = window.ASSESSMENT_CONTEXT?.companyName || 'Organization';
-  const repoName = window.ASSESSMENT_CONTEXT?.repoName || 'Repository';
-  
   return `
     <div class="narrative-report">
       <h3>The Maturity Story</h3>
-      <div class="report-meta" style="margin-bottom: 20px; padding: 10px; background: #f5f5f5; border-radius: 4px;">
-        <strong>Company:</strong> ${companyName} | <strong>Repository:</strong> ${repoName}
-      </div>
       
       <section>
         <h4>📖 Current Chapter</h4>
@@ -841,18 +836,12 @@ function llmStyleReport(results){
     day: 'numeric' 
   });
 
-  // Get company and repository context
-  const companyName = window.ASSESSMENT_CONTEXT?.companyName || 'Organization';
-  const repoName = window.ASSESSMENT_CONTEXT?.repoName || 'Repository';
-
   return `
 <div class="structured-report">
-  <!-- Report Header -->
+  <!-- Report Header (banner removed - now at modal level) -->
   <div class="report-header">
     <h1>Engineering Excellence Maturity Assessment</h1>
     <div class="report-meta">
-      <p><strong>Company:</strong> ${companyName}</p>
-      <p><strong>Repository:</strong> ${repoName}</p>
       <p><strong>Assessment Scope:</strong> ${scope}</p>
       <p><strong>Report Date:</strong> ${reportDate}</p>
       <p><strong>Overall Band:</strong> ${bandTxt} (${scale.toFixed(1)}/5.0, Index: ${idx.toFixed(1)}/100)</p>
@@ -995,9 +984,24 @@ function llmStyleReport(results){
 }
 function openTabbedModal(title, tabs){
   modalTitle.textContent = title;
+  
+  // Add company/repo context banner at top of modal (once)
+  const companyName = window.ASSESSMENT_CONTEXT?.companyName || null;
+  const repoName = window.ASSESSMENT_CONTEXT?.repoName || null;
+  
+  let contextBanner = '';
+  if (companyName || repoName) {
+    contextBanner = `
+      <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">
+        ${companyName ? `<div style="font-size: 0.9em; margin-bottom: 5px;"><strong>Company:</strong> ${companyName}</div>` : ''}
+        ${repoName ? `<div style="font-size: 0.9em;"><strong>Repository:</strong> ${repoName}</div>` : ''}
+      </div>
+    `;
+  }
+  
   const tabBtns = tabs.map((t,i)=>`<button class="tab ${i===0?"active":""}" data-tab="${t.id}" role="tab" aria-selected="${i===0}">${t.title}</button>`).join("");
   const tabPanes = tabs.map((t,i)=>`<section id="tab-${t.id}" class="tabpanel ${i===0?"active":""}" role="tabpanel">${t.html}</section>`).join("");
-  modalContent.innerHTML = `<div class="tabs"><div class="tablist" role="tablist">${tabBtns}</div>${tabPanes}</div>`;
+  modalContent.innerHTML = `${contextBanner}<div class="tabs"><div class="tablist" role="tablist">${tabBtns}</div>${tabPanes}</div>`;
   overlay.style.display = "flex";
   
   // Simple direct button binding with detailed logging
@@ -1402,12 +1406,8 @@ function buildReportTabs(results){
   const companyName = window.ASSESSMENT_CONTEXT?.companyName || 'Organization';
   const repoName = window.ASSESSMENT_CONTEXT?.repoName || 'Repository';
   
-  // Overall metrics card
+  // Overall metrics card (banner removed - now at modal level)
   const overallHTML = `
-    <div style="margin-bottom: 20px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">
-      <div style="font-size: 0.9em; margin-bottom: 5px;"><strong>Company:</strong> ${companyName}</div>
-      <div style="font-size: 0.9em;"><strong>Repository:</strong> ${repoName}</div>
-    </div>
     <div class="kpis">
       <div class="kpi"><div class="tiny">Overall (index 0–100)</div><strong>${fmt(results.finalIndex,1)}</strong></div>
       <div class="kpi"><div class="tiny">Overall (scale 1–5)</div><strong>${fmt(results.finalScale,1)}</strong></div>

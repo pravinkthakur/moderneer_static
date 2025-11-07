@@ -8,266 +8,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/modern-2025.css">
   <link rel="stylesheet" href="moderneer.css" />
-  <style>
-    .setup-container {
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 0 20px;
-    }
-    
-    .setup-card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      padding: 32px;
-      margin-bottom: 24px;
-    }
-    
-    .setup-header {
-      text-align: center;
-      margin-bottom: 32px;
-    }
-    
-    .setup-header h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #1F2937;
-      margin-bottom: 8px;
-    }
-    
-    .setup-header p {
-      color: #6B7280;
-      font-size: 1.125rem;
-    }
-    
-    .form-section {
-      margin-bottom: 32px;
-    }
-    
-    .form-section h2 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: #1F2937;
-      margin-bottom: 16px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid #E5E7EB;
-    }
-    
-    .form-group {
-      margin-bottom: 20px;
-    }
-    
-    .form-group label {
-      display: block;
-      font-weight: 600;
-      color: #374151;
-      margin-bottom: 8px;
-      font-size: 0.9375rem;
-    }
-    
-    .form-group label .required {
-      color: #DC2626;
-      margin-left: 4px;
-    }
-    
-    .form-group input[type="text"],
-    .form-group input[type="email"],
-    .form-group input[type="url"],
-    .form-group input[type="password"],
-    .form-group select {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid #D1D5DB;
-      border-radius: 6px;
-      font-size: 1rem;
-      font-family: inherit;
-      transition: border-color 0.2s;
-    }
-    
-    .form-group input:focus,
-    .form-group select:focus {
-      outline: none;
-      border-color: #3B82F6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-    
-    .form-hint {
-      font-size: 0.875rem;
-      color: #6B7280;
-      margin-top: 6px;
-    }
-    
-    .repo-type-selector {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-    
-    .repo-type-option {
-      border: 2px solid #E5E7EB;
-      border-radius: 8px;
-      padding: 20px;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
-    }
-    
-    .repo-type-option:hover {
-      border-color: #3B82F6;
-      background: #EFF6FF;
-    }
-    
-    .repo-type-option.selected {
-      border-color: #3B82F6;
-      background: #EFF6FF;
-    }
-    
-    .repo-type-option input[type="radio"] {
-      display: none;
-    }
-    
-    .repo-type-option .icon {
-      font-size: 2rem;
-      margin-bottom: 8px;
-    }
-    
-    .repo-type-option .title {
-      font-weight: 600;
-      color: #1F2937;
-      margin-bottom: 4px;
-    }
-    
-    .repo-type-option .desc {
-      font-size: 0.875rem;
-      color: #6B7280;
-    }
-    
-    .repo-list {
-      max-height: 300px;
-      overflow-y: auto;
-      border: 1px solid #E5E7EB;
-      border-radius: 6px;
-      padding: 12px;
-    }
-    
-    .repo-item {
-      padding: 12px;
-      border: 1px solid #E5E7EB;
-      border-radius: 6px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .repo-item:last-child {
-      margin-bottom: 0;
-    }
-    
-    .repo-item input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-    }
-    
-    .repo-item-info {
-      flex: 1;
-    }
-    
-    .repo-item-name {
-      font-weight: 600;
-      color: #1F2937;
-    }
-    
-    .repo-item-desc {
-      font-size: 0.875rem;
-      color: #6B7280;
-    }
-    
-    .btn-group {
-      display: flex;
-      gap: 12px;
-      justify-content: flex-end;
-      margin-top: 32px;
-    }
-    
-    .btn {
-      padding: 12px 24px;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
-    }
-    
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-    
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    }
-    
-    .btn-primary:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-    
-    .btn-secondary {
-      background: white;
-      color: #374151;
-      border: 1px solid #D1D5DB;
-    }
-    
-    .btn-secondary:hover {
-      background: #F9FAFB;
-    }
-    
-    #orgReposSection,
-    #patSection {
-      display: none;
-    }
-    
-    .loading-spinner {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(255,255,255,0.3);
-      border-radius: 50%;
-      border-top-color: white;
-      animation: spin 1s linear infinite;
-      margin-left: 8px;
-    }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    
-    .error-message {
-      background: #FEE2E2;
-      border: 1px solid #FCA5A5;
-      color: #991B1B;
-      padding: 12px 16px;
-      border-radius: 6px;
-      margin-top: 12px;
-      display: none;
-    }
-    
-    .success-message {
-      background: #D1FAE5;
-      border: 1px solid #6EE7B7;
-      color: #065F46;
-      padding: 12px 16px;
-      border-radius: 6px;
-      margin-top: 12px;
-      display: none;
-    }
-  </style>
 </head>
 <body>
 
@@ -355,10 +95,9 @@
             <div class="form-group">
               <label for="pat">
                 Personal Access Token (PAT)
-                <span class="required">*</span>
               </label>
-              <input type="password" id="pat" name="pat" placeholder="ghp_xxxxxxxxxxxxx">
-              <div class="form-hint">Required to fetch repositories from the organization</div>
+              <input type="password" id="pat" name="pat" placeholder="ghp_xxxxxxxxxxxxx (optional for public repos)">
+              <div class="form-hint">Optional: Required only for private repositories or to avoid rate limits</div>
             </div>
             
             <button type="button" class="btn btn-secondary" id="fetchReposBtn">
@@ -377,7 +116,7 @@
 
       <!-- Action Buttons -->
       <div class="btn-group">
-        <button type="button" class="btn btn-secondary" onclick="window.location.href='index.html'">
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='assessment.html'">
           Cancel
         </button>
         <button type="submit" class="btn btn-primary" id="startAssessmentBtn">
@@ -431,8 +170,8 @@
     errorEl.style.display = 'none';
     successEl.style.display = 'none';
     
-    if (!orgName || !pat) {
-      errorEl.textContent = 'Please provide both organization name and PAT';
+    if (!orgName) {
+      errorEl.textContent = 'Please provide organization name';
       errorEl.style.display = 'block';
       return;
     }
@@ -444,11 +183,17 @@
     btn.innerHTML = 'Fetching...<span class="loading-spinner"></span>';
     
     try {
+      const headers = {
+        'Accept': 'application/vnd.github.v3+json'
+      };
+      
+      // Add PAT if provided
+      if (pat) {
+        headers['Authorization'] = `token ${pat}`;
+      }
+      
       const response = await fetch(`https://api.github.com/orgs/${orgName}/repos?per_page=100`, {
-        headers: {
-          'Authorization': `token ${pat}`,
-          'Accept': 'application/vnd.github.v3+json'
-        }
+        headers: headers
       });
       
       if (!response.ok) {
@@ -522,7 +267,7 @@
       
       // Store context and navigate
       updateAssessmentContext(context);
-      window.location.href = 'index.html';
+      window.location.href = 'assessment.html';
       
     } else {
       // Organization - multiple repos
@@ -539,7 +284,7 @@
         context.repoName = selectedRepos[0];
         context.repoUrl = `https://github.com/${selectedRepos[0]}`;
         updateAssessmentContext(context);
-        window.location.href = 'index.html';
+        window.location.href = 'assessment.html';
       } else {
         // Multiple repos - TODO: implement tabbed interface
         alert(`Multi-repo assessment coming soon!\n\nSelected repositories:\n${selectedRepos.join('\n')}\n\nFor now, please assess one repository at a time.`);

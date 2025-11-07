@@ -98,7 +98,7 @@ export function populateFromEdgeAssessment(edgeAssessment, getSaved, setSaved) {
       param.checks.forEach((check, checkIndex) => {
         const checkData = {
           v: null,  // value
-          na: check.manual_review_required || false,
+          na: false,  // Don't auto-disable - only if truly N/A
           evidence: check.evidence_excerpt || check.answer || '',
           answer: check.answer || ''
         };
@@ -107,8 +107,8 @@ export function populateFromEdgeAssessment(edgeAssessment, getSaved, setSaved) {
         if (check.score !== null && check.score !== undefined) {
           // Check type determines how to interpret the score
           if (check.check_type === 'check') {
-            // Boolean check: Edge should only have 0 or 100, but handle any value > 50 as true
-            checkData.v = check.score > 0;  // More forgiving: any positive score = checked
+            // Boolean check: Edge should only have 0 or 100, but handle any value > 0 as true
+            checkData.v = check.score > 0;
           } else if (check.check_type === 'scale5') {
             // Scale 0-5: score is 0-100, convert to 0-5
             checkData.v = Math.min(5, Math.max(0, (check.score / 100) * 5));
@@ -116,6 +116,10 @@ export function populateFromEdgeAssessment(edgeAssessment, getSaved, setSaved) {
             // Scale 0-100: use score directly
             checkData.v = Math.min(100, Math.max(0, check.score));
           }
+        } else if (check.manual_review_required) {
+          // If manual review is required AND no score, mark as N/A
+          // This allows user to review and set proper value
+          checkData.na = true;
         }
         
         savedState[paramId][checkIndex] = checkData;
@@ -246,19 +250,28 @@ export function exportToEdgeFormat(currentSelections, computedResults, MODEL, PA
  * Add evidence tooltips to check elements in the UI
  * @param {HTMLElement} checkElement - The check row element
  * @param {string} evidence - The evidence text to show
+ * @param {string} type - Icon type: 'warning' for manual review, 'success' for LLM assessed
  */
-export function addEvidenceTooltip(checkElement, evidence) {
+export function addEvidenceTooltip(checkElement, evidence, type = 'warning') {
   if (!evidence || !checkElement) return;
   
   // Find the label or control area
   const labelElement = checkElement.querySelector('label');
   if (!labelElement) return;
   
-  // Create warning icon with tooltip
+  // Choose icon and color based on type
+  const iconConfig = {
+    warning: { icon: '⚠️', color: '#EF4444', label: 'Manual review needed' },
+    success: { icon: '✅', color: '#22C55E', label: 'LLM assessed' }
+  };
+  
+  const config = iconConfig[type] || iconConfig.warning;
+  
+  // Create icon with tooltip
   const tooltipIcon = document.createElement('span');
-  tooltipIcon.className = 'evidence-icon';
-  tooltipIcon.innerHTML = '⚠️';
-  tooltipIcon.title = evidence;
+  tooltipIcon.className = `evidence-icon evidence-icon-${type}`;
+  tooltipIcon.innerHTML = config.icon;
+  tooltipIcon.title = `${config.label}: ${evidence}`;
   tooltipIcon.style.cssText = `
     margin-left: 8px;
     cursor: help;
@@ -280,7 +293,7 @@ export function addEvidenceTooltip(checkElement, evidence) {
   // Add tooltip container for better UX
   const tooltip = document.createElement('div');
   tooltip.className = 'evidence-tooltip';
-  tooltip.textContent = evidence;
+  tooltip.innerHTML = `<strong style="color: ${config.color};">${config.label}</strong><br>${evidence}`;
   tooltip.style.cssText = `
     display: none;
     position: absolute;
