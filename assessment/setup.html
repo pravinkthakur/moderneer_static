@@ -265,6 +265,10 @@
       context.repoName = repoName;
       context.repoUrl = `https://github.com/${repoName}`;
       
+      // Clear any previous assessment data to ensure fresh start
+      localStorage.removeItem('oemm_core24_seq');
+      localStorage.removeItem('oemm_full12_seq');
+      
       // Store context and navigate
       updateAssessmentContext(context);
       window.location.href = 'assessment.html';
@@ -283,6 +287,11 @@
         // Single repo selected, navigate to normal assessment
         context.repoName = selectedRepos[0];
         context.repoUrl = `https://github.com/${selectedRepos[0]}`;
+        
+        // Clear any previous assessment data to ensure fresh start
+        localStorage.removeItem('oemm_core24_seq');
+        localStorage.removeItem('oemm_full12_seq');
+        
         updateAssessmentContext(context);
         window.location.href = 'assessment.html';
       } else {
