@@ -434,22 +434,23 @@ function renderParam(pillarName, pid, showPillarChip=false){
       const na = row.querySelector(`[data-na="1"]`);
       if(saved[i].na){ na.checked = true; if(ctrl) ctrl.disabled = true; }
       
-      // Add evidence tooltip if evidence exists
-      if(saved[i].evidence || saved[i].answer) {
-        const evidence = saved[i].evidence || saved[i].answer;
+      // Add evidence tooltip if evidence exists AND has a value
+      const evidence = saved[i].evidence || saved[i].answer;
+      const hasValue = (saved[i].v !== null && saved[i].v !== undefined) || saved[i].v === false;
+      
+      if(evidence && hasValue) {
         const labelElement = row.querySelector(`label[for="${inputId}"]`);
-        if(labelElement && evidence) {
-          // Determine if this was LLM assessed or needs manual review
-          // LLM assessed = has a value (including false for unchecked) AND not marked N/A
-          const hasValue = (saved[i].v !== null && saved[i].v !== undefined) || saved[i].v === false;
-          const isLLMAssessed = hasValue && !saved[i].na;
-          const icon = isLLMAssessed ? '✅' : '⚠️';
-          const iconColor = isLLMAssessed ? '#22C55E' : '#EF4444';
-          const iconLabel = isLLMAssessed ? 'LLM assessed' : 'Manual review needed';
+        if(labelElement) {
+          // Determine if this was Edge assessed or needs manual review
+          // Edge assessed = has a value (including false for unchecked) AND not marked N/A
+          const isEdgeAssessed = hasValue && !saved[i].na;
+          const icon = isEdgeAssessed ? '✅' : '⚠️';
+          const iconColor = isEdgeAssessed ? '#22C55E' : '#EF4444';
+          const iconLabel = isEdgeAssessed ? 'Edge assessed' : 'Manual review needed';
           
           // Add icon with tooltip
           const tooltipIcon = document.createElement('span');
-          tooltipIcon.className = `evidence-icon ${isLLMAssessed ? 'evidence-success' : 'evidence-warning'}`;
+          tooltipIcon.className = `evidence-icon ${isEdgeAssessed ? 'evidence-success' : 'evidence-warning'}`;
           tooltipIcon.innerHTML = ` ${icon}`;
           tooltipIcon.title = `${iconLabel}: ${evidence}`;
           tooltipIcon.style.cssText = `
