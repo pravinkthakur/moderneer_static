@@ -440,8 +440,9 @@ function renderParam(pillarName, pid, showPillarChip=false){
         const labelElement = row.querySelector(`label[for="${inputId}"]`);
         if(labelElement && evidence) {
           // Determine if this was LLM assessed or needs manual review
-          // LLM assessed = has evidence AND has a non-null answer AND not marked for manual review
-          const isLLMAssessed = saved[i].evidence && saved[i].v !== null && saved[i].v !== undefined && !saved[i].na;
+          // LLM assessed = has a value (including false for unchecked) AND not marked N/A
+          const hasValue = (saved[i].v !== null && saved[i].v !== undefined) || saved[i].v === false;
+          const isLLMAssessed = hasValue && !saved[i].na;
           const icon = isLLMAssessed ? '✅' : '⚠️';
           const iconColor = isLLMAssessed ? '#22C55E' : '#EF4444';
           const iconLabel = isLLMAssessed ? 'LLM assessed' : 'Manual review needed';

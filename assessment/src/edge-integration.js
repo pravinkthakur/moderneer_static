@@ -98,9 +98,10 @@ export function populateFromEdgeAssessment(edgeAssessment, getSaved, setSaved) {
       param.checks.forEach((check, checkIndex) => {
         const checkData = {
           v: null,  // value
-          na: false,  // Don't auto-disable - only if truly N/A
+          na: false,  // Never auto-disable - user must manually check N/A
           evidence: check.evidence_excerpt || check.answer || '',
-          answer: check.answer || ''
+          answer: check.answer || '',
+          manual_review_required: check.manual_review_required || false  // Track this separately
         };
         
         // Convert score to appropriate format based on check_type
@@ -116,11 +117,10 @@ export function populateFromEdgeAssessment(edgeAssessment, getSaved, setSaved) {
             // Scale 0-100: use score directly
             checkData.v = Math.min(100, Math.max(0, check.score));
           }
-        } else if (check.manual_review_required) {
-          // If manual review is required AND no score, mark as N/A
-          // This allows user to review and set proper value
-          checkData.na = true;
+          // If we have a score, this was LLM assessed successfully
         }
+        // Note: We intentionally don't set na=true for manual_review_required
+        // The control should remain enabled so user can provide the value
         
         savedState[paramId][checkIndex] = checkData;
         updatedCount++;

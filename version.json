@@ -1,6 +1,6 @@
 {
-    "buildDate":  "2025-11-07T22:00:00.000Z",
-    "version":  "8.7.1",
+    "buildDate":  "2025-11-07T23:00:00.000Z",
+    "version":  "8.7.2",
     "gitCommit":  "latest",
     "environment":  "production",
     "features":  {
@@ -19,7 +19,9 @@
                      "companyContextTracking":  true,
                      "setupOnboardingFlow":  true,
                      "llmSuccessIndicator":  true,
-                     "improvedEdgeLoading":  true
+                     "improvedEdgeLoading":  true,
+                     "correctIconLogic":  true,
+                     "neverAutoDisable":  true
                  },
-    "buildNumber":  "202511072200"
+    "buildNumber":  "202511072300"
 }
