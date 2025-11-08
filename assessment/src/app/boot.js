@@ -740,19 +740,20 @@ function pillarCardsHTML(byPillar){
     const scl = indexToScale(idx);
     const pct = Math.max(0, Math.min(100, idx));
     const roundedScore = Math.round(idx); // Integer score for comparison with Edge
-    const state = scl>=4?'score-good':(scl>=3?'score-warn':'score-bad');
+    // Color based on 0-100 scale: ≥80 good, ≥60 warn, <60 bad
+    const state = idx>=80?'score-good':(idx>=60?'score-warn':'score-bad');
     out += `
       <div class="pillar-card">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div style="display:flex; gap:8px; align-items:baseline">
             <strong>${p}</strong><span class="pill">Weight: ${MODEL.weights[p]}</span>
           </div>
-          <span class="score-badge ${state}">${fmt(scl,1)}</span>
+          <span class="score-badge ${state}">${roundedScore}</span>
         </div>
         <div class="progress" style="margin-top:8px"><div class="bar" style="width:${pct}%"></div></div>
         <div class="tiny" style="display:flex;justify-content:space-between">
           <span>Score: <strong>${roundedScore}/100</strong></span>
-          <span>Index: ${fmt(idx,1)}</span>
+          <span></span>
         </div>
       </div>`;
   });
@@ -2084,7 +2085,8 @@ function refreshVisibleRows(){
     }
     const index = den>0 ? (num/den)*100 : 0;
     const scale = indexToScale(index);
-    comp.innerHTML = `Compliance: ${fmt((den? (num/den) : 0)*100,0)}% · Index: ${fmt(index,1)} · Scale: ${fmt(scale,1)}`;
+    // Show score out of 100
+    comp.innerHTML = `Score: ${fmt(index,0)}/100`;
   });
 }
 
@@ -2203,11 +2205,14 @@ function compute(silent=false){
       const meta=document.getElementById(`meta-${key}`);
       const bar=document.getElementById(`bar-${key}`);
       const badge=document.getElementById(`badge-${key}`);
-      if(meta) meta.textContent = `Compliance: ${fmt(idx,0)}% • Index: ${fmt(idx,0)} • Scale: ${fmt(scl,1)}`;
+      // Show score out of 100
+      if(meta) meta.textContent = `Score: ${fmt(idx,0)}/100`;
       if(bar) bar.style.width = `${Math.max(0,Math.min(100,idx))}%`;
       if(badge){
-        badge.textContent = fmt(scl,1);
-        badge.className = "score-badge " + (scl>=4?"score-good":scl>=3?"score-warn":"score-bad");
+        // Display score out of 100
+        badge.textContent = fmt(idx,0);
+        // Color based on 0-100 scale: ≥80 good, ≥60 warn, <60 bad
+        badge.className = "score-badge " + (idx>=80?"score-good":idx>=60?"score-warn":"score-bad");
       }
     });
   }
@@ -2328,19 +2333,20 @@ function renderBreakdown(byPillar){
     const idx = byPillar[p]; if(idx==null) return;
     const scl = indexToScale(idx); const pct = Math.max(0,Math.min(100,idx));
     const roundedScore = Math.round(idx); // Integer score for comparison with Edge
-    const state = scl>=4?"score-good":(scl>=3?"score-warn":"score-bad");
+    // Color based on 0-100 scale: ≥80 good, ≥60 warn, <60 bad
+    const state = idx>=80?"score-good":(idx>=60?"score-warn":"score-bad");
     const card=document.createElement("div"); card.className="pillar-card";
     card.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div style="display:flex; gap:8px; align-items:baseline">
           <strong>${p}</strong><span class="pill">Weight: ${MODEL.weights[p]}</span>
         </div>
-        <span class="score-badge ${state}">${fmt(scl,1)}</span>
+        <span class="score-badge ${state}">${roundedScore}</span>
       </div>
       <div class="progress" style="margin-top:8px"><div class="bar" style="width:${pct}%"></div></div>
       <div class="tiny" style="display:flex;justify-content:space-between">
         <span>Score: <strong>${roundedScore}/100</strong></span>
-        <span>Index: ${fmt(idx,1)}</span>
+        <span></span>
       </div>
     `;
     cont.appendChild(card);
