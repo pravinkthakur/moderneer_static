@@ -215,12 +215,16 @@ function calculateOverallScore(assessment) {
     return 0;
   }
   
-  // If assessment has overall_score field, use it
+  // If assessment has overall_score field, use it (Edge assessments always have this)
   if (assessment.overall_score !== undefined) {
     return assessment.overall_score;
   }
   
-  // Otherwise calculate from pillar scores
+  // WARNING: This fallback should rarely be used. Edge assessments always include overall_score.
+  // Fallback: Calculate simple average from pillar scores (NOT weighted, NOT tapered)
+  // This is only for legacy/malformed data and will NOT match Edge's weighted tapered calculation.
+  console.warn('⚠️ Assessment missing overall_score field - using simple pillar average (may be inaccurate)');
+  
   const pillarScores = assessment.pillars
     .map(p => p.pillar_score || 0)
     .filter(score => !isNaN(score));

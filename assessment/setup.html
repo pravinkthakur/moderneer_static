@@ -8,6 +8,85 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/modern-2025.css">
   <link rel="stylesheet" href="moderneer.css" />
+  <style>
+    .customer-search-section {
+      position: relative;
+    }
+    
+    .customer-search-results {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 1000;
+      margin-top: 4px;
+    }
+    
+    .search-result-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid #f3f4f6;
+      transition: background-color 0.2s;
+    }
+    
+    .search-result-item:hover {
+      background-color: #f9fafb;
+    }
+    
+    .search-result-item:last-child {
+      border-bottom: none;
+    }
+    
+    .search-result-item.no-results,
+    .search-result-item.error {
+      cursor: default;
+      color: #6b7280;
+      text-align: center;
+    }
+    
+    .search-result-item.error {
+      color: #dc2626;
+    }
+    
+    .selected-customer-display {
+      padding: 12px 16px;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+    
+    .selected-customer-display .success-message {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0;
+    }
+    
+    .btn-link {
+      background: none;
+      border: none;
+      color: #2563eb;
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: 14px;
+      padding: 0;
+    }
+    
+    .btn-link:hover {
+      color: #1d4ed8;
+    }
+    
+    #companyInfoSection {
+      margin-top: 24px;
+    }
+  </style>
 </head>
 <body>
 
@@ -22,8 +101,37 @@
 
   <div class="setup-card">
     <form id="setupForm">
-      <!-- Step 1: Company Information -->
+      <!-- Step 0: Customer Selection/Creation -->
       <div class="form-section">
+        <h2>👤 Customer Selection</h2>
+        
+        <div class="customer-search-section">
+          <div class="form-group">
+            <label for="customerSearch">
+              Search Existing Customer
+            </label>
+            <input type="text" id="customerSearch" placeholder="Search by company name..." autocomplete="off">
+            <div id="customerSearchResults" class="customer-search-results" style="display:none;"></div>
+            <div class="form-hint">Type to search existing customers or create new below</div>
+          </div>
+          
+          <div id="selectedCustomerDisplay" class="selected-customer-display" style="display:none;">
+            <div class="success-message">
+              ✓ Selected: <strong id="selectedCustomerName"></strong>
+              <button type="button" class="btn-link" id="clearCustomerBtn">Change</button>
+            </div>
+          </div>
+          
+          <div id="newCustomerToggle">
+            <button type="button" class="btn btn-secondary" id="createNewCustomerBtn">
+              + Create New Customer
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 1: Company Information -->
+      <div class="form-section" id="companyInfoSection">
         <h2>📋 Company Information</h2>
         
         <div class="form-group">
@@ -134,6 +242,101 @@
 <script type="module">
   import { updateAssessmentContext } from './src/context-manager.js';
 
+  // Customer Service Configuration
+  const CUSTOMER_SERVICE_URL = 'http://localhost:3007';
+  let selectedCustomerId = null;
+
+  // Customer Search Functionality
+  let searchTimeout;
+  const customerSearch = document.getElementById('customerSearch');
+  const searchResults = document.getElementById('customerSearchResults');
+  const selectedDisplay = document.getElementById('selectedCustomerDisplay');
+  const selectedCustomerName = document.getElementById('selectedCustomerName');
+  const companyInfoSection = document.getElementById('companyInfoSection');
+
+  customerSearch.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    const query = this.value.trim();
+    
+    if (query.length < 2) {
+      searchResults.style.display = 'none';
+      return;
+    }
+    
+    searchTimeout = setTimeout(async () => {
+      try {
+        const response = await fetch(`${CUSTOMER_SERVICE_URL}/api/customers?search=${encodeURIComponent(query)}&limit=10`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to search customers');
+        }
+        
+        const data = await response.json();
+        
+        if (data.success && data.data.length > 0) {
+          displaySearchResults(data.data);
+        } else {
+          searchResults.innerHTML = '<div class="search-result-item no-results">No customers found</div>';
+          searchResults.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Customer search error:', error);
+        searchResults.innerHTML = '<div class="search-result-item error">Error searching customers. Is the customer service running?</div>';
+        searchResults.style.display = 'block';
+      }
+    }, 300);
+  });
+
+  function displaySearchResults(customers) {
+    searchResults.innerHTML = '';
+    customers.forEach(customer => {
+      const item = document.createElement('div');
+      item.className = 'search-result-item';
+      item.innerHTML = `
+        <strong>${customer.company_name}</strong>
+        ${customer.email ? `<br><small>${customer.email}</small>` : ''}
+      `;
+      item.addEventListener('click', () => selectCustomer(customer));
+      searchResults.appendChild(item);
+    });
+    searchResults.style.display = 'block';
+  }
+
+  function selectCustomer(customer) {
+    selectedCustomerId = customer.customer_id;
+    selectedCustomerName.textContent = customer.company_name;
+    selectedDisplay.style.display = 'block';
+    searchResults.style.display = 'none';
+    customerSearch.value = '';
+    
+    // Pre-fill company information
+    document.getElementById('companyName').value = customer.company_name;
+    document.getElementById('companyEmail').value = customer.email || '';
+    
+    // Disable company name field since it's from existing customer
+    document.getElementById('companyName').disabled = true;
+    
+    // Load repositories if available
+    if (customer.repositories && Array.isArray(customer.repositories) && customer.repositories.length > 0) {
+      console.log('Customer has', customer.repositories.length, 'repositories');
+    }
+  }
+
+  document.getElementById('clearCustomerBtn').addEventListener('click', function() {
+    selectedCustomerId = null;
+    selectedDisplay.style.display = 'none';
+    document.getElementById('companyName').value = '';
+    document.getElementById('companyName').disabled = false;
+    document.getElementById('companyEmail').value = '';
+  });
+
+  document.getElementById('createNewCustomerBtn').addEventListener('click', function() {
+    selectedCustomerId = null;
+    selectedDisplay.style.display = 'none';
+    document.getElementById('companyName').disabled = false;
+    document.getElementById('companyName').focus();
+  });
+
   // Handle repo type selection
   document.querySelectorAll('.repo-type-option').forEach(option => {
     option.addEventListener('click', function() {
@@ -235,7 +438,7 @@
   });
 
   // Handle form submission
-  document.getElementById('setupForm').addEventListener('submit', function(e) {
+  document.getElementById('setupForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const formData = new FormData(this);
@@ -247,12 +450,91 @@
       return;
     }
     
+    // Save/update customer in customer service
+    try {
+      if (!selectedCustomerId) {
+        // Create new customer
+        const customerData = {
+          company_name: companyName,
+          email: formData.get('companyEmail'),
+          contact_name: formData.get('contactName') || '',
+          repositories: []
+        };
+        
+        // Add repository info
+        if (repoType === 'single') {
+          const repoName = formData.get('repoName');
+          if (repoName) {
+            customerData.repositories.push({
+              name: repoName,
+              url: `https://github.com/${repoName}`
+            });
+          }
+        } else {
+          const selectedRepos = Array.from(document.querySelectorAll('#repoList input:checked'))
+            .map(cb => cb.value);
+          
+          customerData.repositories = selectedRepos.map(fullName => ({
+            name: fullName,
+            url: `https://github.com/${fullName}`
+          }));
+        }
+        
+        const response = await fetch(`${CUSTOMER_SERVICE_URL}/api/customers`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(customerData)
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          selectedCustomerId = result.data.customer_id;
+          console.log('✓ Created customer:', selectedCustomerId);
+        } else {
+          console.warn('Failed to create customer, continuing without customer link');
+        }
+      } else {
+        // Update existing customer with new repositories
+        const customerData = {
+          repositories: []
+        };
+        
+        if (repoType === 'single') {
+          const repoName = formData.get('repoName');
+          if (repoName) {
+            customerData.repositories.push({
+              name: repoName,
+              url: `https://github.com/${repoName}`
+            });
+          }
+        } else {
+          const selectedRepos = Array.from(document.querySelectorAll('#repoList input:checked'))
+            .map(cb => cb.value);
+          
+          customerData.repositories = selectedRepos.map(fullName => ({
+            name: fullName,
+            url: `https://github.com/${fullName}`
+          }));
+        }
+        
+        await fetch(`${CUSTOMER_SERVICE_URL}/api/customers/${selectedCustomerId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(customerData)
+        });
+      }
+    } catch (error) {
+      console.error('Customer service error:', error);
+      // Continue without customer service integration
+    }
+    
     // Prepare context data
     const context = {
       companyName: companyName,
       companyEmail: formData.get('companyEmail'),
       companyAddress: formData.get('companyAddress'),
-      assessmentType: 'manual'
+      assessmentType: 'manual',
+      customerId: selectedCustomerId // Store customer ID in context
     };
     
     if (repoType === 'single') {

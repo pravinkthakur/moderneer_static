@@ -111,8 +111,20 @@ export function populateFromEdgeAssessment(edgeAssessment, getSaved, setSaved) {
             // Boolean check: Edge should only have 0 or 100, but handle any value > 0 as true
             checkData.v = check.score > 0;
           } else if (check.check_type === 'scale5') {
-            // Scale 0-5: score is 0-100, convert to 0-5
-            checkData.v = Math.min(5, Math.max(0, (check.score / 100) * 5));
+            // Scale 1-5: score is 0-100 index, convert using inverse tapered mapping
+            // This must match the tapered index mapping in boot.js compute()
+            const index = check.score;
+            let scale;
+            if (index <= 25) {
+              scale = 1 + (index / 25);  // 0-25 → 1-2
+            } else if (index <= 50) {
+              scale = 2 + ((index - 25) / 25);  // 25-50 → 2-3
+            } else if (index <= 80) {
+              scale = 3 + ((index - 50) / 30);  // 50-80 → 3-4
+            } else {
+              scale = 4 + ((index - 80) / 20);  // 80-100 → 4-5
+            }
+            checkData.v = Math.min(5, Math.max(1, scale));
           } else if (check.check_type === 'scale100') {
             // Scale 0-100: use score directly
             checkData.v = Math.min(100, Math.max(0, check.score));
