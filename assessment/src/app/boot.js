@@ -297,6 +297,69 @@ function band(scale){
   if(scale<=4) return "Level 4 – Outcome oriented";
   return "Level 5 – Outcome engineered";
 }
+
+const STORAGE_VERSION_KEY = 'moderneer_assessment_storage_version';
+const CURRENT_STORAGE_VERSION = 2; // v2: all scores stored as 0-100
+
+function migrateStorageIfNeeded() {
+  const version = parseInt(localStorage.getItem(STORAGE_VERSION_KEY) || '1');
+  
+  if (version >= CURRENT_STORAGE_VERSION) {
+    return; // Already migrated
+  }
+  
+  console.log(`[Migration] Detected old storage version ${version}, migrating to ${CURRENT_STORAGE_VERSION}...`);
+  
+  // v1 → v2: Convert scale5 values from 0-5 to 0-100
+  if (version === 1) {
+    Object.keys(STORAGE_KEYS).forEach(moduleKey => {
+      const storageKey = STORAGE_KEYS[moduleKey];
+      const dataStr = localStorage.getItem(storageKey);
+      if (!dataStr) return;
+      
+      try {
+        const data = JSON.parse(dataStr);
+        let migrated = false;
+        
+        // Iterate through all parameters
+        Object.keys(data).forEach(paramId => {
+          const paramData = data[paramId];
+          if (!paramData || typeof paramData !== 'object') return;
+          
+          // Get parameter metadata to check types
+          const meta = PARAM_META[paramId];
+          if (!meta || !meta.checks) return;
+          
+          // Convert each check based on its type
+          Object.keys(paramData).forEach(checkIndex => {
+            const check = paramData[checkIndex];
+            const checkMeta = meta.checks[parseInt(checkIndex)];
+            
+            if (check && checkMeta && checkMeta.type === 'scale5' && typeof check.v === 'number') {
+              // Old format: stored as 0-5, new format: store as 0-100
+              if (check.v <= 5) { // Safety check: only migrate if value looks like 0-5 range
+                check.v = check.v * 20; // Convert 0-5 → 0-100
+                migrated = true;
+                console.log(`[Migration] ${paramId}[${checkIndex}]: ${check.v / 20} → ${check.v}`);
+              }
+            }
+          });
+        });
+        
+        if (migrated) {
+          localStorage.setItem(storageKey, JSON.stringify(data));
+          console.log(`[Migration] ✓ Migrated ${storageKey}`);
+        }
+      } catch (e) {
+        console.error(`[Migration] Failed to migrate ${storageKey}:`, e);
+      }
+    });
+  }
+  
+  localStorage.setItem(STORAGE_VERSION_KEY, CURRENT_STORAGE_VERSION.toString());
+  console.log(`[Migration] ✓ Storage migrated to version ${CURRENT_STORAGE_VERSION}`);
+}
+
 function getSaved(){ return JSON.parse(localStorage.getItem(STORAGE_KEYS[currentModule]) || "{}"); }
 function setSaved(S){ localStorage.setItem(STORAGE_KEYS[currentModule], JSON.stringify(S)); }
 
@@ -1707,6 +1770,9 @@ function buildReport(results){
 
 // Wait for DOM to be fully loaded before adding event listeners
 document.addEventListener('DOMContentLoaded', async function() {
+  // Migrate storage format if needed (v1 → v2: scale5 values 0-5 → 0-100)
+  migrateStorageIfNeeded();
+  
   // Import Edge integration module
   const { loadEdgeAssessment, populateFromEdgeAssessment, exportToEdgeFormat } = await import('../edge-integration.js');
   
