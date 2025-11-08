@@ -2229,12 +2229,19 @@ function compute(silent=false){
       byPillar[p.name] = Math.round(totalWeighted / 100);
     }
   });
-  let sumW=0, sumWx=0;
+  // Calculate overall score from pillar scores
+  // Pillar weights sum to 100
+  // Overall Score = Σ(pillar_score × pillar_weight) / 100
+  let totalWeighted = 0;
   Object.keys(byPillar).forEach(p=>{
     const idx = byPillar[p];
-    if(idx!=null){ sumW += MODEL.weights[p]||0; sumWx += (MODEL.weights[p]||0)*idx; }
+    if(idx!=null){ 
+      const weight = MODEL.weights[p] || 0;
+      totalWeighted += idx * weight;
+    }
   });
-  const overallIndexPre = sumW? (sumWx/sumW) : null;
+  // Divide by 100 since pillar weights sum to 100
+  const overallIndexPre = Math.round(totalWeighted / 100);
   const overallScalePre = indexToScale(overallIndexPre);
   const gates = MODEL.gates.map(g=>{
     const vals = g.parameters.map(pid => comp[pid]?.scale ?? null);
