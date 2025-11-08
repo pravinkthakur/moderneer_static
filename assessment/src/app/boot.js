@@ -388,6 +388,21 @@ function renderByPillar(){
   MODEL.fullModel.pillars.forEach(block=>{
     const params = block.parameters.filter(p=>vis.has(p));
     if(!params.length) return;
+    
+    // Get pillar score if available
+    const comp = collectCompliance();
+    const byPillar = {};
+    Object.keys(MODEL.weights).forEach(p=>{
+      const pids = MODEL.fullModel.pillars.find(b=>b.name===p)?.parameters || [];
+      const visible = pids.filter(id=>vis.has(id));
+      if(!visible.length) return;
+      let n=0, d=0;
+      visible.forEach(id=>{ const c=comp[id]; if(c){ n+=(c.index/100)*MODEL.weights[p]; d+=MODEL.weights[p]; }});
+      if(d>0) byPillar[p] = (n/d)*100;
+    });
+    const pillarScore = byPillar[block.name];
+    const scoreDisplay = pillarScore != null ? ` · Score: ${Math.round(pillarScore)}/100` : '';
+    
     const card = document.createElement("div");
     card.className="pillar-card";
     card.innerHTML = `
@@ -396,7 +411,7 @@ function renderByPillar(){
           <h3 class="h3">${block.name}</h3>
           <span class="pill">Weight: ${MODEL.weights[block.name]}</span>
         </div>
-        <span class="tiny">${params.length} items</span>
+        <span class="tiny">${params.length} items${scoreDisplay}</span>
       </header>
       <div></div>`;
     const inner = card.lastElementChild;
@@ -2048,7 +2063,7 @@ function refreshVisibleRows(){
       const w = (typeof ch.w==="number")? ch.w : 0;
       let val = 0;
       if(ch.type==="check") val = rec.v?1:0;
-      else if(ch.type==="scale5") val = (rec.v||0)/5;
+      // All numeric types stored as 0-100, normalize to 0-1
       else val = (rec.v||0)/100;
       num += w*val; den+=w;
     }
