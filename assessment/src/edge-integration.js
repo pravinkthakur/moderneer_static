@@ -112,33 +112,17 @@ export function populateFromEdgeAssessment(edgeAssessment, getSaved, setSaved) {
         // Convert score to appropriate format based on check_type
         if (check.score !== null && check.score !== undefined) {
           // Edge LLM returns ALL scores as 0-100 index values
-          // We need to convert based on what the UI expects for each check type
+          // Store them as-is (0-100) for all types - collectCompliance will normalize
           
           if (check.check_type === 'check') {
             // Boolean check: treat anything > 50 as true
             checkData.v = check.score > 50;
             console.log(`[EdgeIntegration] Check ${check.check_id}: score ${check.score} → boolean ${checkData.v}`);
-          } else if (check.check_type === 'scale5') {
-            // Scale 1-5: Edge stores 0-100, but UI expects 0-5 scale value
-            // Convert using the inverse of the tapered mapping
-            const index = check.score;
-            let scale;
-            if (index <= 25) {
-              scale = 1 + (index / 25);  // 0-25 → 1-2
-            } else if (index <= 50) {
-              scale = 2 + ((index - 25) / 25);  // 25-50 → 2-3
-            } else if (index <= 80) {
-              scale = 3 + ((index - 50) / 30);  // 50-80 → 3-4
-            } else {
-              scale = 4 + ((index - 80) / 20);  // 80-100 → 4-5
-            }
-            // Store as 0-5 scale value (UI will later divide by 5 to get 0-1)
-            checkData.v = Math.min(5, Math.max(0, scale));
-            console.log(`[EdgeIntegration] Scale5 ${check.check_id}: score ${index} → scale ${checkData.v.toFixed(2)}`);
-          } else if (check.check_type === 'scale100') {
-            // Scale 0-100: use score directly
+          } else {
+            // For scale5 and scale100: store the raw 0-100 score
+            // UI will normalize by dividing by 100 to get 0-1 compliance
             checkData.v = Math.min(100, Math.max(0, check.score));
-            console.log(`[EdgeIntegration] Scale100 ${check.check_id}: score ${check.score} → value ${checkData.v}`);
+            console.log(`[EdgeIntegration] ${check.check_type} ${check.check_id}: score ${check.score} → stored ${checkData.v}`);
           }
         }
         // Note: We intentionally don't set na=true for manual_review_required

@@ -410,7 +410,8 @@ function renderParam(pillarName, pid, showPillarChip=false){
           </div>
         </div>`;
     } else if(type==="scale5"){
-      const val = saved[i]?.v ?? 0;
+      // Saved values are 0-100 (Edge format), convert to 0-5 for slider
+      const val = saved[i]?.v ? (saved[i].v / 20) : 0;
       control = `
         <div class="field">
           <label for="${inputId}">${ch.label}</label>
@@ -444,7 +445,14 @@ function renderParam(pillarName, pid, showPillarChip=false){
     const ctrl = row.querySelector(`#${CSS.escape(inputId)}`);
     if(saved[i]){
       if((ctrl?.dataset.type)==="check") ctrl.checked = !!saved[i].v;
-      else if(ctrl) ctrl.value = saved[i].v;
+      else if(ctrl) {
+        // Convert 0-100 (Edge format) back to slider range for scale5
+        if(ctrl.dataset.type === "scale5") {
+          ctrl.value = saved[i].v / 20; // 0-100 → 0-5
+        } else {
+          ctrl.value = saved[i].v;
+        }
+      }
       const na = row.querySelector(`[data-na="1"]`);
       if(saved[i].na){ na.checked = true; if(ctrl) ctrl.disabled = true; }
       
@@ -2000,7 +2008,11 @@ function collectCompliance(){
     const type = ctrl.dataset.type;
     let v = 0;
     if(type==="check") v = ctrl.checked ? 1 : 0;
-    else if(type==="scale5") v = parseFloat(ctrl.value||"0");
+    else if(type==="scale5") {
+      // User enters 0-5, but we store as 0-100 to match Edge format
+      const scale5Val = parseFloat(ctrl.value||"0");
+      v = scale5Val * 20; // Convert 0-5 → 0-100
+    }
     else v = parseFloat(ctrl.value||"0");
     const naEl = ctrl.closest(".row").querySelector('[data-na="1"]');
     const na = !!(naEl && naEl.checked);
@@ -2028,7 +2040,7 @@ function collectCompliance(){
       
       let val = 0;
       if(ch.type==="check") val = rec.v?1:0;
-      else if(ch.type==="scale5") val = (rec.v||0)/5;
+      // Edge stores all scores as 0-100, so normalize by dividing by 100
       else val = (rec.v||0)/100;
       num += w * val; den += w;
     });
