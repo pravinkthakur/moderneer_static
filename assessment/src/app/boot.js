@@ -477,7 +477,7 @@ function renderParam(pillarName, pid, showPillarChip=false){
     </header>
     <div class="tiny" style="margin-top:2px"><code style="font-family:var(--font-mono);font-size:.75rem;color:#0369a1">${pid}</code></div>
     <div class="progress" style="margin:8px 0"><div id="bar-${key}" class="bar" style="width:0%"></div></div>
-    <div class="tiny" id="meta-${key}">Compliance: —% • Index: — • Scale: —</div>
+    <div class="tiny" id="meta-${key}">Score: —/100</div>
     <div class="checks" id="checks-${key}"></div>
   `;
   const area = wrap.querySelector(`#checks-${key}`);
