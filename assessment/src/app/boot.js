@@ -1722,17 +1722,66 @@ function attachHandlers(){
   });
   formArea.addEventListener("change", e=>{
     const t=e.target;
+    
+    // Handle N/A checkbox
     if(t.matches('[data-na="1"]')){
       const ctrl = t.closest(".row").querySelector('[data-param][data-index]:not([data-na])');
-      if(ctrl){ ctrl.disabled = t.checked; }
+      if(ctrl){ 
+        ctrl.disabled = t.checked;
+        
+        // Save N/A state
+        const pid = ctrl.dataset.param;
+        const idx = ctrl.dataset.index;
+        if(pid && idx !== undefined){
+          const saved = getSaved();
+          saved[pid] = saved[pid] || {};
+          saved[pid][idx] = saved[pid][idx] || { v: 0, na: false };
+          saved[pid][idx].na = t.checked;
+          setSaved(saved);
+          
+          // Update progress and compute
+          const meta = PARAM_META[pid];
+          if(meta){
+            const checks = meta.checks || [];
+            updateParamProgressInternal(pid, saved, checks);
+          }
+          compute();
+        }
+      }
+      return;
     }
     
-    // Update progress bar for this parameter
+    // Save the changed value to localStorage first
     if(t.dataset.param){
       const pid = t.dataset.param;
+      const idx = t.dataset.index;
+      const saved = getSaved();
+      saved[pid] = saved[pid] || {};
+      
+      // Get the value based on input type
+      const type = t.dataset.type;
+      let v = 0;
+      if(type === "check") {
+        v = t.checked ? 1 : 0;
+      } else if(type === "scale5") {
+        // scale5: user enters 0-5, convert to 0-100 for storage
+        const scale5Val = parseFloat(t.value || "0");
+        v = scale5Val * 20; // 0-5 → 0-100
+      } else {
+        // scale100 or any other numeric type
+        v = parseFloat(t.value || "0");
+      }
+      
+      // Check if N/A is checked
+      const naEl = t.closest(".row")?.querySelector('[data-na="1"]');
+      const na = !!(naEl && naEl.checked);
+      
+      saved[pid][idx] = { v, na };
+      setSaved(saved);
+      
+      // Update progress bar for this parameter
       const meta = PARAM_META[pid];
       if(meta){
-        const saved = getSaved()[pid] || {};
         const checks = meta.checks || [];
         updateParamProgressInternal(pid, saved, checks);
       }
