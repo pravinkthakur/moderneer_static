@@ -1102,20 +1102,19 @@ function openTabbedModal(title, tabs){
           const reportHTML = llmStyleReport(res);
           const el = modal.querySelector("#fullText");
           console.log("Report generated, length:", reportHTML.length);
+          console.log("Report HTML preview:", reportHTML.substring(0, 200));
           if(el) { 
             // Clear any existing content and styling issues
             el.innerHTML = "";
             el.style.whiteSpace = "normal";
             el.style.fontFamily = "inherit";
             
-            // Create a new div to hold the structured report
-            const reportDiv = document.createElement("div");
-            reportDiv.className = "html-report-container";
-            reportDiv.innerHTML = reportHTML;
+            // DIRECTLY set innerHTML - don't wrap in another div
+            el.innerHTML = reportHTML;
             
-            // Append to the container
-            el.appendChild(reportDiv);
-            console.log("Report content set to #fullText with proper HTML rendering");
+            console.log("Report content set to #fullText - HTML should be rendered");
+            console.log("Element innerHTML length:", el.innerHTML.length);
+            console.log("Element textContent preview:", el.textContent.substring(0, 100));
           }
         } catch (err) {
           console.error("Generate report error:", err);

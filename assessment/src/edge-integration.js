@@ -106,13 +106,15 @@ export function populateFromEdgeAssessment(edgeAssessment, getSaved, setSaved) {
         
         // Convert score to appropriate format based on check_type
         if (check.score !== null && check.score !== undefined) {
-          // Check type determines how to interpret the score
+          // Edge LLM returns ALL scores as 0-100 index values
+          // We need to convert based on what the UI expects for each check type
+          
           if (check.check_type === 'check') {
-            // Boolean check: Edge should only have 0 or 100, but handle any value > 0 as true
-            checkData.v = check.score > 0;
+            // Boolean check: treat anything > 50 as true
+            checkData.v = check.score > 50;
           } else if (check.check_type === 'scale5') {
-            // Scale 1-5: score is 0-100 index, convert using inverse tapered mapping
-            // This must match the tapered index mapping in boot.js compute()
+            // Scale 1-5: Edge stores 0-100, but UI expects 0-5 scale value
+            // Convert using the inverse of the tapered mapping
             const index = check.score;
             let scale;
             if (index <= 25) {
@@ -124,12 +126,12 @@ export function populateFromEdgeAssessment(edgeAssessment, getSaved, setSaved) {
             } else {
               scale = 4 + ((index - 80) / 20);  // 80-100 → 4-5
             }
-            checkData.v = Math.min(5, Math.max(1, scale));
+            // Store as 0-5 scale value (UI will later divide by 5 to get 0-1)
+            checkData.v = Math.min(5, Math.max(0, scale));
           } else if (check.check_type === 'scale100') {
             // Scale 0-100: use score directly
             checkData.v = Math.min(100, Math.max(0, check.score));
           }
-          // If we have a score, this was LLM assessed successfully
         }
         // Note: We intentionally don't set na=true for manual_review_required
         // The control should remain enabled so user can provide the value
