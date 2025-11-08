@@ -2016,13 +2016,16 @@ function collectCompliance(){
     checks.forEach((ch,i)=>{
       const w = (typeof ch.w==="number")? ch.w : 0;
       const rec = recs[i];
-      if(rec?.na) return;
+      if(rec?.na) return;  // Skip N/A checks
+      
+      // Skip checks with null/undefined values (not assessed by Edge)
+      // This matches Edge's behavior of filtering out null scores
+      if(!rec || rec.v === null || rec.v === undefined) return;
+      
       let val = 0;
-      if(rec){
-        if(ch.type==="check") val = rec.v?1:0;
-        else if(ch.type==="scale5") val = (rec.v||0)/5;
-        else val = (rec.v||0)/100;
-      }
+      if(ch.type==="check") val = rec.v?1:0;
+      else if(ch.type==="scale5") val = (rec.v||0)/5;
+      else val = (rec.v||0)/100;
       num += w * val; den += w;
     });
     const idx = den>0 ? (num/den)*100 : 0;
