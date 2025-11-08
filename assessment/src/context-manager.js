@@ -23,6 +23,9 @@ export function updateAssessmentContext(context = {}) {
     ...context
   };
   
+  // Save to localStorage for persistence
+  localStorage.setItem('assessment_context', JSON.stringify(window.ASSESSMENT_CONTEXT));
+  
   const banner = document.getElementById('assessmentContext');
   const repoNameEl = document.getElementById('contextRepoName');
   const companyNameEl = document.getElementById('contextCompanyName');

@@ -46,6 +46,33 @@
         <div style="text-align: right; font-size: 0.875rem; opacity: 0.9;" id="contextMetadata"></div>
       </div>
     </div>
+
+    <!-- Organization Multi-Repo Tabs (hidden for single repo view) -->
+    <div id="orgRepoTabs" class="org-repo-tabs" style="display: none; margin-bottom: 16px;">
+      <div class="tab-header" style="background: #f9fafb; border-radius: 8px; padding: 8px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; border: 1px solid #e5e7eb;">
+        <div style="font-weight: 600; color: #374151; padding: 0 8px;">Repositories:</div>
+        <div id="orgRepoTabList" style="display: flex; gap: 4px; flex-wrap: wrap; flex: 1;"></div>
+        <button id="orgOverviewTab" class="repo-tab org-overview-tab" style="margin-left: auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.875rem;">
+          🏢 Organization Overview
+        </button>
+      </div>
+      <div id="orgScoreSummary" class="org-score-summary" style="margin-top: 12px; padding: 16px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; display: none;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+          <div class="score-card" style="background: white; padding: 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div style="font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Organization Score</div>
+            <div id="orgOverallScore" style="font-size: 2rem; font-weight: 700; color: #3b82f6;">—</div>
+          </div>
+          <div class="score-card" style="background: white; padding: 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div style="font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Average Repo Score</div>
+            <div id="orgAvgScore" style="font-size: 2rem; font-weight: 700; color: #10b981;">—</div>
+          </div>
+          <div class="score-card" style="background: white; padding: 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div style="font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Repositories Assessed</div>
+            <div id="orgRepoCount" style="font-size: 2rem; font-weight: 700; color: #8b5cf6;">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
     
     <div class="assessment-toolbar">
       <div class="toolbar-left">
@@ -155,5 +182,18 @@
   <script type="module" src="src/state/boot_state.js?v=8.1.0"></script>
 
   <script type="module" src="src/llm/boot_llm.js?v=8.1.0"></script>
+
+  <!-- Organization Multi-Repo View -->
+  <script type="module">
+    import { initOrgView } from './src/org-view.js';
+    
+    // Initialize org view if URL params indicate org mode
+    window.addEventListener('DOMContentLoaded', () => {
+      const isOrgView = initOrgView();
+      if (isOrgView) {
+        console.log('✅ Organization multi-repo view activated');
+      }
+    });
+  </script>
 </body>
 </html>

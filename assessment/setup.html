@@ -295,9 +295,23 @@
         updateAssessmentContext(context);
         window.location.href = 'assessment.html';
       } else {
-        // Multiple repos - TODO: implement tabbed interface
-        alert(`Multi-repo assessment coming soon!\n\nSelected repositories:\n${selectedRepos.join('\n')}\n\nFor now, please assess one repository at a time.`);
-        return;
+        // Multiple repos - navigate to tabbed multi-repo view
+        const orgName = document.getElementById('orgName').value.trim();
+        
+        context.assessmentType = 'organization';
+        context.orgName = orgName;
+        context.repositories = selectedRepos.map(fullName => ({
+          name: fullName.split('/')[1],
+          fullName: fullName,
+          url: `https://github.com/${fullName}`
+        }));
+        
+        // Clear any previous assessment data to ensure fresh start
+        localStorage.removeItem('oemm_core24_seq');
+        localStorage.removeItem('oemm_full12_seq');
+        
+        updateAssessmentContext(context);
+        window.location.href = 'assessment.html?view=org';
       }
     }
   });

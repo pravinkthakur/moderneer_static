@@ -435,21 +435,56 @@ function renderParam(pillarName, pid, showPillarChip=false){
       if(saved[i].na){ na.checked = true; if(ctrl) ctrl.disabled = true; }
       
       // Add evidence tooltip if evidence exists AND has a value
-      const evidence = saved[i].evidence || saved[i].answer;
+      const answer = saved[i].answer || '';
+      const evidence = saved[i].evidence || '';
       const hasValue = (saved[i].v !== null && saved[i].v !== undefined) || saved[i].v === false;
       
-      if(evidence && hasValue) {
+      // Build tooltip content with both answer and evidence
+      let tooltipContent = '';
+      if (answer && evidence && answer !== evidence) {
+        // Both exist and are different - show both
+        tooltipContent = `<strong>Answer:</strong> ${answer}<br><br><strong>Evidence:</strong> ${evidence}`;
+      } else if (answer) {
+        // Only answer exists (or they're the same)
+        tooltipContent = answer;
+      } else if (evidence) {
+        // Only evidence exists
+        tooltipContent = evidence;
+      }
+      
+      // Check if score is null (uncertain/needs manual review)
+      const isUncertain = saved[i].v === null || saved[i].v === undefined;
+      const isNA = saved[i].na;
+      
+      if(tooltipContent && (hasValue || isUncertain)) {
         const labelElement = row.querySelector(`label[for="${inputId}"]`);
         if(labelElement) {
-          // Determine if this was Edge assessed or needs manual review
-          // Edge assessed = has a value (including false for unchecked) AND not marked N/A
-          const isEdgeAssessed = hasValue && !saved[i].na;
-          const icon = isEdgeAssessed ? '✅' : '⚠️';
-          const iconColor = isEdgeAssessed ? '#22C55E' : '#EF4444';
+          // Determine icon type:
+          // - Uncertain (null score) = warning icon (manual review needed)
+          // - Has value & not N/A = success icon (Edge assessed)
+          // - Has value & N/A = warning (was assessed but marked N/A)
+          let icon, iconColor, iconLabel;
+          
+          if (isUncertain && !isNA) {
+            // Score is null - Edge couldn't determine, needs manual review
+            icon = '⚠️';
+            iconColor = '#F59E0B'; // Orange for uncertain
+            iconLabel = 'Manual review needed - Edge uncertain';
+          } else if (hasValue && !isNA) {
+            // Edge successfully assessed
+            icon = '✅';
+            iconColor = '#22C55E'; // Green for success
+            iconLabel = 'Edge assessed';
+          } else {
+            // N/A or other state
+            icon = '⚠️';
+            iconColor = '#EF4444'; // Red for manual
+            iconLabel = 'Manual review needed';
+          }
           
           // Format score display based on check type
           let scoreDisplay = '';
-          if(isEdgeAssessed && type !== 'check') {
+          if(hasValue && !isNA && type !== 'check') {
             // For scale5 and scale100, show the score
             const scoreValue = saved[i].v || 0;
             if(type === 'scale5') {
@@ -458,13 +493,15 @@ function renderParam(pillarName, pid, showPillarChip=false){
               scoreDisplay = ` (${scoreValue}/100)`;
             }
           }
-          const iconLabel = isEdgeAssessed ? `Edge assessed${scoreDisplay}` : 'Manual review needed';
+          
+          iconLabel = iconLabel + scoreDisplay;
           
           // Add icon with tooltip
           const tooltipIcon = document.createElement('span');
-          tooltipIcon.className = `evidence-icon ${isEdgeAssessed ? 'evidence-success' : 'evidence-warning'}`;
+          const iconClass = isUncertain ? 'evidence-uncertain' : (hasValue && !isNA ? 'evidence-success' : 'evidence-warning');
+          tooltipIcon.className = `evidence-icon ${iconClass}`;
           tooltipIcon.innerHTML = ` ${icon}`;
-          tooltipIcon.title = `${iconLabel}: ${evidence}`;
+          tooltipIcon.title = `${iconLabel}`;
           tooltipIcon.style.cssText = `
             margin-left: 6px;
             cursor: help;
@@ -477,7 +514,7 @@ function renderParam(pillarName, pid, showPillarChip=false){
           const showTooltip = (e) => {
             const tooltip = document.createElement('div');
             tooltip.className = 'evidence-tooltip-popup';
-            tooltip.innerHTML = `<strong style="color: ${iconColor};">${iconLabel}</strong><br><br>${evidence}`;
+            tooltip.innerHTML = `<strong style="color: ${iconColor};">${iconLabel}</strong><br><br>${tooltipContent}`;
             tooltip.style.cssText = `
               position: fixed;
               background: #1F2937;
