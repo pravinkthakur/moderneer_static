@@ -396,9 +396,20 @@ function renderByPillar(){
       const pids = MODEL.fullModel.pillars.find(b=>b.name===p)?.parameters || [];
       const visible = pids.filter(id=>vis.has(id));
       if(!visible.length) return;
-      let n=0, d=0;
-      visible.forEach(id=>{ const c=comp[id]; if(c){ n+=(c.index/100)*MODEL.weights[p]; d+=MODEL.weights[p]; }});
-      if(d>0) byPillar[p] = (n/d)*100;
+      
+      // Parameters have equal weights within a pillar
+      // Each parameter weight = 100 / total_parameters
+      // Pillar Score = Σ(parameter_score × parameter_weight) / 100
+      const paramWeight = 100 / visible.length;
+      let totalWeighted = 0;
+      visible.forEach(id=>{ 
+        const c=comp[id]; 
+        if(c){ 
+          totalWeighted += c.index * paramWeight;
+        }
+      });
+      // Divide by 100 since parameter weights sum to 100
+      byPillar[p] = Math.round(totalWeighted / 100);
     });
     const pillarScore = byPillar[block.name];
     const scoreDisplay = pillarScore != null ? ` · Score: ${Math.round(pillarScore)}/100` : '';
@@ -2135,7 +2146,7 @@ function collectCompliance(){
     const meta = PARAM_META[pid];
     if(!meta) return;
     const recs = saved[pid] || {};
-    let num = 0, den = 0;
+    let totalWeighted = 0;
     const checks = meta.checks || [];
     checks.forEach((ch,i)=>{
       const w = (typeof ch.w==="number")? ch.w : 0;
@@ -2145,18 +2156,20 @@ function collectCompliance(){
       // Skip checks with null/undefined values (not assessed by Edge)
       if(!rec || rec.v === null || rec.v === undefined) return;
       
-      let val = 0;
+      let score = 0;
       if(ch.type==="check") {
-        // Boolean: 0 or 1
-        val = rec.v ? 1 : 0;
+        // Boolean: 0 or 100
+        score = rec.v ? 100 : 0;
       } else {
-        // All numeric types stored as 0-100, normalize to 0-1
-        // Platform controls the type, we just normalize the 0-100 value
-        val = (rec.v || 0) / 100;
+        // All numeric types stored as 0-100
+        score = rec.v || 0;
       }
-      num += w * val; den += w;
+      // Check weights sum to 100 for each parameter
+      // Parameter Score = Σ(check_score × check_weight) / 100
+      totalWeighted += score * w;
     });
-    const idx = den>0 ? (num/den)*100 : 0;
+    // Divide by 100 since check weights sum to 100
+    const idx = Math.round(totalWeighted / 100);
     out[pid] = { index: idx, scale: indexToScale(idx) };
   });
   return out;
@@ -2203,8 +2216,18 @@ function compute(silent=false){
     const ids = p.parameters.filter(id => visibleParamIds().includes(id));
     if(!ids.length) return;
     const idxs = ids.map(id => comp[id]?.index).filter(v=>v!=null);
-    const avg = idxs.length ? idxs.reduce((a,c)=>a+c,0)/idxs.length : null;
-    byPillar[p.name] = avg;
+    
+    // Parameters have equal weights within a pillar
+    // Each parameter weight = 100 / total_parameters  
+    // Pillar Score = Σ(parameter_score × parameter_weight) / 100
+    if(idxs.length > 0) {
+      const paramWeight = 100 / ids.length;
+      let totalWeighted = 0;
+      idxs.forEach(idx => {
+        totalWeighted += idx * paramWeight;
+      });
+      byPillar[p.name] = Math.round(totalWeighted / 100);
+    }
   });
   let sumW=0, sumWx=0;
   Object.keys(byPillar).forEach(p=>{
