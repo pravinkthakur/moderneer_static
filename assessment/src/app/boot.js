@@ -1725,9 +1725,10 @@ function attachHandlers(){
         const checks = meta.checks || [];
         updateParamProgressInternal(pid, saved, checks);
       }
+      
+      // Auto-compute to update all scores and displays
+      compute();
     }
-    
-    // Removed auto-compute - computation now requires manual button click
   });
 }
 function saveAll(){ alert("Saved locally."); }
@@ -1818,6 +1819,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         // Re-render to show the populated data
         render();
+        
+        // Recompute scores to update badges and displays
+        compute();
         
         alert(`✅ Successfully loaded Edge assessment!\n\n` +
               `Repository: ${edgeAssessment.repo_name || 'Unknown'}\n` +

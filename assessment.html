@@ -24,7 +24,7 @@
       // Handle redirect callback
       if (window.location.search.includes('code=')) {
         await auth0.handleRedirectCallback();
-        window.history.replaceState({}, document.title, '/assessment.html');
+        window.history.replaceState({}, document.title, '/assessment/OutcomeScore.html');
       }
 
       const isAuthenticated = await auth0.isAuthenticated();

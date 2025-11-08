@@ -223,7 +223,9 @@ export function exportToEdgeFormat(currentSelections, computedResults, MODEL, PA
               if (checkDef.type === 'check') {
                 score = selection.v ? 100 : 0;
               } else if (checkDef.type === 'scale5') {
-                score = Math.round((selection.v / 5) * 100);
+                // selection.v is ALREADY stored as 0-100 (not 0-5)
+                // Platform defines scale5 as 5-point input, but storage is always 0-100
+                score = Math.round(selection.v);
               } else if (checkDef.type === 'scale100') {
                 score = Math.round(selection.v);
               }
