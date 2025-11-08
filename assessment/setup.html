@@ -9,6 +9,152 @@
   <link rel="stylesheet" href="../css/modern-2025.css">
   <link rel="stylesheet" href="moderneer.css" />
   <style>
+    /* Wizard Progress Steps */
+    .wizard-steps {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 32px 0;
+      gap: 12px;
+    }
+    
+    .wizard-step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .step-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #e5e7eb;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+    
+    .step-circle.active {
+      background: #3b82f6;
+      color: white;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    
+    .step-circle.completed {
+      background: #10b981;
+      color: white;
+    }
+    
+    .step-label {
+      font-size: 14px;
+      color: #6b7280;
+      font-weight: 500;
+    }
+    
+    .step-label.active {
+      color: #3b82f6;
+      font-weight: 600;
+    }
+    
+    .step-divider {
+      width: 60px;
+      height: 2px;
+      background: #e5e7eb;
+    }
+    
+    .step-divider.completed {
+      background: #10b981;
+    }
+    
+    /* Wizard Content */
+    .wizard-content {
+      display: none;
+    }
+    
+    .wizard-content.active {
+      display: block;
+      animation: fadeIn 0.3s;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Modern Card Design */
+    .info-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 24px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+    }
+    
+    .info-card h3 {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+    }
+    
+    .info-card p {
+      margin: 0;
+      opacity: 0.95;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    .success-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 32px;
+      border-radius: 12px;
+      text-align: center;
+      margin: 24px 0;
+    }
+    
+    .success-card .icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+    
+    .success-card h3 {
+      margin: 0 0 12px 0;
+      font-size: 24px;
+    }
+    
+    .success-card .customer-id-display {
+      background: rgba(255,255,255,0.2);
+      padding: 16px;
+      border-radius: 8px;
+      margin: 20px 0;
+      backdrop-filter: blur(10px);
+    }
+    
+    .success-card .customer-id-display label {
+      display: block;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      opacity: 0.9;
+    }
+    
+    .success-card .customer-id-display code {
+      display: block;
+      font-family: 'Courier New', monospace;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 12px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 6px;
+      word-break: break-all;
+      user-select: all;
+    }
+    
+    /* Customer Search */
     .customer-search-section {
       position: relative;
     }
@@ -21,7 +167,7 @@
       background: white;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
       max-height: 300px;
       overflow-y: auto;
       z-index: 1000;
@@ -29,24 +175,34 @@
     }
     
     .search-result-item {
-      padding: 12px 16px;
+      padding: 16px;
       cursor: pointer;
       border-bottom: 1px solid #f3f4f6;
-      transition: background-color 0.2s;
+      transition: all 0.2s;
     }
     
     .search-result-item:hover {
       background-color: #f9fafb;
+      padding-left: 20px;
     }
     
     .search-result-item:last-child {
       border-bottom: none;
     }
     
+    .search-result-item strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #111827;
+    }
+    
+    .search-result-item small {
+      color: #6b7280;
+    }
+    
     .search-result-item.no-results,
     .search-result-item.error {
       cursor: default;
-      color: #6b7280;
       text-align: center;
     }
     
@@ -54,37 +210,103 @@
       color: #dc2626;
     }
     
-    .selected-customer-display {
-      padding: 12px 16px;
-      background: #f0fdf4;
-      border: 1px solid #86efac;
-      border-radius: 8px;
-      margin-top: 8px;
-    }
-    
-    .selected-customer-display .success-message {
+    .selected-customer-banner {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin: 0;
+    }
+    
+    .selected-customer-banner strong {
+      font-size: 18px;
     }
     
     .btn-link {
-      background: none;
-      border: none;
-      color: #2563eb;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
       cursor: pointer;
-      text-decoration: underline;
       font-size: 14px;
-      padding: 0;
+      font-weight: 500;
+      transition: all 0.2s;
     }
     
     .btn-link:hover {
-      color: #1d4ed8;
+      background: rgba(255,255,255,0.3);
     }
     
-    #companyInfoSection {
-      margin-top: 24px;
+    /* Repository Cards */
+    .repo-type-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 24px 0;
+    }
+    
+    .repo-type-option {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: white;
+    }
+    
+    .repo-type-option:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .repo-type-option.selected {
+      border-color: #3b82f6;
+      background: #eff6ff;
+    }
+    
+    .repo-type-option .icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+    
+    .repo-type-option .title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #111827;
+    }
+    
+    .repo-type-option .desc {
+      font-size: 14px;
+      color: #6b7280;
+    }
+    
+    /* Wizard Navigation */
+    .wizard-navigation {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid #e5e7eb;
+    }
+    
+    .btn-wizard {
+      padding: 12px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    
+    .btn-wizard:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
   </style>
 </head>
@@ -95,102 +317,127 @@
 
 <main class="setup-container">
   <div class="setup-header">
-    <h1>🎯 Assessment Setup</h1>
-    <p>Let's gather some information before starting your assessment</p>
+    <h1>🎯 Assessment Setup Wizard</h1>
+    <p>Follow these steps to configure your modernization assessment</p>
+  </div>
+
+  <!-- Wizard Progress Steps -->
+  <div class="wizard-steps">
+    <div class="wizard-step">
+      <div class="step-circle active" id="step1Circle">1</div>
+      <div class="step-label active" id="step1Label">Customer</div>
+    </div>
+    <div class="step-divider" id="divider1"></div>
+    <div class="wizard-step">
+      <div class="step-circle" id="step2Circle">2</div>
+      <div class="step-label" id="step2Label">Repository</div>
+    </div>
+    <div class="step-divider" id="divider2"></div>
+    <div class="wizard-step">
+      <div class="step-circle" id="step3Circle">3</div>
+      <div class="step-label" id="step3Label">Ready</div>
+    </div>
   </div>
 
   <div class="setup-card">
     <form id="setupForm">
-      <!-- Step 0: Customer Selection/Creation -->
-      <div class="form-section">
-        <h2>👤 Customer Selection</h2>
+      
+      <!-- STEP 1: Customer Selection/Creation -->
+      <div class="wizard-content active" id="step1Content">
+        <div class="info-card">
+          <h3>👤 Customer Information</h3>
+          <p>Search for an existing customer or create a new one. All assessments will be linked to this customer.</p>
+        </div>
         
         <div class="customer-search-section">
           <div class="form-group">
-            <label for="customerSearch">
-              Search Existing Customer
-            </label>
-            <input type="text" id="customerSearch" placeholder="Search by company name..." autocomplete="off">
+            <label for="customerSearch">Search Existing Customer</label>
+            <input type="text" id="customerSearch" placeholder="Type company name to search..." autocomplete="off">
             <div id="customerSearchResults" class="customer-search-results" style="display:none;"></div>
-            <div class="form-hint">Type to search existing customers or create new below</div>
+            <div class="form-hint">Start typing to search, or create a new customer below</div>
           </div>
           
-          <div id="selectedCustomerDisplay" class="selected-customer-display" style="display:none;">
-            <div class="success-message">
-              ✓ Selected: <strong id="selectedCustomerName"></strong>
-              <button type="button" class="btn-link" id="clearCustomerBtn">Change</button>
+          <div id="selectedCustomerBanner" class="selected-customer-banner" style="display:none;">
+            <div>
+              <div style="font-size: 14px; opacity: 0.9; margin-bottom: 4px;">Selected Customer</div>
+              <strong id="selectedCustomerName"></strong>
             </div>
+            <button type="button" class="btn-link" id="clearCustomerBtn">Change Customer</button>
+          </div>
+        </div>
+
+        <div id="customerFormSection">
+          <h3 style="margin: 32px 0 16px 0;">Or Create New Customer</h3>
+          
+          <div class="form-group">
+            <label for="companyName">
+              Company Name
+              <span class="required">*</span>
+            </label>
+            <input type="text" id="companyName" name="companyName" required placeholder="e.g., Acme Corporation">
           </div>
           
-          <div id="newCustomerToggle">
-            <button type="button" class="btn btn-secondary" id="createNewCustomerBtn">
-              + Create New Customer
-            </button>
+          <div class="form-group">
+            <label for="companyEmail">Company Email</label>
+            <input type="email" id="companyEmail" name="companyEmail" placeholder="e.g., contact@company.com">
+          </div>
+          
+          <div class="form-group">
+            <label for="industry">Industry</label>
+            <select id="industry" name="industry">
+              <option value="">Select Industry</option>
+              <option value="Technology">Technology</option>
+              <option value="Financial Services">Financial Services</option>
+              <option value="Healthcare">Healthcare</option>
+              <option value="Retail">Retail</option>
+              <option value="Manufacturing">Manufacturing</option>
+              <option value="Education">Education</option>
+              <option value="Government">Government</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="companySize">Company Size</label>
+            <select id="companySize" name="companySize">
+              <option value="">Select Size</option>
+              <option value="1-10">1-10 employees</option>
+              <option value="11-50">11-50 employees</option>
+              <option value="51-200">51-200 employees</option>
+              <option value="201-500">201-500 employees</option>
+              <option value="501-1000">501-1000 employees</option>
+              <option value="1000+">1000+ employees</option>
+            </select>
           </div>
         </div>
-      </div>
 
-      <!-- Step 1: Company Information -->
-      <div class="form-section" id="companyInfoSection">
-        <h2>📋 Company Information</h2>
-        
-        <div class="form-group">
-          <label for="companyName">
-            Company Name
-            <span class="required">*</span>
-          </label>
-          <input type="text" id="companyName" name="companyName" required placeholder="e.g., Acme Corporation">
-          <div class="form-hint">This will appear on your assessment reports</div>
-        </div>
-        
-        <div class="form-group">
-          <label for="companyEmail">Email Address</label>
-          <input type="email" id="companyEmail" name="companyEmail" placeholder="e.g., assessments@company.com">
-          <div class="form-hint">Optional: for report delivery</div>
-        </div>
-        
-        <div class="form-group">
-          <label for="companyAddress">Address</label>
-          <input type="text" id="companyAddress" name="companyAddress" placeholder="e.g., 123 Main St, City, Country">
-          <div class="form-hint">Optional: appears in formal reports</div>
-        </div>
-        
-        <div class="form-group">
-          <button type="button" class="btn btn-primary" id="saveCustomerBtn">
-            💾 Save Customer
+        <div class="wizard-navigation">
+          <button type="button" class="btn btn-secondary btn-wizard" onclick="window.location.href='assessment.html'">
+            Cancel
+          </button>
+          <button type="button" class="btn btn-primary btn-wizard" id="nextToRepoBtn">
+            Next: Select Repository →
           </button>
         </div>
-        
-        <div id="savedCustomerDisplay" class="saved-customer-display" style="display:none;">
-          <div class="success-message">
-            <strong>✓ Customer Saved Successfully!</strong>
-            <div style="margin-top: 8px;">
-              <strong>Customer ID:</strong> 
-              <code id="savedCustomerId" style="background: #f0f0f0; padding: 4px 8px; border-radius: 4px; font-family: monospace; user-select: all;"></code>
-              <button type="button" class="btn-link" id="copyCustomerIdBtn" title="Copy to clipboard">📋 Copy</button>
-            </div>
-            <div class="form-hint" style="margin-top: 8px;">
-              Use this Customer ID when running Edge CLI:<br>
-              <code style="font-size: 12px;">edge repo analyze --customerId YOUR_CUSTOMER_ID</code>
-            </div>
-          </div>
-        </div>
       </div>
 
-      <!-- Step 2: Repository Selection -->
-      <div class="form-section">
-        <h2>📦 Repository Selection</h2>
+      <!-- STEP 2: Repository Selection -->
+      <div class="wizard-content" id="step2Content">
+        <div class="info-card">
+          <h3>📦 Repository Selection</h3>
+          <p>Choose to assess a single repository or multiple repositories from an organization.</p>
+        </div>
         
         <div class="repo-type-selector">
-          <label class="repo-type-option selected">
-            <input type="radio" name="repoType" value="single" checked>
+          <label class="repo-type-option selected" id="singleRepoCard">
+            <input type="radio" name="repoType" value="single" checked style="display:none;">
             <div class="icon">📄</div>
             <div class="title">Single Repository</div>
             <div class="desc">Assess one specific repository</div>
           </label>
           
-          <label class="repo-type-option">
-            <input type="radio" name="repoType" value="organization">
+          <label class="repo-type-option" id="orgRepoCard">
+            <input type="radio" name="repoType" value="organization" style="display:none;">
             <div class="icon">🏢</div>
             <div class="title">Organization</div>
             <div class="desc">Assess multiple repos from an org</div>
@@ -210,7 +457,7 @@
         </div>
         
         <!-- Organization Section -->
-        <div id="orgReposSection">
+        <div id="orgReposSection" style="display:none;">
           <div class="form-group">
             <label for="orgName">
               Organization Name
@@ -222,9 +469,7 @@
           
           <div id="patSection">
             <div class="form-group">
-              <label for="pat">
-                Personal Access Token (PAT)
-              </label>
+              <label for="pat">Personal Access Token (PAT)</label>
               <input type="password" id="pat" name="pat" placeholder="ghp_xxxxxxxxxxxxx (optional for public repos)">
               <div class="form-hint">Optional: Required only for private repositories or to avoid rate limits</div>
             </div>
@@ -241,17 +486,57 @@
             <div id="repoList" class="repo-list"></div>
           </div>
         </div>
+
+        <div class="wizard-navigation">
+          <button type="button" class="btn btn-secondary btn-wizard" id="backToCustomerBtn">
+            ← Back
+          </button>
+          <button type="button" class="btn btn-primary btn-wizard" id="saveAndContinueBtn">
+            Save & Continue →
+          </button>
+        </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="btn-group">
-        <button type="button" class="btn btn-secondary" onclick="window.location.href='assessment.html'">
-          Cancel
-        </button>
-        <button type="submit" class="btn btn-primary" id="startAssessmentBtn">
-          Start Assessment →
-        </button>
+      <!-- STEP 3: Ready to Start -->
+      <div class="wizard-content" id="step3Content">
+        <div class="success-card">
+          <div class="icon">✅</div>
+          <h3>Setup Complete!</h3>
+          <p style="font-size: 16px; margin-bottom: 24px;">Your customer and repository information has been saved.</p>
+          
+          <div class="customer-id-display">
+            <label>Customer ID</label>
+            <code id="finalCustomerId"></code>
+          </div>
+          
+          <div style="background: rgba(255,255,255,0.2); padding: 16px; border-radius: 8px; margin-top: 16px; text-align: left;">
+            <div style="font-weight: 600; margin-bottom: 12px;">📋 Next Steps:</div>
+            <ol style="margin: 0; padding-left: 20px; line-height: 1.8;">
+              <li>Use Edge CLI to run the assessment</li>
+              <li>Include your Customer ID in the command</li>
+              <li>Results will be automatically linked to this customer</li>
+            </ol>
+          </div>
+          
+          <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; margin-top: 16px; text-align: left;">
+            <div style="font-weight: 600; margin-bottom: 8px; font-family: monospace; font-size: 14px;">Command Example:</div>
+            <code id="cliCommand" style="display: block; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; font-size: 13px; word-break: break-all;"></code>
+            <button type="button" class="btn btn-link" id="copyCommandBtn" style="margin-top: 12px; width: 100%;">
+              📋 Copy Command
+            </button>
+          </div>
+        </div>
+
+        <div class="wizard-navigation">
+          <button type="button" class="btn btn-secondary btn-wizard" onclick="window.location.href='assessment.html'">
+            ← Back to Dashboard
+          </button>
+          <button type="button" class="btn btn-primary btn-wizard" onclick="window.location.href='assessment.html'">
+            View Assessments
+          </button>
+        </div>
       </div>
+
     </form>
   </div>
 </main>
@@ -264,16 +549,46 @@
   import { updateAssessmentContext } from './src/context-manager.js';
 
   // Customer Service Configuration
-  const CUSTOMER_SERVICE_URL = 'https://api.customer-service.moderneer.co.uk';
+  // Try custom domain first, fallback to Vercel if DNS not configured yet
+  const CUSTOMER_SERVICE_URL = 'https://moderneer-customer-service.vercel.app';
+  // TODO: Change to 'https://api.customer-service.moderneer.co.uk' after DNS is configured
   let selectedCustomerId = null;
+  let currentStep = 1;
+  let savedRepositories = [];
+
+  // Wizard Navigation Functions
+  function showStep(stepNumber) {
+    // Hide all steps
+    document.querySelectorAll('.wizard-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.step-circle').forEach(el => {
+      el.classList.remove('active');
+      el.classList.remove('completed');
+    });
+    document.querySelectorAll('.step-label').forEach(el => {
+      el.classList.remove('active');
+    });
+    document.querySelectorAll('.step-divider').forEach(el => el.classList.remove('completed'));
+    
+    // Show current step
+    document.getElementById(`step${stepNumber}Content`).classList.add('active');
+    document.getElementById(`step${stepNumber}Circle`).classList.add('active');
+    document.getElementById(`step${stepNumber}Label`).classList.add('active');
+    
+    // Mark completed steps
+    for (let i = 1; i < stepNumber; i++) {
+      document.getElementById(`step${i}Circle`).classList.add('completed');
+      document.getElementById(`divider${i}`).classList.add('completed');
+    }
+    
+    currentStep = stepNumber;
+  }
 
   // Customer Search Functionality
   let searchTimeout;
   const customerSearch = document.getElementById('customerSearch');
   const searchResults = document.getElementById('customerSearchResults');
-  const selectedDisplay = document.getElementById('selectedCustomerDisplay');
+  const selectedBanner = document.getElementById('selectedCustomerBanner');
   const selectedCustomerName = document.getElementById('selectedCustomerName');
-  const companyInfoSection = document.getElementById('companyInfoSection');
 
   customerSearch.addEventListener('input', function() {
     clearTimeout(searchTimeout);
@@ -326,123 +641,171 @@
   function selectCustomer(customer) {
     selectedCustomerId = customer.customer_id;
     selectedCustomerName.textContent = customer.company_name;
-    selectedDisplay.style.display = 'block';
+    selectedBanner.style.display = 'flex';
     searchResults.style.display = 'none';
     customerSearch.value = '';
     
     // Pre-fill company information
     document.getElementById('companyName').value = customer.company_name;
-    document.getElementById('companyEmail').value = customer.email || '';
+    document.getElementById('companyEmail').value = customer.company_email || customer.email || '';
+    document.getElementById('industry').value = customer.industry || '';
+    document.getElementById('companySize').value = customer.company_size || '';
     
-    // Disable company name field since it's from existing customer
+    // Disable fields since it's from existing customer
     document.getElementById('companyName').disabled = true;
-    
-    // Load repositories if available
-    if (customer.repositories && Array.isArray(customer.repositories) && customer.repositories.length > 0) {
-      console.log('Customer has', customer.repositories.length, 'repositories');
-    }
+    document.getElementById('companyEmail').disabled = true;
+    document.getElementById('industry').disabled = true;
+    document.getElementById('companySize').disabled = true;
   }
 
   document.getElementById('clearCustomerBtn').addEventListener('click', function() {
     selectedCustomerId = null;
-    selectedDisplay.style.display = 'none';
+    selectedBanner.style.display = 'none';
     document.getElementById('companyName').value = '';
     document.getElementById('companyName').disabled = false;
     document.getElementById('companyEmail').value = '';
+    document.getElementById('companyEmail').disabled = false;
+    document.getElementById('industry').value = '';
+    document.getElementById('industry').disabled = false;
+    document.getElementById('companySize').value = '';
+    document.getElementById('companySize').disabled = false;
   });
 
-  document.getElementById('createNewCustomerBtn').addEventListener('click', function() {
-    selectedCustomerId = null;
-    selectedDisplay.style.display = 'none';
-    document.getElementById('companyName').disabled = false;
-    document.getElementById('companyName').focus();
-  });
-
-  // Save Customer Button Handler
-  document.getElementById('saveCustomerBtn').addEventListener('click', async function() {
-    const btn = this;
-    const originalText = btn.textContent;
-    
-    // Get form values
+  // Wizard Step Navigation Handlers
+  document.getElementById('nextToRepoBtn').addEventListener('click', async function() {
     const companyName = document.getElementById('companyName').value.trim();
-    const companyEmail = document.getElementById('companyEmail').value.trim();
-    const companyAddress = document.getElementById('companyAddress').value.trim();
     
     if (!companyName) {
-      alert('Please enter a company name');
+      alert('Please enter a company name or select an existing customer');
       document.getElementById('companyName').focus();
       return;
     }
+    
+    const btn = this;
+    const originalText = btn.textContent;
     
     try {
       btn.disabled = true;
       btn.textContent = '💾 Saving...';
       
-      const customerData = {
-        company_name: companyName,
-        company_email: companyEmail || '',
-        contact_name: '',
-        contact_email: '',
-        industry: '',
-        company_size: '',
-        notes: companyAddress || ''
-      };
-      
-      let response;
-      if (selectedCustomerId) {
-        // Update existing customer
-        response = await fetch(`${CUSTOMER_SERVICE_URL}/api/customers/${selectedCustomerId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(customerData)
-        });
-      } else {
-        // Create new customer
-        response = await fetch(`${CUSTOMER_SERVICE_URL}/api/customers`, {
+      // Save or update customer
+      if (!selectedCustomerId) {
+        const customerData = {
+          company_name: companyName,
+          company_email: document.getElementById('companyEmail').value.trim(),
+          industry: document.getElementById('industry').value,
+          company_size: document.getElementById('companySize').value,
+          contact_name: '',
+          contact_email: '',
+          notes: ''
+        };
+        
+        const response = await fetch(`${CUSTOMER_SERVICE_URL}/api/customers`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(customerData)
         });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to save customer');
+        }
+        
+        const result = await response.json();
+        selectedCustomerId = result.data?.customer_id || result.customer_id;
+        
+        // Store in localStorage
+        localStorage.setItem('selectedCustomerId', selectedCustomerId);
+        localStorage.setItem('selectedCustomerName', companyName);
       }
       
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to save customer');
-      }
-      
-      const result = await response.json();
-      const customerId = result.data?.customer_id || result.customer_id;
-      
-      // Update selectedCustomerId
-      selectedCustomerId = customerId;
-      
-      // Display the customer ID
-      document.getElementById('savedCustomerId').textContent = customerId;
-      document.getElementById('savedCustomerDisplay').style.display = 'block';
-      
-      // Store in localStorage
-      localStorage.setItem('selectedCustomerId', customerId);
-      localStorage.setItem('selectedCustomerName', companyName);
-      
-      // Show success
-      btn.textContent = '✓ Saved!';
-      setTimeout(() => {
-        btn.textContent = originalText;
-      }, 2000);
+      // Move to step 2
+      showStep(2);
       
     } catch (error) {
       console.error('Save customer error:', error);
-      alert(`Failed to save customer: ${error.message}`);
-      btn.textContent = originalText;
+      alert(`Failed to save customer: ${error.message}\n\nPlease check if the customer service is running.`);
     } finally {
       btn.disabled = false;
+      btn.textContent = originalText;
     }
   });
-  
-  // Copy Customer ID Button Handler
-  document.getElementById('copyCustomerIdBtn').addEventListener('click', function() {
-    const customerId = document.getElementById('savedCustomerId').textContent;
-    navigator.clipboard.writeText(customerId).then(() => {
+
+  document.getElementById('backToCustomerBtn').addEventListener('click', function() {
+    showStep(1);
+  });
+
+  document.getElementById('saveAndContinueBtn').addEventListener('click', async function() {
+    const repoType = document.querySelector('input[name="repoType"]:checked').value;
+    
+    // Validate repository selection
+    if (repoType === 'single') {
+      const repoName = document.getElementById('repoName').value.trim();
+      if (!repoName) {
+        alert('Please enter a repository name');
+        document.getElementById('repoName').focus();
+        return;
+      }
+      savedRepositories = [{ name: repoName, url: `https://github.com/${repoName}` }];
+    } else {
+      const selectedRepos = Array.from(document.querySelectorAll('#repoList input:checked'))
+        .map(cb => cb.value);
+      
+      if (selectedRepos.length === 0) {
+        alert('Please select at least one repository');
+        return;
+      }
+      
+      savedRepositories = selectedRepos.map(fullName => ({
+        name: fullName,
+        url: `https://github.com/${fullName}`
+      }));
+    }
+    
+    const btn = this;
+    const originalText = btn.textContent;
+    
+    try {
+      btn.disabled = true;
+      btn.textContent = '💾 Saving...';
+      
+      // Update customer with repositories
+      const response = await fetch(`${CUSTOMER_SERVICE_URL}/api/customers/${selectedCustomerId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          repositories: savedRepositories
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to save repositories');
+      }
+      
+      // Show success step
+      document.getElementById('finalCustomerId').textContent = selectedCustomerId;
+      
+      // Set CLI command example
+      const repoName = savedRepositories[0].name;
+      const assessmentType = savedRepositories.length === 1 ? 'repo' : 'org';
+      const command = `edge ${assessmentType} analyze ${repoName.split('/')[1] || repoName} --customerId ${selectedCustomerId}`;
+      document.getElementById('cliCommand').textContent = command;
+      
+      showStep(3);
+      
+    } catch (error) {
+      console.error('Save repositories error:', error);
+      alert(`Failed to save repositories: ${error.message}`);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  });
+
+  // Copy Command Button
+  document.getElementById('copyCommandBtn').addEventListener('click', function() {
+    const command = document.getElementById('cliCommand').textContent;
+    navigator.clipboard.writeText(command).then(() => {
       const btn = this;
       const originalText = btn.textContent;
       btn.textContent = '✓ Copied!';
@@ -456,6 +819,23 @@
   });
 
   // Handle repo type selection
+  document.getElementById('singleRepoCard').addEventListener('click', function() {
+    document.querySelector('input[name="repoType"][value="single"]').checked = true;
+    document.getElementById('singleRepoCard').classList.add('selected');
+    document.getElementById('orgRepoCard').classList.remove('selected');
+    document.getElementById('singleRepoSection').style.display = 'block';
+    document.getElementById('orgReposSection').style.display = 'none';
+  });
+
+  document.getElementById('orgRepoCard').addEventListener('click', function() {
+    document.querySelector('input[name="repoType"][value="organization"]').checked = true;
+    document.getElementById('orgRepoCard').classList.add('selected');
+    document.getElementById('singleRepoCard').classList.remove('selected');
+    document.getElementById('singleRepoSection').style.display = 'none';
+    document.getElementById('orgReposSection').style.display = 'block';
+  });
+
+  // Handle repo type selection (old code for backward compatibility)
   document.querySelectorAll('.repo-type-option').forEach(option => {
     option.addEventListener('click', function() {
       // Update radio button
@@ -555,167 +935,11 @@
     }
   });
 
-  // Handle form submission
-  document.getElementById('setupForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    const repoType = formData.get('repoType');
-    const companyName = formData.get('companyName');
-    
-    if (!companyName) {
-      alert('Please provide a company name');
-      return;
-    }
-    
-    // Save/update customer in customer service
-    try {
-      if (!selectedCustomerId) {
-        // Create new customer
-        const customerData = {
-          company_name: companyName,
-          email: formData.get('companyEmail'),
-          contact_name: formData.get('contactName') || '',
-          repositories: []
-        };
-        
-        // Add repository info
-        if (repoType === 'single') {
-          const repoName = formData.get('repoName');
-          if (repoName) {
-            customerData.repositories.push({
-              name: repoName,
-              url: `https://github.com/${repoName}`
-            });
-          }
-        } else {
-          const selectedRepos = Array.from(document.querySelectorAll('#repoList input:checked'))
-            .map(cb => cb.value);
-          
-          customerData.repositories = selectedRepos.map(fullName => ({
-            name: fullName,
-            url: `https://github.com/${fullName}`
-          }));
-        }
-        
-        const response = await fetch(`${CUSTOMER_SERVICE_URL}/api/customers`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(customerData)
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          selectedCustomerId = result.data.customer_id;
-          console.log('✓ Created customer:', selectedCustomerId);
-        } else {
-          console.warn('Failed to create customer, continuing without customer link');
-        }
-      } else {
-        // Update existing customer with new repositories
-        const customerData = {
-          repositories: []
-        };
-        
-        if (repoType === 'single') {
-          const repoName = formData.get('repoName');
-          if (repoName) {
-            customerData.repositories.push({
-              name: repoName,
-              url: `https://github.com/${repoName}`
-            });
-          }
-        } else {
-          const selectedRepos = Array.from(document.querySelectorAll('#repoList input:checked'))
-            .map(cb => cb.value);
-          
-          customerData.repositories = selectedRepos.map(fullName => ({
-            name: fullName,
-            url: `https://github.com/${fullName}`
-          }));
-        }
-        
-        await fetch(`${CUSTOMER_SERVICE_URL}/api/customers/${selectedCustomerId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(customerData)
-        });
-      }
-    } catch (error) {
-      console.error('Customer service error:', error);
-      // Continue without customer service integration
-    }
-    
-    // Prepare context data
-    const context = {
-      companyName: companyName,
-      companyEmail: formData.get('companyEmail'),
-      companyAddress: formData.get('companyAddress'),
-      assessmentType: 'manual',
-      customerId: selectedCustomerId // Store customer ID in context
-    };
-    
-    if (repoType === 'single') {
-      const repoName = formData.get('repoName');
-      if (!repoName) {
-        alert('Please provide a repository name');
-        return;
-      }
-      
-      context.repoName = repoName;
-      context.repoUrl = `https://github.com/${repoName}`;
-      
-      // Clear any previous assessment data to ensure fresh start
-      localStorage.removeItem('oemm_core24_seq');
-      localStorage.removeItem('oemm_full12_seq');
-      
-      // Store context and navigate
-      updateAssessmentContext(context);
-      window.location.href = 'assessment.html';
-      
-    } else {
-      // Organization - multiple repos
-      const selectedRepos = Array.from(document.querySelectorAll('#repoList input:checked'))
-        .map(cb => cb.value);
-      
-      if (selectedRepos.length === 0) {
-        alert('Please select at least one repository to assess');
-        return;
-      }
-      
-      if (selectedRepos.length === 1) {
-        // Single repo selected, navigate to normal assessment
-        context.repoName = selectedRepos[0];
-        context.repoUrl = `https://github.com/${selectedRepos[0]}`;
-        
-        // Clear any previous assessment data to ensure fresh start
-        localStorage.removeItem('oemm_core24_seq');
-        localStorage.removeItem('oemm_full12_seq');
-        
-        updateAssessmentContext(context);
-        window.location.href = 'assessment.html';
-      } else {
-        // Multiple repos - navigate to tabbed multi-repo view
-        const orgName = document.getElementById('orgName').value.trim();
-        
-        context.assessmentType = 'organization';
-        context.orgName = orgName;
-        context.repositories = selectedRepos.map(fullName => ({
-          name: fullName.split('/')[1],
-          fullName: fullName,
-          url: `https://github.com/${fullName}`
-        }));
-        
-        // Clear any previous assessment data to ensure fresh start
-        localStorage.removeItem('oemm_core24_seq');
-        localStorage.removeItem('oemm_full12_seq');
-        
-        updateAssessmentContext(context);
-        window.location.href = 'assessment.html?view=org';
-      }
-    }
-  });
+  // Initialize wizard at step 1
+  showStep(1);
+
 </script>
 
 </body>
 </html>
+
