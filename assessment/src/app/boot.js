@@ -637,6 +637,7 @@ function pillarCardsHTML(byPillar){
     const idx = byPillar[p]; if(idx==null) return;
     const scl = indexToScale(idx);
     const pct = Math.max(0, Math.min(100, idx));
+    const roundedScore = Math.round(idx); // Integer score for comparison with Edge
     const state = scl>=4?'score-good':(scl>=3?'score-warn':'score-bad');
     out += `
       <div class="pillar-card">
@@ -647,7 +648,10 @@ function pillarCardsHTML(byPillar){
           <span class="score-badge ${state}">${fmt(scl,1)}</span>
         </div>
         <div class="progress" style="margin-top:8px"><div class="bar" style="width:${pct}%"></div></div>
-        <div class="tiny">Index: ${fmt(idx,1)}</div>
+        <div class="tiny" style="display:flex;justify-content:space-between">
+          <span>Score: <strong>${roundedScore}/100</strong></span>
+          <span>Index: ${fmt(idx,1)}</span>
+        </div>
       </div>`;
   });
   if(!out) out = '<p>No pillar data.</p>';
@@ -2133,6 +2137,16 @@ function compute(silent=false){
     
     // Update compute timestamp only when actually computing (not during render)
     setLastCompute();
+    
+    // Log pillar scores for comparison with Edge
+    console.log('📊 Pillar Scores (for Edge comparison):');
+    console.log('Overall Score:', Math.round(finalIndex));
+    Object.keys(byPillar).forEach(p => {
+      const idx = byPillar[p];
+      if (idx !== null) {
+        console.log(`  ${p}: ${Math.round(idx)}/100`);
+      }
+    });
   }
   return { perParam: comp, byPillar, overallIndexPre, overallScalePre, afterGatesScale, finalScale, finalIndex, gates, caps };
 }
@@ -2159,6 +2173,7 @@ function renderBreakdown(byPillar){
   Object.keys(MODEL.weights).forEach(p=>{
     const idx = byPillar[p]; if(idx==null) return;
     const scl = indexToScale(idx); const pct = Math.max(0,Math.min(100,idx));
+    const roundedScore = Math.round(idx); // Integer score for comparison with Edge
     const state = scl>=4?"score-good":(scl>=3?"score-warn":"score-bad");
     const card=document.createElement("div"); card.className="pillar-card";
     card.innerHTML = `
@@ -2169,7 +2184,10 @@ function renderBreakdown(byPillar){
         <span class="score-badge ${state}">${fmt(scl,1)}</span>
       </div>
       <div class="progress" style="margin-top:8px"><div class="bar" style="width:${pct}%"></div></div>
-      <div class="tiny">Index: ${fmt(idx,1)}</div>
+      <div class="tiny" style="display:flex;justify-content:space-between">
+        <span>Score: <strong>${roundedScore}/100</strong></span>
+        <span>Index: ${fmt(idx,1)}</span>
+      </div>
     `;
     cont.appendChild(card);
   });
