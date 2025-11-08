@@ -85,6 +85,17 @@ export function populateFromEdgeAssessment(edgeAssessment, getSaved, setSaved) {
   console.log('[EdgeIntegration] Current saved state keys:', Object.keys(savedState).length);
   let updatedCount = 0;
   
+  /**
+   * SCORE INTEGRATION ARCHITECTURE:
+   * 
+   * Edge outputs all check scores as 0-100 index values.
+   * We store them as-is without conversion - the platform service
+   * defines check types (check, scale5, scale100, etc.) and the UI
+   * handles display conversion only.
+   * 
+   * This makes Edge and UI independent of platform's type system.
+   */
+  
   // Iterate through pillars and parameters
   edgeAssessment.pillars.forEach(pillar => {
     if (!pillar.parameters || !Array.isArray(pillar.parameters)) return;
@@ -109,21 +120,17 @@ export function populateFromEdgeAssessment(edgeAssessment, getSaved, setSaved) {
           manual_review_required: check.manual_review_required || false  // Track this separately
         };
         
-        // Convert score to appropriate format based on check_type
+        // Edge always returns scores as 0-100 index values
+        // Store as-is - UI will handle display/normalization based on platform's check type
         if (check.score !== null && check.score !== undefined) {
-          // Edge LLM returns ALL scores as 0-100 index values
-          // Store them as-is (0-100) for all types - collectCompliance will normalize
-          
           if (check.check_type === 'check') {
-            // Boolean check: treat anything > 50 as true
+            // Boolean: treat > 50 as true
             checkData.v = check.score > 50;
-            console.log(`[EdgeIntegration] Check ${check.check_id}: score ${check.score} → boolean ${checkData.v}`);
           } else {
-            // For scale5 and scale100: store the raw 0-100 score
-            // UI will normalize by dividing by 100 to get 0-1 compliance
+            // All numeric types: store raw 0-100 score
             checkData.v = Math.min(100, Math.max(0, check.score));
-            console.log(`[EdgeIntegration] ${check.check_type} ${check.check_id}: score ${check.score} → stored ${checkData.v}`);
           }
+          console.log(`[EdgeIntegration] ${check.check_type} ${check.check_id}: score ${check.score} → stored ${checkData.v}`);
         }
         // Note: We intentionally don't set na=true for manual_review_required
         // The control should remain enabled so user can provide the value

@@ -410,8 +410,9 @@ function renderParam(pillarName, pid, showPillarChip=false){
           </div>
         </div>`;
     } else if(type==="scale5"){
-      // Saved values are 0-100 (Edge format), convert to 0-5 for slider
-      const val = saved[i]?.v ? (saved[i].v / 20) : 0;
+      // scale5: stored as 0-100, display as 0-5 slider
+      // Platform defines this is a 5-point scale for user input
+      const val = saved[i]?.v ? (saved[i].v / 20) : 0; // 0-100 → 0-5
       control = `
         <div class="field">
           <label for="${inputId}">${ch.label}</label>
@@ -423,6 +424,8 @@ function renderParam(pillarName, pid, showPillarChip=false){
           <div id="${inputId}-desc" class="tiny">${ch.purpose||""}</div>
         </div>`;
     } else {
+      // scale100 or any other numeric type from platform
+      // Stored and displayed as 0-100
       const val = saved[i]?.v ?? 0;
       control = `
         <div class="field">
@@ -444,12 +447,14 @@ function renderParam(pillarName, pid, showPillarChip=false){
 
     const ctrl = row.querySelector(`#${CSS.escape(inputId)}`);
     if(saved[i]){
-      if((ctrl?.dataset.type)==="check") ctrl.checked = !!saved[i].v;
-      else if(ctrl) {
-        // Convert 0-100 (Edge format) back to slider range for scale5
+      if((ctrl?.dataset.type)==="check") {
+        ctrl.checked = !!saved[i].v;
+      } else if(ctrl) {
+        // Convert stored 0-100 to display range based on platform's check type
         if(ctrl.dataset.type === "scale5") {
-          ctrl.value = saved[i].v / 20; // 0-100 → 0-5
+          ctrl.value = saved[i].v / 20; // 0-100 → 0-5 for display
         } else {
+          // scale100 or other types: use stored value as-is
           ctrl.value = saved[i].v;
         }
       }
@@ -1997,6 +2002,21 @@ function setLastCompute(){
   el.textContent = "Last compute: " + stamp;
 }
 
+/**
+ * SCORE STORAGE ARCHITECTURE:
+ * 
+ * - Edge always outputs scores as 0-100 index values (regardless of check type)
+ * - localStorage stores all scores as 0-100 (matches Edge format)
+ * - Platform API defines check types: 'check', 'scale5', 'scale100', etc.
+ * - UI adapts to check type from platform:
+ *   - 'check': boolean (true/false)
+ *   - 'scale5': display as 0-5 slider, store as 0-100
+ *   - 'scale100': display and store as 0-100
+ *   - Future types: platform controls, UI just needs display conversion
+ * - Calculation: always normalize 0-100 → 0-1 for weighted average
+ * 
+ * This ensures Edge and UI are decoupled from check type definitions.
+ */
 
 function collectCompliance(){
   // Merge saved with current DOM values, then compute from saved for ALL visible params
@@ -2007,13 +2027,16 @@ function collectCompliance(){
     saved[pid] = saved[pid] || {};
     const type = ctrl.dataset.type;
     let v = 0;
-    if(type==="check") v = ctrl.checked ? 1 : 0;
-    else if(type==="scale5") {
-      // User enters 0-5, but we store as 0-100 to match Edge format
+    if(type==="check") {
+      v = ctrl.checked ? 1 : 0;
+    } else if(type==="scale5") {
+      // scale5: user enters 0-5, convert to 0-100 for storage (Edge format)
       const scale5Val = parseFloat(ctrl.value||"0");
-      v = scale5Val * 20; // Convert 0-5 → 0-100
+      v = scale5Val * 20; // 0-5 → 0-100
+    } else {
+      // scale100 or any other numeric type: use value as-is
+      v = parseFloat(ctrl.value||"0");
     }
-    else v = parseFloat(ctrl.value||"0");
     const naEl = ctrl.closest(".row").querySelector('[data-na="1"]');
     const na = !!(naEl && naEl.checked);
     saved[pid][i] = { v, na };
@@ -2035,13 +2058,17 @@ function collectCompliance(){
       if(rec?.na) return;  // Skip N/A checks
       
       // Skip checks with null/undefined values (not assessed by Edge)
-      // This matches Edge's behavior of filtering out null scores
       if(!rec || rec.v === null || rec.v === undefined) return;
       
       let val = 0;
-      if(ch.type==="check") val = rec.v?1:0;
-      // Edge stores all scores as 0-100, so normalize by dividing by 100
-      else val = (rec.v||0)/100;
+      if(ch.type==="check") {
+        // Boolean: 0 or 1
+        val = rec.v ? 1 : 0;
+      } else {
+        // All numeric types stored as 0-100, normalize to 0-1
+        // Platform controls the type, we just normalize the 0-100 value
+        val = (rec.v || 0) / 100;
+      }
       num += w * val; den += w;
     });
     const idx = den>0 ? (num/den)*100 : 0;
