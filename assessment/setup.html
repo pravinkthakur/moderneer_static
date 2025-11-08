@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/modern-2025.css">
-  <link rel="stylesheet" href="../css/wizard.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/pravinkthakur/moderneer-design-system@main/src/wizard.css">
   <link rel="stylesheet" href="moderneer.css" />
 </head>      align-items: center;
       margin: 32px 0;
@@ -259,6 +259,22 @@
 
   // Customer Service Configuration
   const CUSTOMER_SERVICE_URL = 'https://api.customer-service.moderneer.co.uk';
+  
+  // Test connection on page load
+  (async function testConnection() {
+    try {
+      const response = await fetch(`${CUSTOMER_SERVICE_URL}/health`);
+      if (response.ok) {
+        console.log('✓ Customer service connected:', CUSTOMER_SERVICE_URL);
+      } else {
+        console.warn('⚠ Customer service returned error:', response.status);
+      }
+    } catch (error) {
+      console.error('✗ Customer service connection failed:', error);
+      console.error('URL:', CUSTOMER_SERVICE_URL);
+    }
+  })();
+  
   let selectedCustomerId = null;
   let currentStep = 1;
   let savedRepositories = [];
