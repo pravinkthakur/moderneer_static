@@ -40,7 +40,7 @@ export async function loadEdgeAssessment(file) {
         
         // Update assessment context banner
         try {
-          const { updateAssessmentContext, extractContextFromAssessment } = await import('./context-manager.js');
+          const { updateAssessmentContext, extractContextFromAssessment } = await import(`./context-manager.js?v=${Date.now()}`);
           const context = extractContextFromAssessment(assessment);
           updateAssessmentContext(context);
         } catch (err) {

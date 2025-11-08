@@ -982,9 +982,8 @@ const NanoLLM = { sent(s){ if(!s) return ""; s = s.trim(); if(!s) return ""; con
 /* ---------- Full report composer ---------- */
 function llmStyleReport(results){
   const scope = scopeLabel();
-  const bandTxt = band(results.finalScale);
-  const idx = results.finalIndex||0;
-  const scale = results.finalScale||0;
+  const idx = Math.round(results.finalIndex || 0);
+  const bandTxt = idx >= 80 ? "5 (Leading)" : idx >= 60 ? "4 (Advanced)" : idx >= 40 ? "3 (Established)" : idx >= 20 ? "2 (Developing)" : "1 (Initial)";
   const target = nextLevelTarget(idx);
   const gap = Math.max(0, target.targetIdx - idx);
   const gatesPass = results.gates.filter(g=>g.pass).length;
@@ -1016,7 +1015,7 @@ function llmStyleReport(results){
     <div class="report-meta">
       <p><strong>Assessment Scope:</strong> ${scope}</p>
       <p><strong>Report Date:</strong> ${reportDate}</p>
-      <p><strong>Overall Band:</strong> ${bandTxt} (${scale.toFixed(1)}/5.0, Index: ${idx.toFixed(1)}/100)</p>
+      <p><strong>Overall Score:</strong> ${idx}/100 (Band ${bandTxt})</p>
     </div>
   </div>
 
@@ -1026,7 +1025,7 @@ function llmStyleReport(results){
     <div class="summary-grid">
       <div class="summary-card">
         <h3>Current State</h3>
-        <p>The organisation is currently assessed at <strong>Band ${bandTxt}</strong> with a scale score of <strong>${scale.toFixed(1)} out of 5</strong> and an index of <strong>${idx.toFixed(1)} out of 100</strong>.</p>
+        <p>The organisation is currently assessed at <strong>Band ${bandTxt}</strong> with an overall score of <strong>${idx} out of 100</strong>.</p>
       </div>
       
       <div class="summary-card">
@@ -1802,7 +1801,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   migrateStorageIfNeeded();
   
   // Import Edge integration module
-  const { loadEdgeAssessment, populateFromEdgeAssessment, exportToEdgeFormat } = await import('../edge-integration.js');
+  const { loadEdgeAssessment, populateFromEdgeAssessment, exportToEdgeFormat } = await import(`../edge-integration.js?v=${Date.now()}`);
   
   const btnReport = document.getElementById("btnReport");
   const btnSave = document.getElementById("btnSave");
@@ -2256,9 +2255,14 @@ function compute(silent=false){
   // Divide by 100 since pillar weights sum to 100
   const overallIndexPre = Math.round(totalWeighted / 100);
   const overallScalePre = indexToScale(overallIndexPre);
+  
+  // Gates: Check parameter scores (0-100) against thresholds
+  // If thresholds are in 1-5 scale, convert to 0-100 by multiplying by 20
   const gates = MODEL.gates.map(g=>{
-    const vals = g.parameters.map(pid => comp[pid]?.scale ?? null);
-    const pass = vals.every(v=>v!=null) && ((g.logic==="AND") ? vals.every(v=>v>=g.threshold) : vals.some(v=>v>=g.threshold));
+    const vals = g.parameters.map(pid => comp[pid]?.index ?? null);
+    // Convert threshold from scale (1-5) to index (0-100) if needed
+    const thresholdIndex = g.threshold <= 5 ? g.threshold * 20 : g.threshold;
+    const pass = vals.every(v=>v!=null) && ((g.logic==="AND") ? vals.every(v=>v>=thresholdIndex) : vals.some(v=>v>=thresholdIndex));
     return { id:g.id, label:g.label, pass };
   });
   const allPass = gates.every(x=>x.pass);
@@ -2288,17 +2292,35 @@ function compute(silent=false){
   });
   let finalScale = afterGatesScale;
   caps.forEach(c=>{ if(c.trigger) finalScale = Math.min(finalScale, c.cap); });
-  const finalIndex = (()=>{
-    if(finalScale==null) return null;
-    if(finalScale<=2) return (finalScale-1)*25;
-    if(finalScale<=3) return 25 + (finalScale-2)*25;
-    if(finalScale<=4) return 50 + (finalScale-3)*30;
-    return 80 + (finalScale-4)*20;
-  })();
+  
+  // Use overallIndexPre as the correct final score (0-100)
+  // Don't recalculate from scale - that loses precision
+  let finalIndex = overallIndexPre;
+  
+  // Apply gate caps to the index score if gates not passed
+  if (!allPass) {
+    finalIndex = Math.min(finalIndex, 60); // Cap at Band 3 level
+  }
+  
+  // Apply capability caps to the index score
+  caps.forEach(c => {
+    if (c.trigger && c.cap) {
+      // Convert cap value (1-5 scale) to index (0-100)
+      const capIndex = c.cap * 20; // Simple conversion: scale * 20 = index
+      finalIndex = Math.min(finalIndex, capIndex);
+    }
+  });
+  
   if(!silent){
+    // Calculate band from finalIndex (0-100)
+    const bandText = finalIndex >= 80 ? "5 (Leading)" : 
+                     finalIndex >= 60 ? "4 (Advanced)" : 
+                     finalIndex >= 40 ? "3 (Established)" : 
+                     finalIndex >= 20 ? "2 (Developing)" : 
+                     "1 (Initial)";
+    
     document.getElementById("overallIndex").textContent = fmt(finalIndex,1);
-    document.getElementById("overallScale").textContent = fmt(finalScale,1);
-    document.getElementById("overallBand").textContent = band(finalScale);
+    document.getElementById("overallBand").textContent = bandText;
     document.getElementById("gatesPassed").textContent = allPass ? "All" : `${gates.filter(x=>x.pass).length}/${MODEL.gates.length}`;
     renderGateCaps(gates,caps); renderBreakdown(byPillar);
     
