@@ -389,29 +389,29 @@ function renderByPillar(){
     const params = block.parameters.filter(p=>vis.has(p));
     if(!params.length) return;
     
-    // Get pillar score if available
-    const comp = collectCompliance();
-    const byPillar = {};
-    Object.keys(MODEL.weights).forEach(p=>{
-      const pids = MODEL.fullModel.pillars.find(b=>b.name===p)?.parameters || [];
-      const visible = pids.filter(id=>vis.has(id));
-      if(!visible.length) return;
-      
-      // Parameters have equal weights within a pillar
-      // Each parameter weight = 100 / total_parameters
-      // Pillar Score = Σ(parameter_score × parameter_weight) / 100
-      const paramWeight = 100 / visible.length;
-      let totalWeighted = 0;
-      visible.forEach(id=>{ 
-        const c=comp[id]; 
-        if(c){ 
-          totalWeighted += c.index * paramWeight;
-        }
-      });
-      // Divide by 100 since parameter weights sum to 100
-      byPillar[p] = Math.round(totalWeighted / 100);
-    });
-    const pillarScore = byPillar[block.name];
+    // Check if we have Edge pillar score, otherwise calculate
+    let pillarScore;
+    if (window.EDGE_PILLAR_SCORES && window.EDGE_PILLAR_SCORES[block.name] !== undefined) {
+      // Use Edge pillar score directly
+      pillarScore = window.EDGE_PILLAR_SCORES[block.name];
+      console.log(`[UI] Using Edge pillar score for ${block.name}: ${pillarScore}`);
+    } else {
+      // Calculate from parameters (fallback)
+      const comp = collectCompliance();
+      const pids = block.parameters.filter(id=>vis.has(id));
+      if (pids.length > 0) {
+        const paramWeight = 100 / pids.length;
+        let totalWeighted = 0;
+        pids.forEach(id=>{ 
+          const c=comp[id]; 
+          if(c){ 
+            totalWeighted += c.index * paramWeight;
+          }
+        });
+        pillarScore = Math.round(totalWeighted / 100);
+      }
+    }
+    
     const scoreDisplay = pillarScore != null ? ` · Score: ${Math.round(pillarScore)}/100` : '';
     
     const card = document.createElement("div");
@@ -2218,20 +2218,28 @@ function compute(silent=false){
   }
   const byPillar = {};
   MODEL.fullModel.pillars.forEach(p=>{
-    const ids = p.parameters.filter(id => visibleParamIds().includes(id));
-    if(!ids.length) return;
-    const idxs = ids.map(id => comp[id]?.index).filter(v=>v!=null);
-    
-    // Parameters have equal weights within a pillar
-    // Each parameter weight = 100 / total_parameters  
-    // Pillar Score = Σ(parameter_score × parameter_weight) / 100
-    if(idxs.length > 0) {
-      const paramWeight = 100 / ids.length;
-      let totalWeighted = 0;
-      idxs.forEach(idx => {
-        totalWeighted += idx * paramWeight;
-      });
-      byPillar[p.name] = Math.round(totalWeighted / 100);
+    // Check if we have Edge pillar score, otherwise calculate
+    if (window.EDGE_PILLAR_SCORES && window.EDGE_PILLAR_SCORES[p.name] !== undefined) {
+      // Use Edge pillar score directly
+      byPillar[p.name] = window.EDGE_PILLAR_SCORES[p.name];
+      console.log(`[Compute] Using Edge pillar score for ${p.name}: ${byPillar[p.name]}`);
+    } else {
+      // Calculate from parameters (fallback)
+      const ids = p.parameters.filter(id => visibleParamIds().includes(id));
+      if(!ids.length) return;
+      const idxs = ids.map(id => comp[id]?.index).filter(v=>v!=null);
+      
+      // Parameters have equal weights within a pillar
+      // Each parameter weight = 100 / total_parameters  
+      // Pillar Score = Σ(parameter_score × parameter_weight) / 100
+      if(idxs.length > 0) {
+        const paramWeight = 100 / ids.length;
+        let totalWeighted = 0;
+        idxs.forEach(idx => {
+          totalWeighted += idx * paramWeight;
+        });
+        byPillar[p.name] = Math.round(totalWeighted / 100);
+      }
     }
   });
   // Calculate overall score from pillar scores

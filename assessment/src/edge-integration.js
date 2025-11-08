@@ -6,6 +6,9 @@
 // Global variable to store loaded Edge assessment data
 window.EDGE_ASSESSMENT = null;
 
+// Global variable to store Edge pillar scores (keyed by pillar name)
+window.EDGE_PILLAR_SCORES = {};
+
 /**
  * Load and parse Edge assessment.json file
  * @param {File} file - The uploaded file
@@ -98,6 +101,12 @@ export function populateFromEdgeAssessment(edgeAssessment, getSaved, setSaved) {
   
   // Iterate through pillars and parameters
   edgeAssessment.pillars.forEach(pillar => {
+    // Store Edge pillar score for display
+    if (pillar.pillar_name && pillar.pillar_score !== undefined) {
+      window.EDGE_PILLAR_SCORES[pillar.pillar_name] = pillar.pillar_score;
+      console.log(`[EdgeIntegration] Stored pillar score: ${pillar.pillar_name} = ${pillar.pillar_score}`);
+    }
+    
     if (!pillar.parameters || !Array.isArray(pillar.parameters)) return;
     
     pillar.parameters.forEach(param => {
