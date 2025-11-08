@@ -1102,7 +1102,10 @@ function openTabbedModal(title, tabs){
           const reportHTML = llmStyleReport(res);
           const el = modal.querySelector("#fullText");
           console.log("Report generated, length:", reportHTML.length);
-          console.log("Report HTML preview:", reportHTML.substring(0, 200));
+          console.log("Report HTML starts with:", reportHTML.substring(0, 100));
+          console.log("Target element:", el);
+          console.log("Target element tagName:", el?.tagName);
+          
           if(el) { 
             // Clear any existing content and styling issues
             el.innerHTML = "";
@@ -1112,9 +1115,18 @@ function openTabbedModal(title, tabs){
             // DIRECTLY set innerHTML - don't wrap in another div
             el.innerHTML = reportHTML;
             
-            console.log("Report content set to #fullText - HTML should be rendered");
-            console.log("Element innerHTML length:", el.innerHTML.length);
-            console.log("Element textContent preview:", el.textContent.substring(0, 100));
+            console.log("✅ Report HTML set directly to element.innerHTML");
+            console.log("Element now contains", el.children.length, "child elements");
+            console.log("First child:", el.children[0]?.tagName, el.children[0]?.className);
+            
+            // Verify it's actually HTML and not text
+            const hasHTMLElements = el.querySelector('div, section, h1, h2, p');
+            console.log("Has HTML elements:", !!hasHTMLElements);
+            
+            if (!hasHTMLElements) {
+              console.error("⚠️ WARNING: No HTML elements found! innerHTML may have been escaped");
+              console.log("Element textContent preview:", el.textContent.substring(0, 200));
+            }
           }
         } catch (err) {
           console.error("Generate report error:", err);
