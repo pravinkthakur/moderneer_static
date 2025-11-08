@@ -293,6 +293,10 @@ function band(scale){
 function getSaved(){ return JSON.parse(localStorage.getItem(STORAGE_KEYS[currentModule]) || "{}"); }
 function setSaved(S){ localStorage.setItem(STORAGE_KEYS[currentModule], JSON.stringify(S)); }
 
+// Expose state functions globally for boot_customer_context.js
+window.getSaved = getSaved;
+window.setSaved = setSaved;
+
 /* ---------- Render ---------- */
 function render(){
   formArea.innerHTML="";
@@ -301,6 +305,9 @@ function render(){
   attachHandlers();
   // Removed auto-compute and timestamp refresh - these should only happen when compute button is clicked
 }
+
+// Expose render globally for boot_customer_context.js
+window.render = render;
 function visibleParamIds(){
   const all = MODEL.fullModel.pillars.flatMap(p=>p.parameters);
   if(currentModule==="core"){ const set=new Set(MODEL.core24); return all.filter(id=>set.has(id)); }

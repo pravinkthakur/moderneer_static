@@ -54,6 +54,35 @@ import { fetchCustomerData, fetchCustomerAssessment, updateAssessmentContext } f
         localStorage.setItem('edge_assessment_data', JSON.stringify(assessment.assessment_data));
         
         console.log('✅ Assessment data loaded from customer service');
+        
+        // Auto-populate the UI with fetched Edge assessment
+        console.log('🔄 Auto-populating assessment UI...');
+        try {
+          // Wait a bit to ensure boot.js has loaded
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          const { populateFromEdgeAssessment } = await import('./edge-integration.js');
+          
+          // Get getSaved and setSaved from window (set by boot.js)
+          if (window.getSaved && window.setSaved) {
+            const count = populateFromEdgeAssessment(
+              assessment.assessment_data, 
+              window.getSaved, 
+              window.setSaved
+            );
+            
+            // Trigger re-render if available
+            if (window.render) {
+              window.render();
+            }
+            
+            console.log(`✅ Auto-populated ${count} checks from customer service`);
+          } else {
+            console.warn('⚠️ Assessment state functions not ready yet');
+          }
+        } catch (err) {
+          console.error('❌ Error auto-populating assessment:', err);
+        }
       }
     }
   }
