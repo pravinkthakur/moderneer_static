@@ -12,9 +12,21 @@ import { fetchCustomerData, fetchCustomerAssessment, updateAssessmentContext } f
   const savedContext = localStorage.getItem('assessment_context');
   let context = savedContext ? JSON.parse(savedContext) : {};
   
+  // Also check for selectedCustomerId from setup page
+  const selectedCustomerId = localStorage.getItem('selectedCustomerId');
+  const selectedCustomerName = localStorage.getItem('selectedCustomerName');
+  
+  if (selectedCustomerId) {
+    console.log(`📦 Found customer ID from setup: ${selectedCustomerId}`);
+    context.customerId = selectedCustomerId;
+    if (selectedCustomerName) {
+      context.companyName = selectedCustomerName;
+    }
+  }
+  
   // If we have a customerId, try to fetch from customer service
   if (context.customerId) {
-    console.log(`📦 Found customer ID in context: ${context.customerId}`);
+    console.log(`� Fetching customer data for ID: ${context.customerId}`);
     
     // Fetch customer data
     const customerData = await fetchCustomerData(context.customerId);
