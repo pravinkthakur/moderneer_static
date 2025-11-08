@@ -9,8 +9,81 @@ window.ASSESSMENT_CONTEXT = {
   repoName: null,
   repoUrl: null,
   generatedAt: null,
-  assessmentType: 'manual'
+  assessmentType: 'manual',
+  customerId: null,
+  dataSource: null // 'local' | 'customer-service' | null
 };
+
+/**
+ * Fetch customer data from customer service
+ * @param {string} customerId - Customer UUID
+ * @returns {Promise<Object|null>} Customer data or null if not found
+ */
+export async function fetchCustomerData(customerId) {
+  if (!customerId) return null;
+  
+  const serviceUrl = 'https://api.customer-service.moderneer.co.uk';
+  
+  try {
+    console.log(`🔍 Fetching customer data for ID: ${customerId}`);
+    const response = await fetch(`${serviceUrl}/api/customers/${customerId}`);
+    
+    if (!response.ok) {
+      console.warn(`⚠️  Customer not found: ${customerId}`);
+      return null;
+    }
+    
+    const data = await response.json();
+    if (data.success && data.data) {
+      console.log(`✅ Customer data loaded from service:`, data.data.company_name);
+      return {
+        company_name: data.data.company_name,
+        email: data.data.email,
+        customerId: data.data.customer_id,
+        dataSource: 'customer-service'
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('❌ Failed to fetch customer data:', error);
+    return null;
+  }
+}
+
+/**
+ * Fetch latest assessment for a customer from customer service
+ * @param {string} customerId - Customer UUID  
+ * @returns {Promise<Object|null>} Assessment data or null if not found
+ */
+export async function fetchCustomerAssessment(customerId) {
+  if (!customerId) return null;
+  
+  const serviceUrl = 'https://api.customer-service.moderneer.co.uk';
+  
+  try {
+    console.log(`🔍 Fetching assessments for customer: ${customerId}`);
+    const response = await fetch(`${serviceUrl}/api/assessments/customer/${customerId}`);
+    
+    if (!response.ok) {
+      console.warn(`⚠️  No assessments found for customer: ${customerId}`);
+      return null;
+    }
+    
+    const data = await response.json();
+    if (data.success && data.data && data.data.length > 0) {
+      // Get the most recent assessment
+      const latestAssessment = data.data[0];
+      console.log(`✅ Latest assessment loaded:`, latestAssessment.repo_name || latestAssessment.org_name);
+      return latestAssessment;
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('❌ Failed to fetch assessments:', error);
+    return null;
+  }
+}
 
 /**
  * Update the assessment context banner
@@ -41,7 +114,14 @@ export function updateAssessmentContext(context = {}) {
   // Update company name if provided
   if (companyNameEl) {
     if (ctx.companyName) {
-      companyNameEl.textContent = `Company: ${ctx.companyName}`;
+      let companyText = `Company: ${ctx.companyName}`;
+      if (ctx.customerId) {
+        companyText += ` • ID: ${ctx.customerId.substring(0, 8)}...`;
+      }
+      if (ctx.dataSource === 'customer-service') {
+        companyText += ' ✅ Verified';
+      }
+      companyNameEl.innerHTML = companyText;
       companyNameEl.style.display = 'block';
     } else {
       companyNameEl.style.display = 'none';
