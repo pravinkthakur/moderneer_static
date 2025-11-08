@@ -65,6 +65,26 @@ import { fetchCustomerData, fetchCustomerAssessment, updateAssessmentContext } f
           
           // Get getSaved and setSaved from window (set by boot.js)
           if (window.getSaved && window.setSaved) {
+            // CRITICAL: Switch to "full" mode before populating
+            // Edge generates full assessments, but UI defaults to "core" (24 params)
+            console.log('🔄 Switching to Full Assessment mode...');
+            
+            // Trigger the Full button click to switch modes
+            const btnFull = document.getElementById('btnFull');
+            if (btnFull) {
+              btnFull.click();
+              console.log('✅ Switched to Full Assessment mode');
+              
+              // Wait for mode switch to complete
+              await new Promise(resolve => setTimeout(resolve, 200));
+            } else {
+              console.warn('⚠️ btnFull button not found, attempting manual mode switch');
+              // Manually switch if button not available yet
+              if (window.currentModule !== undefined) {
+                window.currentModule = 'full';
+              }
+            }
+            
             const count = populateFromEdgeAssessment(
               assessment.assessment_data, 
               window.getSaved, 

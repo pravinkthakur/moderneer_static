@@ -272,6 +272,13 @@ function patchModel(){
 /* ---------- State & view ---------- */
 const STORAGE_KEYS = { core:"oemm_core24_seq", full:"oemm_full12_seq" };
 let currentModule="core", currentView="pillar", singleMode=false, singleKey=null;
+
+// Expose currentModule globally for boot_customer_context.js
+window.currentModule = currentModule;
+Object.defineProperty(window, 'currentModule', {
+  get: () => currentModule,
+  set: (val) => { currentModule = val; }
+});
 const formArea = document.getElementById("formArea");
 function b64(s){ return btoa(unescape(encodeURIComponent(s))).replace(/=+$/,''); }
 function fmt(n,d=1){ return (n==null||isNaN(n)) ? "—" : (+n).toFixed(d); }
@@ -1107,15 +1114,25 @@ function openTabbedModal(title, tabs){
           console.log("Target element tagName:", el?.tagName);
           
           if(el) { 
-            // Clear any existing content and styling issues
+            // Clear everything and reset
             el.innerHTML = "";
+            el.textContent = "";
+            
+            // Set explicit styles to ensure proper rendering
             el.style.whiteSpace = "normal";
             el.style.fontFamily = "inherit";
+            el.style.display = "block";
             
-            // DIRECTLY set innerHTML - don't wrap in another div
-            el.innerHTML = reportHTML;
+            // Use a temporary div to parse and render the HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = reportHTML;
             
-            console.log("✅ Report HTML set directly to element.innerHTML");
+            // Move all children from temp div to target element
+            while (tempDiv.firstChild) {
+              el.appendChild(tempDiv.firstChild);
+            }
+            
+            console.log("✅ Report HTML rendered via DOM manipulation");
             console.log("Element now contains", el.children.length, "child elements");
             console.log("First child:", el.children[0]?.tagName, el.children[0]?.className);
             
@@ -1124,8 +1141,10 @@ function openTabbedModal(title, tabs){
             console.log("Has HTML elements:", !!hasHTMLElements);
             
             if (!hasHTMLElements) {
-              console.error("⚠️ WARNING: No HTML elements found! innerHTML may have been escaped");
-              console.log("Element textContent preview:", el.textContent.substring(0, 200));
+              console.error("⚠️ WARNING: No HTML elements found!");
+              console.log("Attempting fallback: direct innerHTML assignment...");
+              el.innerHTML = reportHTML;
+              console.log("Fallback complete. Check if HTML renders now.");
             }
           }
         } catch (err) {
