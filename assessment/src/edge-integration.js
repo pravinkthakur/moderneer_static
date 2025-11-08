@@ -73,11 +73,16 @@ function mapEdgeParameterId(edgeParamId) {
  * @param {Function} setSaved - Function to update saved state
  */
 export function populateFromEdgeAssessment(edgeAssessment, getSaved, setSaved) {
+  console.log('[EdgeIntegration] 🔄 Starting population from Edge assessment...');
+  console.log('[EdgeIntegration] Edge overall_score:', edgeAssessment.overall_score);
+  console.log('[EdgeIntegration] Edge pillars count:', edgeAssessment.pillars?.length);
+  
   if (!edgeAssessment || !edgeAssessment.pillars) {
     throw new Error('Invalid Edge assessment data');
   }
   
   const savedState = getSaved();
+  console.log('[EdgeIntegration] Current saved state keys:', Object.keys(savedState).length);
   let updatedCount = 0;
   
   // Iterate through pillars and parameters
