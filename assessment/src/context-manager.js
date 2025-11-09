@@ -26,7 +26,8 @@ export async function fetchCustomerData(customerId) {
   
   try {
     console.log(`🔍 Fetching customer data for ID: ${customerId}`);
-    const data = await bffClient.getCustomer(customerId);
+    const response = await bffClient.getCustomer(customerId);
+    const data = response.data || response; // Handle both {data: ...} and direct response
     
     if (data && data.company_name) {
       console.log(`✅ Customer data loaded via BFF:`, data.company_name);
@@ -55,7 +56,8 @@ export async function fetchCustomerAssessment(customerId) {
   
   try {
     console.log(`🔍 Fetching assessments for customer: ${customerId}`);
-    const assessments = await bffClient.getCustomerAssessments(customerId);
+    const response = await bffClient.getCustomerAssessments(customerId);
+    const assessments = response.data || response; // Handle both {data: ...} and direct response
     
     if (assessments && assessments.length > 0) {
       // Get the most recent assessment
