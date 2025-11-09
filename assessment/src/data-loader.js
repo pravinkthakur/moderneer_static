@@ -5,29 +5,26 @@
  * 
  * This system implements a hybrid architecture that combines:
  * 1. Static frontend hosting (GitHub Pages) for performance and reliability
- * 2. Dynamic API-based data loading for flexibility and real-time updates
+ * 2. Dynamic API-based data loading via BFF for flexibility and real-time updates
  * 3. Local JSON fallback for development and offline scenarios
  * 
- * Production Mode: Loads all assessment configuration dynamically from api.moderneer.co.uk
+ * Production Mode: Loads all assessment configuration from BFF (api.moderneer.co.uk)
  * Development Mode: Falls back to local static JSON files for offline development
  * 
  * The frontend is static, but the data and computation are fully dynamic and API-driven.
  */
 
+import { bffClient } from './bff-client.js';
+
 class AssessmentDataLoader {
   constructor() {
     this.cache = new Map();
-    
-    // Determine if we're running in development mode
-    // Always use hosted API endpoints
-    this.configApiUrl = 'https://api.assessment.config.moderneer.co.uk/';
-    this.computeApiUrl = 'https://api.assessment.compute.moderneer.co.uk/';
     this.useAPI = true;
     this.loaded = false;
     
-    console.log(`� Assessment Platform Mode: ${this.useAPI ? 'LIVE APIs' : 'Development'}`);
-    console.log(`📊 Config Source: ${this.useAPI ? this.configApiUrl : 'Local JSON files'}`);
-    console.log(`🧮 Compute Service: ${this.computeApiUrl}`);
+    console.log(`🚀 Assessment Platform Mode: ${this.useAPI ? 'LIVE via BFF' : 'Development'}`);
+    console.log(`� BFF URL: ${bffClient.bffURL}`);
+    console.log(`🎯 BFF Enabled: ${bffClient.useBFF}`);
   }
 
   /**
@@ -37,10 +34,51 @@ class AssessmentDataLoader {
     if (this.loaded) return this.cache.get('fullConfig');
 
     try {
-      console.log('🔄 Loading assessment configuration from API...');
-      console.log(`📡 Config API: ${this.configApiUrl}`);
+      console.log('🔄 Loading assessment configuration via BFF...');
       
-      // Load all configuration files in parallel, including parameter meta and detailed checks
+      // Use BFF client to get full configuration
+      const fullConfig = await bffClient.getConfig();
+
+      // Validate loaded data
+      if (!fullConfig || !fullConfig.pillars || !fullConfig.parameters) {
+        throw new Error('Invalid configuration structure received from BFF');
+      }
+
+      // Cache the result
+      this.cache.set('fullConfig', fullConfig);
+      this.loaded = true;
+
+      console.log('✅ Assessment configuration loaded successfully via BFF');
+      console.log(`� Loaded: ${fullConfig.pillars.length} pillars, ${fullConfig.gates?.length || 0} gates, ${fullConfig.caps?.length || 0} caps`);
+      console.log(`📋 Parameters: ${Object.keys(fullConfig.parameters).length} total`);
+      
+      // Debug specific pillar data
+      const strategyPillar = fullConfig.pillars.find(p => p.id === 'strategy-exec');
+      if (strategyPillar) {
+        console.log(`🎯 Strategy pillar name: "${strategyPillar.name}"`);
+      }
+      
+      return fullConfig;
+
+    } catch (error) {
+      console.error('❌ Failed to load assessment configuration via BFF:', error);
+      console.warn('⚠️ Falling back to direct API calls...');
+      
+      // Fallback to direct API if BFF fails
+      return this.loadAllFallback();
+    }
+  }
+
+  /**
+   * Fallback method: Load from direct APIs if BFF fails
+   */
+  async loadAllFallback() {
+    try {
+      console.log('🔄 Loading from fallback endpoints...');
+      
+      const configApiUrl = 'https://api.assessment.config.moderneer.co.uk/';
+      
+      // Load all configuration files in parallel
       const [
         config,
         pillars, 
@@ -49,27 +87,22 @@ class AssessmentDataLoader {
         parameters,
         detailedChecks
       ] = await Promise.all([
-        this.loadJSON('config.json'),
-        this.loadJSON('pillars.json'),
-        this.loadJSON('rules.json'), 
-        this.loadJSON('scales.json'),
-        this.loadJSON('parameters.json'),
-        this.loadJSON('checks.json')
+        this.loadJSON('config.json', configApiUrl),
+        this.loadJSON('pillars.json', configApiUrl),
+        this.loadJSON('rules.json', configApiUrl), 
+        this.loadJSON('scales.json', configApiUrl),
+        this.loadJSON('parameters.json', configApiUrl),
+        this.loadJSON('checks.json', configApiUrl)
       ]);
-
-      // Validate loaded data
-      this.validateConfig(config, pillars, rules, scales);
 
       // Merge detailed checks into parameters
       const parametersWithChecks = { ...parameters.parameters };
       if (detailedChecks && detailedChecks.checks) {
         Object.keys(detailedChecks.checks).forEach(paramId => {
           if (parametersWithChecks[paramId]) {
-            // Replace generic checks with detailed checks
             parametersWithChecks[paramId].checks = detailedChecks.checks[paramId];
           }
         });
-        console.log(`✅ Merged detailed checks for ${Object.keys(detailedChecks.checks).length} parameters`);
       }
 
       // Combine into full configuration
@@ -85,52 +118,35 @@ class AssessmentDataLoader {
         parameters: parametersWithChecks
       };
 
-      // Cache the result
       this.cache.set('fullConfig', fullConfig);
       this.loaded = true;
 
-      console.log('✅ Assessment configuration loaded successfully from API');
-      console.log(`📊 Loaded: ${pillars.pillars.length} pillars, ${rules.gates.length} gates, ${rules.caps.length} caps`);
-      console.log(`📋 Parameters: ${Object.keys(parameters.parameters).length} total`);
-      
-      // Debug specific pillar data
-      const strategyPillar = pillars.pillars.find(p => p.id === 'strategy-exec');
-      if (strategyPillar) {
-        console.log(`🎯 Strategy pillar name: "${strategyPillar.name}"`);
-      }
-      
+      console.log('✅ Assessment configuration loaded via fallback');
       return fullConfig;
 
     } catch (error) {
-      console.error('❌ Failed to load assessment configuration:', error);
+      console.error('❌ Fallback also failed:', error);
       throw new Error(`Assessment configuration loading failed: ${error.message}`);
     }
   }
 
   /**
-   * Load individual JSON file or API endpoint with error handling
+   * Load individual JSON file or API endpoint with error handling (fallback only)
    */
-  async loadJSON(filename) {
-    let url;
+  async loadJSON(filename, apiUrl) {
+    // Map filename to API endpoint - these endpoints return {success: true, data: {...}}
+    const endpointMap = {
+      'config.json': `${apiUrl}config`,
+      'pillars.json': `${apiUrl}pillars`, 
+      'rules.json': `${apiUrl}rules`,
+      'scales.json': `${apiUrl}scales`,
+      'parameters.json': `${apiUrl}parameters`,
+      'checks.json': `${apiUrl}checks`
+    };
     
-    if (this.useAPI) {
-      // Map filename to API endpoint - these endpoints return {success: true, data: {...}}
-      const endpointMap = {
-        'config.json': `${this.configApiUrl}config`,
-        'pillars.json': `${this.configApiUrl}pillars`, 
-        'rules.json': `${this.configApiUrl}rules`,
-        'scales.json': `${this.configApiUrl}scales`,
-        'parameters.json': `${this.configApiUrl}parameters`,
-        'checks.json': `${this.configApiUrl}checks`
-      };
-      
-      url = endpointMap[filename];
-      if (!url) {
-        throw new Error(`Unknown API endpoint for ${filename}`);
-      }
-    } else {
-      // Local file path for development
-      url = this.configApiUrl + filename;
+    const url = endpointMap[filename];
+    if (!url) {
+      throw new Error(`Unknown API endpoint for ${filename}`);
     }
     
     try {
@@ -139,7 +155,6 @@ class AssessmentDataLoader {
       const urlWithCacheBuster = url + (url.includes('?') ? '&' : '?') + `_cb=${cacheBuster}`;
       
       console.log(`🔄 Loading ${filename} from: ${urlWithCacheBuster}`);
-      console.log(`📍 Environment: Production API (${window.location.hostname})`);
       
       const response = await fetch(urlWithCacheBuster, {
         cache: 'no-cache',
@@ -154,13 +169,11 @@ class AssessmentDataLoader {
       }
       
       const json = await response.json();
-      console.log(`✅ Received data for ${filename}:`, json);
       
       // API returns {success: true, data: {...}}, extract data
-      // Local files return data directly
-      const data = this.useAPI && json.success ? json.data : json;
+      const data = json.success ? json.data : json;
       
-      console.log(`✅ Loaded ${filename} from ${this.useAPI ? 'Config API' : 'local'} (v${data.version || 'unknown'})`);
+      console.log(`✅ Loaded ${filename} (v${data.version || 'unknown'})`);
       return data;
       
     } catch (error) {

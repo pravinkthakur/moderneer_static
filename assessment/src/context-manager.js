@@ -3,6 +3,8 @@
  * Manages the display of assessment metadata (company, repo, dates, etc.)
  */
 
+import { bffClient } from './bff-client.js';
+
 // Global assessment context
 window.ASSESSMENT_CONTEXT = {
   companyName: null,
@@ -15,72 +17,57 @@ window.ASSESSMENT_CONTEXT = {
 };
 
 /**
- * Fetch customer data from customer service
+ * Fetch customer data from customer service via BFF
  * @param {string} customerId - Customer UUID
  * @returns {Promise<Object|null>} Customer data or null if not found
  */
 export async function fetchCustomerData(customerId) {
   if (!customerId) return null;
   
-  const serviceUrl = 'https://api.customer-service.moderneer.co.uk';
-  
   try {
     console.log(`🔍 Fetching customer data for ID: ${customerId}`);
-    const response = await fetch(`${serviceUrl}/api/customers/${customerId}`);
+    const data = await bffClient.getCustomer(customerId);
     
-    if (!response.ok) {
-      console.warn(`⚠️  Customer not found: ${customerId}`);
-      return null;
-    }
-    
-    const data = await response.json();
-    if (data.success && data.data) {
-      console.log(`✅ Customer data loaded from service:`, data.data.company_name);
+    if (data && data.company_name) {
+      console.log(`✅ Customer data loaded via BFF:`, data.company_name);
       return {
-        company_name: data.data.company_name,
-        email: data.data.email,
-        customerId: data.data.customer_id,
+        company_name: data.company_name,
+        email: data.email,
+        customerId: data.customer_id,
         dataSource: 'customer-service'
       };
     }
     
     return null;
   } catch (error) {
-    console.error('❌ Failed to fetch customer data:', error);
+    console.warn(`⚠️ Failed to fetch customer data: ${error.message}`);
     return null;
   }
 }
 
 /**
- * Fetch latest assessment for a customer from customer service
+ * Fetch latest assessment for a customer from customer service via BFF
  * @param {string} customerId - Customer UUID  
  * @returns {Promise<Object|null>} Assessment data or null if not found
  */
 export async function fetchCustomerAssessment(customerId) {
   if (!customerId) return null;
   
-  const serviceUrl = 'https://api.customer-service.moderneer.co.uk';
-  
   try {
     console.log(`🔍 Fetching assessments for customer: ${customerId}`);
-    const response = await fetch(`${serviceUrl}/api/assessments/customer/${customerId}`);
+    const assessments = await bffClient.getCustomerAssessments(customerId);
     
-    if (!response.ok) {
-      console.warn(`⚠️  No assessments found for customer: ${customerId}`);
-      return null;
-    }
-    
-    const data = await response.json();
-    if (data.success && data.data && data.data.length > 0) {
+    if (assessments && assessments.length > 0) {
       // Get the most recent assessment
-      const latestAssessment = data.data[0];
-      console.log(`✅ Latest assessment loaded:`, latestAssessment.repo_name || latestAssessment.org_name);
+      const latestAssessment = assessments[0];
+      console.log(`✅ Latest assessment loaded via BFF:`, latestAssessment.repo_name || latestAssessment.org_name);
       return latestAssessment;
     }
     
+    console.warn(`⚠️ No assessments found for customer: ${customerId}`);
     return null;
   } catch (error) {
-    console.error('❌ Failed to fetch assessments:', error);
+    console.error('❌ Failed to fetch customer assessment:', error);
     return null;
   }
 }

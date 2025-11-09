@@ -547,9 +547,8 @@
 <script src="js/includes.js"></script>
 <script type="module">
   import { updateAssessmentContext } from './src/context-manager.js';
+  import { bffClient } from './src/bff-client.js';
 
-  // Customer Service Configuration
-  const CUSTOMER_SERVICE_URL = 'https://api.customer-service.moderneer.co.uk';
   let selectedCustomerId = null;
   let currentStep = 1;
   let savedRepositories = [];

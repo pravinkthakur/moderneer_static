@@ -1,14 +1,15 @@
 /**
  * Assessment Compute API Integration
- * Provides API-based scoring as alternative to client-side computation
+ * Provides API-based scoring via BFF as alternative to client-side computation
  */
+
+import { bffClient } from './bff-client.js';
 
 class AssessmentComputeAPI {
   constructor() {
-    this.baseUrl = 'https://api.assessment.compute.moderneer.co.uk';
     this.enabled = true; // Can be toggled for fallback
     
-    console.log(`� Compute API: ${this.enabled ? 'Live Service' : 'Disabled'} (${this.baseUrl})`);
+    console.log(`🧮 Compute API: ${this.enabled ? 'Live via BFF' : 'Disabled'} (${bffClient.bffURL})`);
   }
 
   /**
@@ -16,12 +17,9 @@ class AssessmentComputeAPI {
    */
   async healthCheck() {
     try {
-      const response = await fetch(`${this.baseUrl}/health`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      
-      const data = await response.json();
-      console.log('✅ Compute API health check passed:', data.service);
-      return true;
+      const isHealthy = await bffClient.computeHealth();
+      console.log('✅ Compute API health check passed via BFF');
+      return isHealthy;
     } catch (error) {
       console.warn('⚠️ Compute API health check failed:', error.message);
       return false;
@@ -61,7 +59,7 @@ class AssessmentComputeAPI {
   }
 
   /**
-   * Call the compute API with assessment data and configuration
+   * Call the compute API with assessment data and configuration via BFF
    */
   async computeScore(assessmentData, config) {
     try {
@@ -70,32 +68,20 @@ class AssessmentComputeAPI {
         config
       };
       
-      console.log('🚀 Calling compute API...', {
+      console.log('🚀 Calling compute API via BFF...', {
         parameters: Object.keys(assessmentData).length,
         pillars: config.pillars?.length || 0,
         gates: config.gates?.length || 0,
         caps: config.caps?.length || 0
       });
       
-      const response = await fetch(`${this.baseUrl}/api/compute`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      const result = await response.json();
+      const result = await bffClient.compute(requestBody);
       
       if (!result.success) {
         throw new Error(result.error || 'Computation failed');
       }
       
-      console.log('✅ Compute API response received:', {
+      console.log('✅ Compute API response received via BFF:', {
         finalScore: result.data.finalScale,
         finalIndex: result.data.finalIndex,
         gatesPassed: result.data.gatesPassed
