@@ -154,12 +154,58 @@ class BFFClient {
   // ==================== Customer Service ====================
 
   /**
+   * Search customers
+   * @param {string} query - Search query
+   * @param {number} limit - Maximum results (default: 10)
+   */
+  async searchCustomers(query, limit = 10) {
+    const url = this.useBFF
+      ? `${this.bffURL}/api/customers?search=${encodeURIComponent(query)}&limit=${limit}`
+      : `${this.directServices.customer}/api/customers?search=${encodeURIComponent(query)}&limit=${limit}`;
+    
+    return this.fetch(url);
+  }
+
+  /**
+   * Create new customer
+   * @param {Object} customerData - Customer information
+   */
+  async createCustomer(customerData) {
+    const url = this.useBFF
+      ? `${this.bffURL}/api/customers`
+      : `${this.directServices.customer}/api/customers`;
+    
+    return this.fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(customerData)
+    });
+  }
+
+  /**
+   * Update customer
+   * @param {string} customerId - Customer ID
+   * @param {Object} updates - Customer updates
+   */
+  async updateCustomer(customerId, updates) {
+    const url = this.useBFF
+      ? `${this.bffURL}/api/customers/${customerId}`
+      : `${this.directServices.customer}/api/customers/${customerId}`;
+    
+    return this.fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    });
+  }
+
+  /**
    * Get customer details
    * @param {string} customerId - Customer ID
    */
   async getCustomer(customerId) {
     const url = this.useBFF
-      ? `${this.bffURL}/api/customer/${customerId}`
+      ? `${this.bffURL}/api/customers/${customerId}`
       : `${this.directServices.customer}/api/customers/${customerId}`;
     
     return this.fetch(url);
@@ -171,7 +217,7 @@ class BFFClient {
    */
   async getCustomerAssessments(customerId) {
     const url = this.useBFF
-      ? `${this.bffURL}/api/customer/${customerId}/assessments`
+      ? `${this.bffURL}/api/customers/${customerId}/assessments`
       : `${this.directServices.customer}/api/assessments/customer/${customerId}`;
     
     return this.fetch(url);

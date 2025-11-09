@@ -598,13 +598,7 @@
     
     searchTimeout = setTimeout(async () => {
       try {
-        const response = await fetch(`${CUSTOMER_SERVICE_URL}/api/customers?search=${encodeURIComponent(query)}&limit=10`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to search customers');
-        }
-        
-        const data = await response.json();
+        const data = await bffClient.searchCustomers(query, 10);
         
         if (data.success && data.data.length > 0) {
           displaySearchResults(data.data);
@@ -697,18 +691,7 @@
           website: ''
         };
         
-        const response = await fetch(`${CUSTOMER_SERVICE_URL}/api/customers`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(customerData)
-        });
-        
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Failed to save customer');
-        }
-        
-        const result = await response.json();
+        const result = await bffClient.createCustomer(customerData);
         selectedCustomerId = result.data?.customer_id || result.customer_id;
         
         // Store in localStorage
@@ -767,17 +750,9 @@
       btn.textContent = '💾 Saving...';
       
       // Update customer with repositories
-      const response = await fetch(`${CUSTOMER_SERVICE_URL}/api/customers/${selectedCustomerId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          repositories: savedRepositories
-        })
+      await bffClient.updateCustomer(selectedCustomerId, {
+        repositories: savedRepositories
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to save repositories');
-      }
       
       // Show success step
       document.getElementById('finalCustomerId').textContent = selectedCustomerId;
