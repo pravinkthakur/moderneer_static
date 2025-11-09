@@ -1,0 +1,202 @@
+<!doctype html>
+<!-- 
+  Moderneer Assessment Platform - Hybrid Architecture
+  
+  ARCHITECTURE: This is NOT a purely static site!
+  - Frontend: Static HTML/CSS/JS (GitHub Pages hosting)
+  - Data Layer: Dynamic API loading from api.moderneer.co.uk  
+  - Compute Layer: Serverless functions for assessment processing
+  - CSP Policy: Configured for API endpoints and compute services
+  
+  The static frontend provides performance while APIs enable
+  dynamic configuration, real-time data updates, and server-side computation.
+-->
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.moderneer.co.uk">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Assessment — Moderneer</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/modern-2025.css">
+  <link rel="stylesheet" href="moderneer.css" />
+  <meta name="description" content="Outcome Engineering Maturity Assessment | Moderneer">
+  <meta name="theme-color" content="#3B82F6" />
+</head>
+<body>
+
+<!-- Header Include -->
+<div id="header-include"></div>
+
+<main class="container" role="main">
+  <div id="loader" style="text-align:center;padding:2em;font-size:1.2em;color:#3B82F6;">
+    <div style="margin-bottom:1em;">🔄 Loading assessment data from API...</div>
+    <div id="loader-status" style="font-size:0.9em;color:#666;"></div>
+  </div>
+  <div class="assessment-grid" data-testid="main" style="display:none;">
+    <section class="assessment-card">
+    <!-- Assessment Context Banner -->
+    <div id="assessmentContext" class="assessment-context" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px 24px; border-radius: 8px; margin-bottom: 16px; display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 4px;">Currently Assessing</div>
+          <div style="font-size: 1.25rem; font-weight: 700;" id="contextRepoName">Unknown Repository</div>
+          <div style="font-size: 0.875rem; opacity: 0.8; margin-top: 4px;" id="contextCompanyName"></div>
+        </div>
+        <div style="text-align: right; font-size: 0.875rem; opacity: 0.9;" id="contextMetadata"></div>
+      </div>
+    </div>
+
+    <!-- Organization Multi-Repo Tabs (hidden for single repo view) -->
+    <div id="orgRepoTabs" class="org-repo-tabs" style="display: none; margin-bottom: 16px;">
+      <div class="tab-header" style="background: #f9fafb; border-radius: 8px; padding: 8px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; border: 1px solid #e5e7eb;">
+        <div style="font-weight: 600; color: #374151; padding: 0 8px;">Repositories:</div>
+        <div id="orgRepoTabList" style="display: flex; gap: 4px; flex-wrap: wrap; flex: 1;"></div>
+        <button id="orgOverviewTab" class="repo-tab org-overview-tab" style="margin-left: auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.875rem;">
+          🏢 Organization Overview
+        </button>
+      </div>
+      <div id="orgScoreSummary" class="org-score-summary" style="margin-top: 12px; padding: 16px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; display: none;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+          <div class="score-card" style="background: white; padding: 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div style="font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Organization Score</div>
+            <div id="orgOverallScore" style="font-size: 2rem; font-weight: 700; color: #3b82f6;">—</div>
+          </div>
+          <div class="score-card" style="background: white; padding: 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div style="font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Average Repo Score</div>
+            <div id="orgAvgScore" style="font-size: 2rem; font-weight: 700; color: #10b981;">—</div>
+          </div>
+          <div class="score-card" style="background: white; padding: 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div style="font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Repositories Assessed</div>
+            <div id="orgRepoCount" style="font-size: 2rem; font-weight: 700; color: #8b5cf6;">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="assessment-toolbar">
+      <div class="toolbar-left">
+        <!-- Mode Selection -->
+        <div class="toggle-group compact" role="tablist">
+          <button id="btnCore" class="toggle-btn active" aria-selected="true" data-testid="mode-core">
+            Core 24
+          </button>
+          <button id="btnFull" class="toggle-btn" aria-selected="false" data-testid="mode-full">
+            Full Assessment
+          </button>
+        </div>
+
+        <!-- View Options -->
+        <div class="toggle-group compact" role="tablist">
+          <button id="btnViewPillar" class="toggle-btn active" aria-selected="true">
+            By Pillar
+          </button>
+          <button id="btnViewTier" class="toggle-btn" aria-selected="false">
+            By Tier
+          </button>
+        </div>
+
+        <!-- Display Mode -->
+        <div class="toggle-group compact" role="tablist">
+          <button id="btnModeAll" class="toggle-btn active" aria-selected="true">
+            All
+          </button>
+          <button id="btnModeSingle" class="toggle-btn" aria-selected="false">
+            Step-by-Step
+          </button>
+        </div>
+      </div>
+
+      <!-- Analysis & Export -->
+      <div class="toolbar-right">
+        <!-- Primary Action -->
+        <button class="primary-btn" id="btnReport" data-testid="report" aria-label="Generate comprehensive analysis report">
+          📊 Generate Analysis Report
+        </button>
+        
+        <!-- Secondary Actions -->
+        <div class="action-menu" role="group" aria-label="Assessment actions">
+          <button class="icon-btn" id="btnUpload" data-testid="upload" title="Upload Edge assessment.json" aria-label="Upload Edge assessment">📥</button>
+          <button class="icon-btn" id="btnSave" data-testid="save" title="Save current progress" aria-label="Save progress">💾</button>
+          <button class="icon-btn" id="btnLoad" data-testid="load" title="Load saved assessment" aria-label="Load saved data">📁</button>
+          <button class="icon-btn" id="btnExport" data-testid="export" title="Export assessment data" aria-label="Export data">📤</button>
+          <button class="icon-btn warning" id="btnReset" title="Reset all responses" aria-label="Reset assessment">🔄</button>
+          <button class="icon-btn" id="btnHelp" title="View help and guidance" aria-label="Open help">❓</button>
+        </div>
+        <!-- Hidden file input for upload -->
+        <input type="file" id="fileInput" accept=".json" style="display: none" />
+      </div>
+    </div>
+
+
+
+    <div id="formArea"></div>
+  </section>
+
+    <aside class="assessment-card" style="display:none">
+    <h2 class="h3">Results</h2>
+    <div class="kpis">
+      <div class="kpi"><div class="tiny">Overall (index 0–100)</div><strong id="overallIndex" data-testid="overall-index">—</strong></div>
+      <div class="kpi"><div class="tiny">Overall (scale 1–5)</div><strong id="overallScale">—</strong></div>
+      <div class="kpi"><div class="tiny">Band</div><strong id="overallBand">—</strong></div>
+      <div class="kpi"><div class="tiny">Gates passed</div><strong id="gatesPassed">—</strong></div>
+    </div>
+
+    <div style="margin-top:10px">
+      <h3 class="h3">Gate & cap diagnostics</h3>
+      <div id="gateList" style="display:grid;gap:10px"></div>
+    </div>
+
+    <div style="margin-top:10px">
+      <h3 class="h3">Breakdown</h3>
+      <div id="pillarBreakdown" style="display:grid;gap:10px"></div>
+    </div>
+    </aside>
+  </div>
+</main>
+
+<!-- Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <header><strong id="modalTitle">Details</strong><button class="x" id="modalClose">Close</button></header>
+    <div class="content" id="modalContent"></div>
+  </div>
+</div>
+
+<!-- Footer Include -->
+<div id="footer-include"></div>
+<script src="js/includes.js"></script>
+
+<script src="src/data-loader.js?v=8.1.0"></script>
+<script src="src/app/boot.js?v=8.1.0"></script>
+
+
+
+
+  <script type="module" src="src/main.js?v=8.1.0"></script>
+
+  <script type="module" src="src/l3_boot.js?v=8.1.0"></script>
+
+  <script type="module" src="src/perf/boot_perf.js?v=8.1.0"></script>
+
+  <!-- Customer Context Initialization - Load early to fetch from customer service -->
+  <script type="module" src="src/boot_customer_context.js?v=8.8.0"></script>
+
+  <script type="module" src="src/state/boot_state.js?v=8.1.0"></script>
+
+  <script type="module" src="src/llm/boot_llm.js?v=8.1.0"></script>
+
+  <!-- Organization Multi-Repo View -->
+  <script type="module">
+    import { initOrgView } from './src/org-view.js';
+    
+    // Initialize org view if URL params indicate org mode
+    window.addEventListener('DOMContentLoaded', () => {
+      const isOrgView = initOrgView();
+      if (isOrgView) {
+        console.log('✅ Organization multi-repo view activated');
+      }
+    });
+  </script>
+</body>
+</html>

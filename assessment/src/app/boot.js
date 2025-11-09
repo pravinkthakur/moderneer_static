@@ -12,8 +12,9 @@
  * performance benefits of static hosting for the frontend shell.
  */
 
-// Import AssessmentDataLoader (now a module)
+// Import dependencies
 import { AssessmentDataLoader } from '../data-loader.js';
+import { bffClient } from '../bff-client.js';
 
 /* Year */
 document.addEventListener('DOMContentLoaded', function() {
@@ -1208,56 +1209,70 @@ function openTabbedModal(title, tabs){
     console.log("- btnCopyFull:", copyBtnModal); 
     console.log("- btnDownloadFull:", dlBtnModal);
     
-    // Set up Generate Report button
+    // Set up Generate Report button - Use BFF LLM service
     if (genBtnModal) {
-      console.log("Setting up Generate Report button handler");
-      genBtnModal.onclick = function(e) {
-        console.log(">>> Generate Report CLICKED! <<<");
+      console.log("Setting up Generate Report button handler (BFF-enabled)");
+      genBtnModal.onclick = async function(e) {
+        console.log(">>> Generate Report CLICKED! (calling BFF) <<<");
+        const el = modal.querySelector("#fullText");
+        
         try {
-          const res = compute(true);
-          const reportHTML = llmStyleReport(res);
-          const el = modal.querySelector("#fullText");
-          console.log("Report generated, length:", reportHTML.length);
-          console.log("Report HTML starts with:", reportHTML.substring(0, 100));
-          console.log("Target element:", el);
-          console.log("Target element tagName:", el?.tagName);
+          // Show loading state
+          if (el) {
+            el.innerHTML = '<div style="padding: 40px; text-align: center;"><div class="spinner"></div><p>Generating comprehensive report...</p></div>';
+          }
           
-          if(el) { 
-            // Clear everything and reset
+          // Compute current results (includes user modifications)
+          const res = compute(true);
+          console.log("📊 Assessment results computed:", { 
+            finalIndex: res.finalIndex, 
+            finalScale: res.finalScale,
+            pillars: Object.keys(res.byPillar).length 
+          });
+          
+          // Call BFF LLM service
+          console.log("🌐 Calling BFF LLM service for full report...");
+          const response = await bffClient.generateLLM('full', res);
+          console.log("✅ BFF response received:", response);
+          
+          // Extract HTML from response
+          const reportHTML = response.data?.html || response.html || '';
+          console.log("📄 Report HTML length:", reportHTML.length);
+          console.log("📄 Report HTML starts with:", reportHTML.substring(0, 100));
+          
+          if (el && reportHTML) { 
+            // Clear and render
             el.innerHTML = "";
             el.textContent = "";
             
-            // Set explicit styles to ensure proper rendering
+            // Set explicit styles
             el.style.whiteSpace = "normal";
             el.style.fontFamily = "inherit";
             el.style.display = "block";
             
-            // Use a temporary div to parse and render the HTML
+            // Use temp div to parse HTML
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = reportHTML;
             
-            // Move all children from temp div to target element
+            // Move all children to target
             while (tempDiv.firstChild) {
               el.appendChild(tempDiv.firstChild);
             }
             
-            console.log("✅ Report HTML rendered via DOM manipulation");
-            console.log("Element now contains", el.children.length, "child elements");
-            console.log("First child:", el.children[0]?.tagName, el.children[0]?.className);
-            
-            // Verify it's actually HTML and not text
-            const hasHTMLElements = el.querySelector('div, section, h1, h2, p');
-            console.log("Has HTML elements:", !!hasHTMLElements);
-            
-            if (!hasHTMLElements) {
-              console.error("⚠️ WARNING: No HTML elements found!");
-              console.log("Attempting fallback: direct innerHTML assignment...");
-              el.innerHTML = reportHTML;
-              console.log("Fallback complete. Check if HTML renders now.");
-            }
+            console.log("✅ Report rendered via BFF service");
+            console.log("📊 Element now contains", el.children.length, "child elements");
+          } else if (el) {
+            el.innerHTML = '<div style="padding: 40px; color: #e74c3c;"><p>⚠️ Error: No report content received from server</p></div>';
           }
         } catch (err) {
-          console.error("Generate report error:", err);
+          console.error("❌ Generate report error:", err);
+          if (el) {
+            el.innerHTML = `<div style="padding: 40px; color: #e74c3c;">
+              <h3>⚠️ Error Generating Report</h3>
+              <p>${err.message || 'Failed to generate report. Please try again.'}</p>
+              <p class="tiny">Check console for details.</p>
+            </div>`;
+          }
         }
       };
     }
@@ -1643,6 +1658,12 @@ function buildReportTabs(results){
       <div class="report" id="fullText">(click "Generate full report")</div>
     </div>`;
   
+  // Executive summary tab - now uses frontend logic (no LLM needed)
+  const execTab = generateExecutiveSummary(results);
+  
+  // Narrative tab - now uses frontend logic (no LLM needed)
+  const narrativeTab = generateNarrative(results);
+  
   // Return all tabs with their HTML content
   return [
     {id:"overall", title:"Overall", html: overallHTML},
@@ -1650,8 +1671,8 @@ function buildReportTabs(results){
     {id:"pillars", title:"Pillar Overview", html: pillarHTML},
     {id:"radar", title:"Radar Chart", html: generateRadarChart(results)},
     {id:"next", title:"Further Details", html: detailsHTML},
-    {id:"exec", title:"Executive Summary", html: generateExecutiveSummary(results)},
-    {id:"narrative", title:"Narrative", html: generateNarrative(results)},
+    {id:"exec", title:"Executive Summary", html: execTab},
+    {id:"narrative", title:"Narrative", html: narrativeTab},
     {id:"full", title:"Full Report", html: fullTab},
     {id:"analyst", title:"Analyst Lens", html: analystHTML(results)}
   ];
