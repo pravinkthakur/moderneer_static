@@ -170,8 +170,8 @@
 <script src="js/includes.js"></script>
 
 <!-- Load data-loader and boot as modules (they now use ES6 imports) -->
-<script type="module" src="src/data-loader.js?v=9.1.0"></script>
-<script type="module" src="src/app/boot.js?v=9.1.0"></script>
+<script type="module" src="src/data-loader.js?v=9.1.2"></script>
+<script type="module" src="src/app/boot.js?v=9.1.2"></script>
 
 <script>
   // Cache buster - add timestamp to prevent browser caching
@@ -179,19 +179,19 @@
   </script>
 
   <!-- BFF Client - Single API interface -->
-  <script type="module" src="src/bff-client.js?v=8.10.0"></script>
+  <script type="module" src="src/bff-client.js?v=9.1.2"></script>
 
   <script type="module">
     // Dynamically load scripts with cache buster
     const cacheBuster = Date.now();
     import(`./src/main.js?v=${cacheBuster}`);
     import(`./src/l3_boot.js?v=${cacheBuster}`);
-  </script>  <script type="module" src="src/perf/boot_perf.js?v=8.1.0"></script>
+  </script>  <script type="module" src="src/perf/boot_perf.js?v=9.1.2"></script>
 
   <!-- Customer Context Initialization - Load early to fetch from customer service -->
-  <script type="module" src="src/boot_customer_context.js?v=8.8.0"></script>
+  <script type="module" src="src/boot_customer_context.js?v=9.1.2"></script>
 
-  <script type="module" src="src/state/boot_state.js?v=8.1.0"></script>
+  <script type="module" src="src/state/boot_state.js?v=9.1.2"></script>
 
   <!-- LLM Module - Temporarily disabled until Phase 2 migration -->
   <!-- <script type="module" src="src/llm/boot_llm.js?v=8.1.0"></script> -->
