@@ -160,7 +160,7 @@ class BFFClient {
    */
   async searchCustomers(query, limit = 10) {
     const url = this.useBFF
-      ? `${this.bffURL}/api/customers?search=${encodeURIComponent(query)}&limit=${limit}`
+      ? `${this.bffURL}/api/customer?search=${encodeURIComponent(query)}&limit=${limit}`
       : `${this.directServices.customer}/api/customers?search=${encodeURIComponent(query)}&limit=${limit}`;
     
     return this.fetch(url);
@@ -172,7 +172,7 @@ class BFFClient {
    */
   async createCustomer(customerData) {
     const url = this.useBFF
-      ? `${this.bffURL}/api/customers`
+      ? `${this.bffURL}/api/customer`
       : `${this.directServices.customer}/api/customers`;
     
     return this.fetch(url, {
@@ -189,7 +189,7 @@ class BFFClient {
    */
   async updateCustomer(customerId, updates) {
     const url = this.useBFF
-      ? `${this.bffURL}/api/customers/${customerId}`
+      ? `${this.bffURL}/api/customer/${customerId}`
       : `${this.directServices.customer}/api/customers/${customerId}`;
     
     return this.fetch(url, {
@@ -205,7 +205,7 @@ class BFFClient {
    */
   async getCustomer(customerId) {
     const url = this.useBFF
-      ? `${this.bffURL}/api/customers/${customerId}`
+      ? `${this.bffURL}/api/customer/${customerId}`
       : `${this.directServices.customer}/api/customers/${customerId}`;
     
     return this.fetch(url);
@@ -217,7 +217,7 @@ class BFFClient {
    */
   async getCustomerAssessments(customerId) {
     const url = this.useBFF
-      ? `${this.bffURL}/api/customers/${customerId}/assessments`
+      ? `${this.bffURL}/api/customer/${customerId}/assessments`
       : `${this.directServices.customer}/api/assessments/customer/${customerId}`;
     
     return this.fetch(url);
