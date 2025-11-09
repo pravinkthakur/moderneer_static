@@ -1802,6 +1802,27 @@ document.addEventListener('DOMContentLoaded', async function() {
       alert('Error exporting assessment:\n\n' + error.message);
     }
   });
+  
+  // Check if customer service has loaded assessment data (from boot_customer_context.js)
+  if (window.EDGE_ASSESSMENT_DATA) {
+    console.log('🔄 Detected assessment data from customer service, auto-populating...');
+    try {
+      // Switch to full mode first (Edge assessments are full)
+      currentModule = "full";
+      document.getElementById("btnFull").classList.add("active");
+      document.getElementById("btnCore").classList.remove("active");
+      
+      // Populate from the loaded assessment
+      const count = populateFromEdgeAssessment(window.EDGE_ASSESSMENT_DATA, getSaved, setSaved);
+      console.log(`✅ Auto-populated ${count} checks from customer service`);
+      
+      // Re-render and recompute
+      render();
+      compute();
+    } catch (error) {
+      console.error('❌ Error auto-populating from customer service:', error);
+    }
+  }
 });
 document.getElementById("btnCore").addEventListener("click", ()=>{
   currentModule="core";
