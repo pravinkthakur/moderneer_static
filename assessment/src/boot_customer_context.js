@@ -66,8 +66,17 @@ import { fetchCustomerData, fetchCustomerAssessment, updateAssessmentContext } f
         // Auto-populate the UI with fetched Edge assessment
         console.log('🔄 Auto-populating assessment UI...');
         try {
-          // Wait a bit to ensure boot.js has loaded
-          await new Promise(resolve => setTimeout(resolve, 500));
+          // Wait for boot.js to be ready (poll for required functions)
+          console.log('⏳ Waiting for boot.js to initialize...');
+          let attempts = 0;
+          while (!window.getSaved || !window.setSaved) {
+            if (attempts > 50) { // 5 seconds max
+              throw new Error('Timeout waiting for boot.js to initialize');
+            }
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+          }
+          console.log(`✅ boot.js ready after ${attempts * 100}ms`);
           
           const { populateFromEdgeAssessment } = await import('./edge-integration.js');
           
