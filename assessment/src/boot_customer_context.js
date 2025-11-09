@@ -8,6 +8,10 @@ import { fetchCustomerData, fetchCustomerAssessment, updateAssessmentContext } f
 (async function initCustomerContext() {
   console.log('🚀 Initializing customer context...');
   
+  // Check URL parameters first (highest priority)
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlCustomerId = urlParams.get('customerId');
+  
   // Check localStorage for saved context
   const savedContext = localStorage.getItem('assessment_context');
   let context = savedContext ? JSON.parse(savedContext) : {};
@@ -16,7 +20,11 @@ import { fetchCustomerData, fetchCustomerAssessment, updateAssessmentContext } f
   const selectedCustomerId = localStorage.getItem('selectedCustomerId');
   const selectedCustomerName = localStorage.getItem('selectedCustomerName');
   
-  if (selectedCustomerId) {
+  // Priority: URL parameter > localStorage setup > saved context
+  if (urlCustomerId) {
+    console.log(`🔗 Found customer ID from URL: ${urlCustomerId}`);
+    context.customerId = urlCustomerId;
+  } else if (selectedCustomerId) {
     console.log(`📦 Found customer ID from setup: ${selectedCustomerId}`);
     context.customerId = selectedCustomerId;
     if (selectedCustomerName) {
