@@ -169,10 +169,9 @@
 <div id="footer-include"></div>
 <script src="js/includes.js"></script>
 
-<script src="src/data-loader.js?v=8.1.0"></script>
-<script src="src/app/boot.js?v=8.1.0"></script>
-
-
+<!-- Load data-loader and boot as modules (they now use ES6 imports) -->
+<script type="module" src="src/data-loader.js?v=8.11.0"></script>
+<script type="module" src="src/app/boot.js?v=8.11.0"></script>
 
 <script>
   // Cache buster - add timestamp to prevent browser caching
@@ -185,8 +184,8 @@
   <script type="module">
     // Dynamically load scripts with cache buster
     const cacheBuster = Date.now();
-    import(`src/main.js?v=${cacheBuster}`);
-    import(`src/l3_boot.js?v=${cacheBuster}`);
+    import(`./src/main.js?v=${cacheBuster}`);
+    import(`./src/l3_boot.js?v=${cacheBuster}`);
   </script>  <script type="module" src="src/perf/boot_perf.js?v=8.1.0"></script>
 
   <!-- Customer Context Initialization - Load early to fetch from customer service -->

@@ -304,8 +304,8 @@ class AssessmentDataLoader {
   }
 }
 
-// Create global instance
-window.AssessmentDataLoader = new AssessmentDataLoader();
+// Module-level instance for backwards compatibility
+let dataLoaderInstance = null;
 
 /**
  * Initialize assessment with JSON configuration
@@ -313,7 +313,12 @@ window.AssessmentDataLoader = new AssessmentDataLoader();
  */
 async function initializeAssessment() {
   try {
-    const loader = window.AssessmentDataLoader;
+    // Create instance if not exists
+    if (!dataLoaderInstance) {
+      dataLoaderInstance = new AssessmentDataLoader();
+    }
+    
+    const loader = dataLoaderInstance;
     const fullConfig = await loader.loadAll();
     
     // Create backward-compatible MODEL object
@@ -343,4 +348,7 @@ if (document.readyState === 'loading') {
   // DOM already loaded
   initializeAssessment();
 }
+
+// Export for module usage
+export { AssessmentDataLoader };
 

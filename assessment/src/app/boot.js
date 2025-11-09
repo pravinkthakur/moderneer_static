@@ -12,6 +12,9 @@
  * performance benefits of static hosting for the frontend shell.
  */
 
+// Import AssessmentDataLoader (now a module)
+import { AssessmentDataLoader } from '../data-loader.js';
+
 /* Year */
 document.addEventListener('DOMContentLoaded', function() {
   const yearEl = document.getElementById('yr');
