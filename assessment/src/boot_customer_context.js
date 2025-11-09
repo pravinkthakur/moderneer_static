@@ -48,6 +48,7 @@ import { fetchCustomerData, fetchCustomerAssessment, updateAssessmentContext } f
       
       // Try to fetch latest assessment
       const assessment = await fetchCustomerAssessment(context.customerId);
+      console.log('🔍 Assessment fetch result:', assessment ? 'Found' : 'Not found', assessment);
       if (assessment && assessment.assessment_data) {
         console.log('📊 Loading assessment data from customer service...');
         
