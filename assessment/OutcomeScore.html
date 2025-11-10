@@ -32,6 +32,16 @@
 <div id="header-include"></div>
 
 <main class="container" role="main">
+  <!-- Debug Panel -->
+  <div id="debugPanel" style="background:#f0f9ff;border:1px solid #3B82F6;border-radius:8px;padding:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+    <div style="font-size:0.875rem;color:#1e40af;">
+      <strong>🔍 Debug:</strong> <span id="debugVersion">Loading...</span>
+    </div>
+    <a id="downloadContextFile" href="src/boot_customer_context.js?v=9.1.2" download="boot_customer_context.js" style="background:#3B82F6;color:white;padding:6px 12px;border-radius:6px;text-decoration:none;font-size:0.875rem;font-weight:600;">
+      📥 Download boot_customer_context.js
+    </a>
+  </div>
+
   <div id="loader" style="text-align:center;padding:2em;font-size:1.2em;color:#3B82F6;">
     <div style="margin-bottom:1em;">🔄 Loading assessment data from API...</div>
     <div id="loader-status" style="font-size:0.9em;color:#666;"></div>
@@ -206,6 +216,23 @@
       if (isOrgView) {
         console.log('✅ Organization multi-repo view activated');
       }
+      
+      // Show which boot_customer_context.js is loaded
+      fetch('src/boot_customer_context.js?v=9.1.2')
+        .then(res => res.text())
+        .then(code => {
+          // Extract timestamp or hash from file
+          const match = code.match(/\/\/ Version: (.*)|\/\/ Last modified: (.*)/);
+          const debugEl = document.getElementById('debugVersion');
+          if (debugEl) {
+            debugEl.textContent = `boot_customer_context.js loaded (${code.length} bytes)`;
+            debugEl.title = `File size: ${code.length} bytes`;
+          }
+        })
+        .catch(err => {
+          const debugEl = document.getElementById('debugVersion');
+          if (debugEl) debugEl.textContent = 'Failed to fetch context file';
+        });
     });
   </script>
 </body>
