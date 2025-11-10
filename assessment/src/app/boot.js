@@ -1804,7 +1804,22 @@ document.addEventListener('DOMContentLoaded', async function() {
   });
   
   // Check if customer service has loaded assessment data (from boot_customer_context.js)
+  // Wait for boot_customer_context.js to finish loading
+  console.log('🔍 Waiting for customer context to be ready...');
+  if (window.CUSTOMER_CONTEXT_READY) {
+    try {
+      await window.CUSTOMER_CONTEXT_READY;
+      console.log('✅ Customer context ready');
+    } catch (err) {
+      console.error('⚠️ Error waiting for customer context:', err);
+    }
+  }
+  
+  console.log('🔍 Checking for window.EDGE_ASSESSMENT_DATA...');
+  console.log('   - window.EDGE_ASSESSMENT_DATA exists?', !!window.EDGE_ASSESSMENT_DATA);
+  console.log('   - Type:', typeof window.EDGE_ASSESSMENT_DATA);
   if (window.EDGE_ASSESSMENT_DATA) {
+    console.log('   - Keys:', Object.keys(window.EDGE_ASSESSMENT_DATA));
     console.log('🔄 Detected assessment data from customer service, auto-populating...');
     try {
       // Switch to full mode first (Edge assessments are full)
@@ -1821,6 +1836,23 @@ document.addEventListener('DOMContentLoaded', async function() {
       compute();
     } catch (error) {
       console.error('❌ Error auto-populating from customer service:', error);
+    }
+  } else {
+    console.log('⚠️ No assessment data found in window.EDGE_ASSESSMENT_DATA');
+    console.log('   - Checking localStorage...');
+    const stored = localStorage.getItem('edge_assessment_data');
+    console.log('   - localStorage has data?', !!stored);
+    if (stored) {
+      console.log('   - Trying to use localStorage data...');
+      try {
+        window.EDGE_ASSESSMENT_DATA = JSON.parse(stored);
+        const count = populateFromEdgeAssessment(window.EDGE_ASSESSMENT_DATA, getSaved, setSaved);
+        console.log(`✅ Auto-populated ${count} checks from localStorage`);
+        render();
+        compute();
+      } catch (err) {
+        console.error('❌ Failed to load from localStorage:', err);
+      }
     }
   }
 });

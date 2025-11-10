@@ -5,6 +5,11 @@
 
 import { fetchCustomerData, fetchCustomerAssessment, updateAssessmentContext } from './context-manager.js';
 
+// Create a promise that resolves when context is loaded
+window.CUSTOMER_CONTEXT_READY = new Promise((resolve) => {
+  window.resolveCustomerContext = resolve;
+});
+
 (async function initCustomerContext() {
   console.log('🚀 Initializing customer context...');
   
@@ -73,4 +78,9 @@ import { fetchCustomerData, fetchCustomerAssessment, updateAssessmentContext } f
   }
   
   console.log('✅ Customer context initialized:', context);
+  
+  // Signal that context is ready
+  if (window.resolveCustomerContext) {
+    window.resolveCustomerContext(context);
+  }
 })();
