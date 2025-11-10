@@ -14,10 +14,58 @@ window.CUSTOMER_CONTEXT_READY = new Promise((resolve) => {
 window.CUSTOMER_CONTEXT_ERROR = null;
 
 /**
- * Display error banner at top of page
+ * Clear all score displays and assessment data
+ */
+function clearAllScores() {
+  console.log('🧹 Clearing all score displays and assessment data...');
+  
+  // Clear global assessment data
+  window.EDGE_ASSESSMENT_DATA = null;
+  window.ORG_ASSESSMENT = null;
+  
+  // Clear localStorage
+  localStorage.removeItem('edge_assessment_data');
+  localStorage.removeItem('org_assessment_data');
+  
+  // Clear all score display elements
+  const scoreElements = [
+    'overallIndex',
+    'overallBand',
+    'gatesPassed',
+    'orgOverallScore',
+    'orgAvgScore',
+    'orgRepoCount'
+  ];
+  
+  scoreElements.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = '0';
+      console.log(`  Cleared ${id} to 0`);
+    }
+  });
+  
+  // Clear form area and results
+  const formArea = document.getElementById('formArea');
+  if (formArea) formArea.innerHTML = '';
+  
+  const gateList = document.getElementById('gateList');
+  if (gateList) gateList.innerHTML = '';
+  
+  const pillarBreakdown = document.getElementById('pillarBreakdown');
+  if (pillarBreakdown) pillarBreakdown.innerHTML = '';
+  
+  console.log('✅ All scores cleared and set to 0');
+}
+
+/**
+ * Show error banner at top of page
  */
 function showErrorBanner(message, details = '') {
   console.error('🚨 Customer context error:', message, details);
+  
+  // CRITICAL: Clear all scores and data FIRST
+  clearAllScores();
   
   // Store error globally
   window.CUSTOMER_CONTEXT_ERROR = { message, details };
