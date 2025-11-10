@@ -33,13 +33,18 @@
 
 <main class="container" role="main">
   <!-- Debug Panel -->
-  <div id="debugPanel" style="background:#f0f9ff;border:1px solid #3B82F6;border-radius:8px;padding:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+  <div id="debugPanel" style="background:#f0f9ff;border:1px solid #3B82F6;border-radius:8px;padding:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
     <div style="font-size:0.875rem;color:#1e40af;">
       <strong>🔍 Debug:</strong> <span id="debugVersion">Loading...</span>
     </div>
-    <a id="downloadContextFile" href="src/boot_customer_context.js?v=9.1.2" download="boot_customer_context.js" style="background:#3B82F6;color:white;padding:6px 12px;border-radius:6px;text-decoration:none;font-size:0.875rem;font-weight:600;">
-      📥 Download boot_customer_context.js
-    </a>
+    <div style="display:flex;gap:8px;">
+      <button id="downloadAssessmentData" style="background:#10b981;color:white;padding:6px 12px;border-radius:6px;border:none;font-size:0.875rem;font-weight:600;cursor:pointer;" disabled>
+        📥 Download Fetched Assessment
+      </button>
+      <a href="src/boot_customer_context.js?v=9.1.2" download="boot_customer_context.js" style="background:#3B82F6;color:white;padding:6px 12px;border-radius:6px;text-decoration:none;font-size:0.875rem;font-weight:600;">
+        � Download Context Script
+      </a>
+    </div>
   </div>
 
   <div id="loader" style="text-align:center;padding:2em;font-size:1.2em;color:#3B82F6;">
@@ -233,6 +238,37 @@
           const debugEl = document.getElementById('debugVersion');
           if (debugEl) debugEl.textContent = 'Failed to fetch context file';
         });
+      
+      // Enable download button when assessment data is available
+      const checkAssessmentData = setInterval(() => {
+        if (window.EDGE_ASSESSMENT_DATA) {
+          clearInterval(checkAssessmentData);
+          const btn = document.getElementById('downloadAssessmentData');
+          if (btn) {
+            btn.disabled = false;
+            btn.style.cursor = 'pointer';
+            btn.onclick = () => {
+              try {
+                const dataStr = JSON.stringify(window.EDGE_ASSESSMENT_DATA, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `assessment-data-${Date.now()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                console.log('✅ Assessment data downloaded');
+              } catch (err) {
+                console.error('❌ Failed to download assessment data:', err);
+                alert('Failed to download assessment data. Check console for details.');
+              }
+            };
+          }
+        }
+      }, 100);
+      
+      // Stop checking after 10 seconds
+      setTimeout(() => clearInterval(checkAssessmentData), 10000);
     });
   </script>
 </body>
